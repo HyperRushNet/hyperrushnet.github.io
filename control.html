@@ -1,97 +1,77 @@
 <!DOCTYPE html>
 <html>
-<head><title>Controller (Peer 1)</title></head>
+<head><title>Caller (Offer)</title></head>
 <body>
-<h1>Controller (Peer 1)</h1>
+  <h1>Caller (Offer maken)</h1>
+  <video id="localVideo" autoplay muted playsinline style="width:320px; border:1px solid black"></video>
+  
+  <h3>Offer (kopieer naar Answerer)</h3>
+  <textarea id="offerSDP" style="width:100%; height:150px;"></textarea>
+  
+  <h3>ICE candidates (kopieer naar Answerer)</h3>
+  <textarea id="offerICE" style="width:100%; height:100px;"></textarea>
+  
+  <h3>Answer SDP (plak hier van Answerer)</h3>
+  <textarea id="answerSDP" style="width:100%; height:150px;"></textarea>
+  
+  <h3>Answer ICE candidates (plak hier van Answerer)</h3>
+  <textarea id="answerICE" style="width:100%; height:100px;"></textarea>
+  
+  <button id="setAnswer">Set answer + ICE</button>
 
-<label>Offer + ICE 0/1-string (typen):</label><br>
-<textarea id="offerBin" style="width:100%; height:150px;"></textarea><br><br>
+  <script>
+    const localVideo = document.getElementById('localVideo');
+    const offerSDP = document.getElementById('offerSDP');
+    const offerICE = document.getElementById('offerICE');
+    const answerSDP = document.getElementById('answerSDP');
+    const answerICE = document.getElementById('answerICE');
+    const setAnswerBtn = document.getElementById('setAnswer');
 
-<button id="connect">Verbind met offer</button><br><br>
+    // RTCPeerConnection met Google STUN server
+    const pc = new RTCPeerConnection({
+      iceServers: [{urls: 'stun:stun.l.google.com:19302'}]
+    });
 
-<button id="sendJump">Jump</button>
-<button id="sendAttack">Attack</button>
+    let iceCandidatesFromLocal = [];
+    let iceCandidatesFromRemote = [];
 
-<p>Log:<br><pre id="log"></pre></p>
+    // lokale video tonen
+    navigator.mediaDevices.getUserMedia({video:true,audio:true}).then(stream => {
+      localVideo.srcObject = stream;
+      stream.getTracks().forEach(track => pc.addTrack(track, stream));
+      return pc.createOffer();
+    })
+    .then(offer => pc.setLocalDescription(offer))
+    .then(() => {
+      offerSDP.value = JSON.stringify(pc.localDescription);
+    });
 
-<script>
-  let pc = null;
-  let dc = null;
-  const logElem = document.getElementById('log');
-
-  function log(msg){
-    logElem.textContent += msg + "\n";
-  }
-
-  function binToStr(bin) {
-    let str = "";
-    for(let i=0; i<bin.length; i+=8){
-      let byte = bin.slice(i,i+8);
-      str += String.fromCharCode(parseInt(byte, 2));
-    }
-    return str;
-  }
-
-  async function connectWithOffer(binStr) {
-    try {
-      const jsonStr = binToStr(binStr.trim());
-      const data = JSON.parse(jsonStr);
-      if(!data.sdp || !data.ice){
-        log("Ongeldige data");
-        return;
+    // ICE candidates verzamelen en tonen
+    pc.onicecandidate = e => {
+      if(e.candidate){
+        iceCandidatesFromLocal.push(e.candidate);
+        offerICE.value = JSON.stringify(iceCandidatesFromLocal);
       }
+    };
 
-      pc = new RTCPeerConnection({iceServers: []});
-      dc = pc.createDataChannel("data");
-      dc.onopen = () => log("DataChannel open!");
-      dc.onmessage = e => log("Ontvangen: " + e.data);
-      dc.onclose = () => log("DataChannel gesloten");
+    setAnswerBtn.onclick = async () => {
+      if(!answerSDP.value) return alert('Plak eerst answer SDP');
+      if(!answerICE.value) return alert('Plak eerst answer ICE candidates');
 
-      await pc.setRemoteDescription(data.sdp);
-      for(const c of data.ice){
-        await pc.addIceCandidate(new RTCIceCandidate(c));
+      const remoteDesc = new RTCSessionDescription(JSON.parse(answerSDP.value));
+      await pc.setRemoteDescription(remoteDesc);
+
+      // Voeg alle remote ICE candidates toe
+      const remoteCandidates = JSON.parse(answerICE.value);
+      for(const c of remoteCandidates){
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(c));
+        } catch(e){
+          console.warn('Fout bij toevoegen ICE candidate:', e);
+        }
       }
-
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-
-      log("Verbonden met offer, answer gemaakt");
-    } catch(e){
-      log("Fout bij verbinden: " + e);
-    }
-  }
-
-  document.getElementById('connect').onclick = async () => {
-    if(pc) {
-      log("Al verbonden");
-      return;
-    }
-    const binStr = document.getElementById('offerBin').value;
-    if(!binStr.match(/^[01]+$/)){
-      log("Voer alleen 0 en 1 in");
-      return;
-    }
-    log("Verbinding maken...");
-    await connectWithOffer(binStr);
-  };
-
-  document.getElementById('sendJump').onclick = () => {
-    if(dc && dc.readyState === 'open') {
-      dc.send("jump");
-      log("Jump gestuurd");
-    } else {
-      log("DataChannel niet open");
-    }
-  };
-
-  document.getElementById('sendAttack').onclick = () => {
-    if(dc && dc.readyState === 'open') {
-      dc.send("attack");
-      log("Attack gestuurd");
-    } else {
-      log("DataChannel niet open");
-    }
-  };
-</script>
+      alert('Remote SDP en ICE toegevoegd!');
+    };
+  </script>
 </body>
 </html>
