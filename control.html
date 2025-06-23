@@ -4,29 +4,23 @@
 <body>
 <h1>Controller (Peer 1)</h1>
 
-<button id="startScan">Start camera en scan QR-code</button><br><br>
-
+<button id="startScan">Scan QR-code</button><br><br>
 <div id="reader" style="width:300px; height:300px; border:1px solid #ccc;"></div>
+
+<button id="sendJump">Jump</button>
+<button id="sendAttack">Attack</button>
 
 <p>Status:<br><pre id="log"></pre></p>
 
-<!-- html5-qrcode lib -->
 <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
-<!-- LZ-String lib -->
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
 
 <script>
-  const logElem = document.getElementById('log');
-  function log(msg) { logElem.textContent += msg + "\n"; }
+  const log = msg => (document.getElementById('log').textContent += msg + "\n");
+  let pc = null, dc = null;
 
-  let pc = null;
-  let dc = null;
-
-  async function setupConnection(data) {
-    const { sdp, ice } = data;
-
+  async function setupConnection(offerSDP) {
     pc = new RTCPeerConnection({iceServers: []});
-
     pc.ondatachannel = e => {
       dc = e.channel;
       dc.onopen = () => log("DataChannel open!");
@@ -34,48 +28,52 @@
       dc.onclose = () => log("DataChannel gesloten");
     };
 
-    await pc.setRemoteDescription(sdp);
-
-    for (const c of ice) {
-      await pc.addIceCandidate(new RTCIceCandidate(c));
-    }
-
+    await pc.setRemoteDescription(offerSDP);
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
+    log("Answer gegenereerd, verbinding wordt opgezet");
 
     pc.onicecandidate = e => {
-      if(e.candidate) {
-        log("ICE candidate verzameld");
-      }
+      if(e.candidate) log("ICE: " + JSON.stringify(e.candidate.toJSON()));
     };
-
-    log("Answer gemaakt en verbinding gestart");
   }
 
   document.getElementById('startScan').onclick = () => {
     const html5QrCode = new Html5Qrcode("reader");
-
     html5QrCode.start(
       { facingMode: "environment" },
       { fps: 10, qrbox: 250 },
-      qrCodeMessage => {
-        log("QR-code gescand!");
+      async qrMessage => {
         html5QrCode.stop();
         try {
-          const decompressed = LZString.decompressFromUTF16(qrCodeMessage);
-          if(!decompressed) throw "Decompressie mislukt";
-
-          const data = JSON.parse(decompressed);
-          if(!data.sdp || !data.ice) throw "Ongeldige data";
-          setupConnection(data);
+          const offerText = LZString.decompressFromBase64(qrMessage);
+          if (!offerText) throw "Decompressie mislukt";
+          const offer = JSON.parse(offerText);
+          await setupConnection(offer);
         } catch(e) {
-          log("Fout bij decoderen QR: " + e);
+          log("Fout: " + e);
         }
       },
-      errorMessage => {
-        // scan errors negeren
-      }
-    ).catch(err => log("Camera starten mislukt: " + err));
+      () => {}
+    );
+  };
+
+  document.getElementById('sendJump').onclick = () => {
+    if(dc && dc.readyState === 'open') {
+      dc.send("jump");
+      log("Jump gestuurd");
+    } else {
+      log("DataChannel niet open");
+    }
+  };
+
+  document.getElementById('sendAttack').onclick = () => {
+    if(dc && dc.readyState === 'open') {
+      dc.send("attack");
+      log("Attack gestuurd");
+    } else {
+      log("DataChannel niet open");
+    }
   };
 </script>
 </body>
