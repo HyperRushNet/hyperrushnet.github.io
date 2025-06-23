@@ -11,6 +11,7 @@
 <p>Status:<br><pre id="log"></pre></p>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
 <script>
   const logElem = document.getElementById('log');
   function log(msg) { logElem.textContent += msg + "\n"; }
@@ -18,17 +19,13 @@
   let pc = null;
   let dc = null;
 
-  function encodeCompact(str) {
-    return btoa(str).replace(/\+/g,'p').replace(/\//g,'s').replace(/=/g,'e').toLowerCase();
-  }
-
   async function gatherIceCandidates() {
     return new Promise(resolve => {
       let candidates = [];
       pc.onicecandidate = e => {
         if(e.candidate) {
           candidates.push(e.candidate.toJSON());
-          updateQRCode(JSON.stringify({sdp: pc.localDescription, ice: candidates}));
+          updateQRCode({sdp: pc.localDescription, ice: candidates});
         } else {
           resolve(candidates);
         }
@@ -36,11 +33,16 @@
     });
   }
 
-  function updateQRCode(jsonStr) {
-    const compact = encodeCompact(jsonStr);
+  function updateQRCode(data) {
+    // 1. JSON stringify minimal
+    const jsonStr = JSON.stringify(data);
+
+    // 2. Compress met LZ-string (UTF16 compression voor QR)
+    const compressed = LZString.compressToUTF16(jsonStr);
+
     const qrDiv = document.getElementById('qrcode');
     qrDiv.innerHTML = "";
-    QRCode.toCanvas(qrDiv, compact, {width:250}, err => {
+    QRCode.toCanvas(qrDiv, compressed, {width:250}, err => {
       if(err) log("QR error: " + err);
       else log("QR-code gemaakt, scan met controller");
     });
