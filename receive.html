@@ -1,66 +1,84 @@
 <!DOCTYPE html>
 <html>
-<head><title>Game (Peer 2) - Multi QR</title></head>
+<head><title>Game (Peer 2)</title></head>
 <body>
-<h1>Game (Peer 2) - Genereer Multi QR</h1>
+<h1>Game (Peer 2)</h1>
 
-<label>Offer SDP (JSON):</label><br>
-<textarea id="offerSDP" style="width:100%; height:120px;"></textarea><br><br>
+<button id="createOffer">Maak Offer + ICE (als 0/1-string)</button><br><br>
 
-<button id="generateQRs">Genereer QR codes</button><br><br>
+<label>Offer + ICE (alleen 0 en 1, overtypen):</label><br>
+<textarea id="offerBin" style="width:100%; height:150px;" readonly></textarea><br><br>
 
-<div id="qrcodes"></div>
-
-<script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<p>Log:<br><pre id="log"></pre></p>
 
 <script>
-  const QR_CHUNK_SIZE = 100; // pas evt aan voor kleinere/grotere QR's
+  let pc = null;
+  const logElem = document.getElementById('log');
 
-  document.getElementById('generateQRs').onclick = () => {
-    const offerText = document.getElementById('offerSDP').value.trim();
-    if (!offerText) {
-      alert("Vul de offer SDP in");
-      return;
+  function log(msg){
+    logElem.textContent += msg + "\n";
+  }
+
+  function strToBin(str) {
+    let bin = "";
+    for(let i=0; i<str.length; i++){
+      let code = str.charCodeAt(i);
+      let b = code.toString(2).padStart(8, '0');
+      bin += b;
     }
+    return bin;
+  }
 
-    // Comprimeer en base64 encode
-    const compressed = LZString.compressToBase64(offerText);
-    
-    // Split in stukjes
-    let chunks = [];
-    for (let i = 0; i < compressed.length; i += QR_CHUNK_SIZE) {
-      chunks.push(compressed.substring(i, i + QR_CHUNK_SIZE));
+  function binToStr(bin) {
+    let str = "";
+    for(let i=0; i<bin.length; i+=8){
+      let byte = bin.slice(i,i+8);
+      str += String.fromCharCode(parseInt(byte, 2));
     }
+    return str;
+  }
 
-    const total = chunks.length;
-
-    // Maak container leeg
-    const container = document.getElementById('qrcodes');
-    container.innerHTML = "";
-
-    // Genereer QR codes met info: "index/total:data"
-    chunks.forEach((chunk, idx) => {
-      const text = `${idx+1}/${total}:${chunk}`;
-      const div = document.createElement('div');
-      div.style.display = "inline-block";
-      div.style.margin = "10px";
-      div.style.textAlign = "center";
-      container.appendChild(div);
-
-      // QR code canvas
-      const canvas = document.createElement('canvas');
-      div.appendChild(canvas);
-
-      QRCode.toCanvas(canvas, text, {width: 150, margin: 1}, err => {
-        if(err) console.error(err);
-      });
-
-      // Label
-      const label = document.createElement('div');
-      label.textContent = `QR ${idx+1} / ${total}`;
-      div.appendChild(label);
+  async function gatherIceCandidates() {
+    return new Promise(resolve => {
+      let candidates = [];
+      pc.onicecandidate = e => {
+        if(e.candidate) {
+          candidates.push(e.candidate.toJSON());
+          updateOfferText();
+        } else {
+          resolve(candidates);
+        }
+      };
     });
+  }
+
+  async function updateOfferText() {
+    const obj = {
+      sdp: pc.localDescription,
+      ice: pc._iceCandidates || []
+    };
+    document.getElementById('offerBin').value = strToBin(JSON.stringify(obj));
+  }
+
+  document.getElementById('createOffer').onclick = async () => {
+    if(pc) return;
+    pc = new RTCPeerConnection({iceServers: []});
+    pc._iceCandidates = [];
+
+    pc.onicecandidate = e => {
+      if(e.candidate) {
+        pc._iceCandidates.push(e.candidate.toJSON());
+        updateOfferText();
+      }
+    };
+
+    log("Offer aan het maken...");
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    await gatherIceCandidates();
+
+    log("Offer + ICE klaar als binaire string");
   };
 </script>
 </body>
