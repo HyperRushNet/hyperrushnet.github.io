@@ -1,144 +1,130 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Controller (Peer 1) - jsQR</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <style>
-    body { font-family: sans-serif; text-align:center; margin:0; padding:0; }
-    video, canvas { max-width: 100%; }
-    #output { white-space: pre-wrap; margin-top:10px; height:150px; overflow-y:auto; border:1px solid #ccc; padding:5px; }
-    button { margin:5px; padding:10px 20px; font-size:16px; }
-  </style>
-</head>
+<head><title>Controller (Peer 1) - Multi QR Scan</title></head>
 <body>
+<h1>Controller (Peer 1) - Scan Multi QR codes</h1>
 
-<h1>Controller (Peer 1)</h1>
+<button id="startScan">Start scannen</button><br><br>
+<div id="reader" style="width:320px; height:320px; border:1px solid #ccc;"></div>
 
-<video id="video" autoplay playsinline></video>
-<canvas id="canvas" style="display:none;"></canvas>
+<p>Status:<br><pre id="log"></pre></p>
 
-<div>
-  <button id="startScanBtn">Start Scan</button>
-  <button id="stopScanBtn">Stop Scan</button><br><br>
-  <button id="sendJumpBtn">Jump</button>
-  <button id="sendAttackBtn">Attack</button>
-</div>
+<button id="sendJump">Jump</button>
+<button id="sendAttack">Attack</button>
 
-<pre id="output"></pre>
-
-<script src="https://cdn.jsdelivr.net/npm/jsqr@1.4.0/dist/jsQR.js"></script>
+<script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
 
 <script>
-  const video = document.getElementById('video');
-  const canvas = document.getElementById('canvas');
-  const ctx = canvas.getContext('2d');
-  const output = document.getElementById('output');
-  let scanning = false;
-  let scanInterval;
+  const logElem = document.getElementById('log');
+  const log = msg => {
+    logElem.textContent += msg + "\n";
+  };
 
-  let pc, dc;
+  let pc = null, dc = null;
+  let receivedChunks = {};
+  let totalChunks = 0;
 
-  function log(msg) {
-    output.textContent += msg + '\n';
-    output.scrollTop = output.scrollHeight;
-  }
+  const html5QrCode = new Html5Qrcode("reader");
 
   async function setupConnection(offerSDP) {
-    pc = new RTCPeerConnection({ iceServers: [] });
+    pc = new RTCPeerConnection({iceServers: []});
     pc.ondatachannel = e => {
       dc = e.channel;
       dc.onopen = () => log("DataChannel open!");
-      dc.onmessage = e => log("Ontvangen: " + e.data);
+      dc.onmessage = ev => log("Ontvangen: " + ev.data);
       dc.onclose = () => log("DataChannel gesloten");
     };
+
     await pc.setRemoteDescription(offerSDP);
     const answer = await pc.createAnswer();
     await pc.setLocalDescription(answer);
-    log("Verbinden...");
+    log("Answer gegenereerd, verbinding wordt opgezet");
+
+    pc.onicecandidate = e => {
+      if(e.candidate) log("ICE: " + JSON.stringify(e.candidate.toJSON()));
+    };
   }
 
-  async function startScan() {
-    if (scanning) return;
-    scanning = true;
-    output.textContent = "";
+  function tryConnectIfComplete() {
+    if (Object.keys(receivedChunks).length === totalChunks && totalChunks > 0) {
+      // Alle chunks binnen, zet alles in volgorde aan elkaar
+      let combined = "";
+      for(let i=1; i<=totalChunks; i++) {
+        combined += receivedChunks[i];
+      }
+      log("Alle QR codes ontvangen, decompressie...");
 
-    // Achtercamera aanvragen
-    try {
-      const stream = await navigator.mediaDevices.getUserMedia({
-        video: { facingMode: { exact: "environment" } }
-      });
-      video.srcObject = stream;
-      video.setAttribute("playsinline", true);
-      await video.play();
-
-      canvas.width = video.videoWidth;
-      canvas.height = video.videoHeight;
-
-      scanInterval = requestAnimationFrame(tick);
-    } catch (e) {
-      log("Camera fout: " + e);
-    }
-  }
-
-  function stopScan() {
-    scanning = false;
-    if (video.srcObject) {
-      video.srcObject.getTracks().forEach(track => track.stop());
-      video.srcObject = null;
-    }
-    if (scanInterval) {
-      cancelAnimationFrame(scanInterval);
-      scanInterval = null;
-    }
-    log("Scan gestopt.");
-  }
-
-  function tick() {
-    if (!scanning) return;
-
-    if (video.readyState === video.HAVE_ENOUGH_DATA) {
-      canvas.height = video.videoHeight;
-      canvas.width = video.videoWidth;
-      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
-      const imageData = ctx.getImageData(0, 0, canvas.width, canvas.height);
-      const code = jsQR(imageData.data, imageData.width, imageData.height, {
-        inversionAttempts: "attemptBoth",
-      });
-
-      if (code) {
-        log("QR code gevonden!");
-        try {
-          const decompressed = LZString.decompressFromBase64(code.data);
-          if (!decompressed) throw "Decompressie mislukt";
-          const offer = JSON.parse(decompressed);
-          stopScan();
-          setupConnection(offer);
-        } catch (e) {
-          log("Fout bij verwerken QR: " + e);
-        }
+      const decompressed = LZString.decompressFromBase64(combined);
+      if (!decompressed) {
+        log("Fout bij decompressie");
         return;
       }
+      try {
+        const offer = JSON.parse(decompressed);
+        setupConnection(offer);
+      } catch (e) {
+        log("Fout bij parsen JSON: " + e);
+      }
     }
-    scanInterval = requestAnimationFrame(tick);
   }
 
-  document.getElementById('startScanBtn').onclick = startScan;
-  document.getElementById('stopScanBtn').onclick = stopScan;
+  document.getElementById('startScan').onclick = () => {
+    receivedChunks = {};
+    totalChunks = 0;
+    logElem.textContent = "";
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 280 },
+      qrMessage => {
+        // Verwacht: "index/total:data"
+        const match = qrMessage.match(/^(\d+)\/(\d+):(.+)$/);
+        if (!match) {
+          log("Ongeldige QR code: " + qrMessage);
+          return;
+        }
+        const [_, idxStr, totalStr, chunk] = match;
+        const idx = parseInt(idxStr);
+        const total = parseInt(totalStr);
 
-  function sendMessage(msg) {
-    if (dc && dc.readyState === 'open') {
-      dc.send(msg);
-      log("Gestuurd: " + msg);
+        if (totalChunks === 0) {
+          totalChunks = total;
+          log(`Aantal QR codes te scannen: ${totalChunks}`);
+        }
+
+        if (receivedChunks[idx]) {
+          log(`QR ${idx} al gescand`);
+          return;
+        }
+
+        receivedChunks[idx] = chunk;
+        log(`QR ${idx} ontvangen`);
+
+        tryConnectIfComplete();
+      },
+      errorMessage => {
+        // Optioneel: log scan fouten
+      }
+    );
+  };
+
+  document.getElementById('sendJump').onclick = () => {
+    if(dc && dc.readyState === 'open') {
+      dc.send("jump");
+      log("Jump gestuurd");
     } else {
       log("DataChannel niet open");
     }
-  }
+  };
 
-  document.getElementById('sendJumpBtn').onclick = () => sendMessage('jump');
-  document.getElementById('sendAttackBtn').onclick = () => sendMessage('attack');
-
+  document.getElementById('sendAttack').onclick = () => {
+    if(dc && dc.readyState === 'open') {
+      dc.send("attack");
+      log("Attack gestuurd");
+    } else {
+      log("DataChannel niet open");
+    }
+  };
 </script>
-
 </body>
 </html>
