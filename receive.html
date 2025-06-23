@@ -1,18 +1,16 @@
 <!DOCTYPE html>
 <html>
-<head><title>receive</title></head>
+<head><title>Game (Peer 2)</title></head>
 <body>
 <h1>Game (Peer 2)</h1>
 
 <button id="start">Start en maak QR-code</button><br><br>
 
-<div id="qrcode"></div>
+<canvas id="qrcode" width="250" height="250" style="border:1px solid #ccc"></canvas>
 
 <p>Status:<br><pre id="log"></pre></p>
 
-<!-- QRCode lib -->
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
-<!-- LZ-String lib -->
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
 
 <script>
@@ -39,9 +37,9 @@
   function updateQRCode(data) {
     const jsonStr = JSON.stringify(data);
     const compressed = LZString.compressToUTF16(jsonStr);
-    const qrDiv = document.getElementById('qrcode');
-    qrDiv.innerHTML = "";
-    QRCode.toCanvas(qrDiv, compressed, {width:250}, err => {
+
+    const canvas = document.getElementById('qrcode');
+    QRCode.toCanvas(canvas, compressed, {width:250}, err => {
       if(err) log("QR error: " + err);
       else log("QR-code gemaakt, scan met controller");
     });
