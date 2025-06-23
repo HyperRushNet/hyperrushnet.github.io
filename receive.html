@@ -1,92 +1,75 @@
 <!DOCTYPE html>
 <html>
-<head><title>Game (Peer 2)</title></head>
+<head><title>Answerer (Answer maken)</title></head>
 <body>
-<h1>Game (Peer 2)</h1>
+  <h1>Answerer (Answer maken)</h1>
+  <video id="remoteVideo" autoplay playsinline style="width:320px; border:1px solid black"></video>
+  
+  <h3>Offer SDP (plak hier van Caller)</h3>
+  <textarea id="offerSDP" style="width:100%; height:150px;"></textarea>
+  
+  <h3>Offer ICE candidates (plak hier van Caller)</h3>
+  <textarea id="offerICE" style="width:100%; height:100px;"></textarea>
+  
+  <h3>Answer SDP (kopieer naar Caller)</h3>
+  <textarea id="answerSDP" style="width:100%; height:150px;"></textarea>
+  
+  <h3>Answer ICE candidates (kopieer naar Caller)</h3>
+  <textarea id="answerICE" style="width:100%; height:100px;"></textarea>
+  
+  <button id="createAnswer">Create answer</button>
 
-<button id="createOffer">Maak Offer + ICE (als 0/1-string)</button><br><br>
+  <script>
+    const remoteVideo = document.getElementById('remoteVideo');
+    const offerSDP = document.getElementById('offerSDP');
+    const offerICE = document.getElementById('offerICE');
+    const answerSDP = document.getElementById('answerSDP');
+    const answerICE = document.getElementById('answerICE');
+    const createAnswerBtn = document.getElementById('createAnswer');
 
-<label>Offer + ICE (alleen 0 en 1, overtypen):</label><br>
-<textarea id="offerBin" style="width:100%; height:150px;" readonly></textarea><br><br>
-
-<p>Log:<br><pre id="log"></pre></p>
-
-<script>
-  let pc = null;
-  const logElem = document.getElementById('log');
-
-  function log(msg){
-    logElem.textContent += msg + "\n";
-  }
-
-  function strToBin(str) {
-    let bin = "";
-    for(let i=0; i<str.length; i++){
-      let code = str.charCodeAt(i);
-      let b = code.toString(2).padStart(8, '0');
-      bin += b;
-    }
-    return bin;
-  }
-
-  async function gatherIceCandidates(timeoutMs = 3000) {
-    return new Promise(resolve => {
-      let candidates = [];
-      let done = false;
-
-      pc.onicecandidate = e => {
-        if(e.candidate) {
-          candidates.push(e.candidate.toJSON());
-          updateOfferText();
-        } else {
-          if (!done) {
-            done = true;
-            resolve(candidates);
-          }
-        }
-      };
-
-      // fallback: stop na timeout ook
-      setTimeout(() => {
-        if (!done) {
-          done = true;
-          resolve(candidates);
-        }
-      }, timeoutMs);
+    const pc = new RTCPeerConnection({
+      iceServers: [{urls: 'stun:stun.l.google.com:19302'}]
     });
-  }
 
-  async function updateOfferText() {
-    const obj = {
-      sdp: pc.localDescription,
-      ice: pc._iceCandidates || []
+    let iceCandidatesFromLocal = [];
+    let iceCandidatesFromRemote = [];
+
+    pc.ontrack = e => {
+      remoteVideo.srcObject = e.streams[0];
     };
-    document.getElementById('offerBin').value = strToBin(JSON.stringify(obj));
-  }
 
-  document.getElementById('createOffer').onclick = async () => {
-    if(pc) return;
-    log("Offer aan het maken...");
-    
-    pc = new RTCPeerConnection({
-      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
-    });
-    pc._iceCandidates = [];
+    createAnswerBtn.onclick = async () => {
+      if(!offerSDP.value) return alert('Plak eerst offer SDP');
+      if(!offerICE.value) return alert('Plak eerst offer ICE candidates');
+
+      const offerDesc = new RTCSessionDescription(JSON.parse(offerSDP.value));
+      await pc.setRemoteDescription(offerDesc);
+
+      // Voeg alle remote ICE candidates toe
+      const remoteCandidates = JSON.parse(offerICE.value);
+      for(const c of remoteCandidates){
+        try {
+          await pc.addIceCandidate(new RTCIceCandidate(c));
+        } catch(e){
+          console.warn('Fout bij toevoegen ICE candidate:', e);
+        }
+      }
+
+      const stream = await navigator.mediaDevices.getUserMedia({video:true,audio:true});
+      stream.getTracks().forEach(track => pc.addTrack(track, stream));
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      answerSDP.value = JSON.stringify(pc.localDescription);
+    };
 
     pc.onicecandidate = e => {
-      if(e.candidate) {
-        pc._iceCandidates.push(e.candidate.toJSON());
-        updateOfferText();
+      if(e.candidate){
+        iceCandidatesFromLocal.push(e.candidate);
+        answerICE.value = JSON.stringify(iceCandidatesFromLocal);
       }
     };
-
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-
-    await gatherIceCandidates(3000);
-
-    log("Offer + ICE klaar als binaire string");
-  };
-</script>
+  </script>
 </body>
 </html>
