@@ -4,8 +4,7 @@
 <body>
 <h1>Game (Peer 2)</h1>
 
-<button id="start">Start en maak QR-code</button><br><br>
-
+<button id="start">Start en toon QR</button><br><br>
 <canvas id="qrcode" width="250" height="250" style="border:1px solid #ccc"></canvas>
 
 <p>Status:<br><pre id="log"></pre></p>
@@ -14,39 +13,14 @@
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
 
 <script>
-  const logElem = document.getElementById('log');
-  function log(msg) { logElem.textContent += msg + "\n"; }
+  const log = msg => (document.getElementById('log').textContent += msg + "\n");
 
   let pc = null;
   let dc = null;
-
-  async function gatherIceCandidates() {
-    return new Promise(resolve => {
-      let candidates = [];
-      pc.onicecandidate = e => {
-        if(e.candidate) {
-          candidates.push(e.candidate.toJSON());
-          updateQRCode({sdp: pc.localDescription, ice: candidates});
-        } else {
-          resolve(candidates);
-        }
-      };
-    });
-  }
-
-  function updateQRCode(data) {
-    const jsonStr = JSON.stringify(data);
-    const compressed = LZString.compressToUTF16(jsonStr);
-
-    const canvas = document.getElementById('qrcode');
-    QRCode.toCanvas(canvas, compressed, {width:250}, err => {
-      if(err) log("QR error: " + err);
-      else log("QR-code gemaakt, scan met controller");
-    });
-  }
+  let offerSDP = "";
 
   document.getElementById('start').onclick = async () => {
-    if(pc) return;
+    if (pc) return;
     log("PeerConnection maken...");
     pc = new RTCPeerConnection({iceServers: []});
 
@@ -57,8 +31,14 @@
 
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
+    offerSDP = JSON.stringify(offer);
+    const compressed = LZString.compressToBase64(offerSDP);
 
-    await gatherIceCandidates();
+    const canvas = document.getElementById('qrcode');
+    QRCode.toCanvas(canvas, compressed, {width:250}, err => {
+      if(err) log("QR error: " + err);
+      else log("QR-code gemaakt, scan met controller");
+    });
   };
 </script>
 </body>
