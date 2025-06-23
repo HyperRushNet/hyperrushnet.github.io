@@ -11,16 +11,13 @@
 <p>Status:<br><pre id="log"></pre></p>
 
 <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
 <script>
   const logElem = document.getElementById('log');
   function log(msg) { logElem.textContent += msg + "\n"; }
 
   let pc = null;
   let dc = null;
-
-  function decodeCompact(str) {
-    return atob(str.toUpperCase().replace(/p/g, '+').replace(/s/g, '/').replace(/e/g, '='));
-  }
 
   async function setupConnection(data) {
     const { sdp, ice } = data;
@@ -45,7 +42,6 @@
 
     pc.onicecandidate = e => {
       if(e.candidate) {
-        // We kunnen hier eventueel candidates verzamelen en versturen, maar vaak is dat niet nodig als beide peers op hetzelfde netwerk zitten
         log("ICE candidate verzameld");
       }
     };
@@ -63,8 +59,11 @@
         log("QR-code gescand!");
         html5QrCode.stop();
         try {
-          const jsonStr = decodeCompact(qrCodeMessage);
-          const data = JSON.parse(jsonStr);
+          // decompress met LZ-string
+          const decompressed = LZString.decompressFromUTF16(qrCodeMessage);
+          if(!decompressed) throw "Decompressie mislukt";
+
+          const data = JSON.parse(decompressed);
           if(!data.sdp || !data.ice) throw "Ongeldige data";
           setupConnection(data);
         } catch(e) {
