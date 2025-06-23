@@ -6,8 +6,8 @@
 
 <button id="startOffer">Maak Offer + ICE</button><br><br>
 
-<label>Offer + ICE (kopieer naar Peer 2):</label><br>
-<textarea id="offerData" style="width:100%; height:150px;" readonly></textarea><br><br>
+<label>Offer + ICE (kopieer naar Peer 2, geen spaties, kleine letters):</label><br>
+<textarea id="offerData" style="width:100%; height:120px;" readonly></textarea><br><br>
 
 <label>Answer + ICE plakken (van Peer 2):</label><br>
 <textarea id="answerData" style="width:100%; height:150px;"></textarea><br><br>
@@ -24,7 +24,7 @@
   let dc = null;
   const logElem = document.getElementById('log');
 
-  function log(msg){
+  function log(msg) {
     logElem.textContent += msg + "\n";
   }
 
@@ -36,19 +36,38 @@
     dc.onclose = () => log("DataChannel gesloten");
   }
 
+  function encodeToCompact(str) {
+    // Base64 variant: gebruik alleen a-z en 0-9 (letters lowercase)
+    // Encode base64, replace +,/ en = met letters/nummers, en lowercase
+    return btoa(str)
+      .replace(/\+/g, 'p')
+      .replace(/\//g, 's')
+      .replace(/=/g, 'e')
+      .toLowerCase();
+  }
+
+  function decodeFromCompact(str) {
+    // Omgekeerde transformatie
+    return atob(
+      str
+        .toUpperCase()
+        .replace(/p/g, '+')
+        .replace(/s/g, '/')
+        .replace(/e/g, '=')
+    );
+  }
+
   async function gatherIceCandidates() {
     return new Promise(resolve => {
       let candidates = [];
       pc.onicecandidate = e => {
         if (e.candidate) {
           candidates.push(e.candidate.toJSON());
-          // update output each time
-          document.getElementById('offerData').value = JSON.stringify({
+          document.getElementById('offerData').value = encodeToCompact(JSON.stringify({
             sdp: pc.localDescription,
             ice: candidates
-          }, null, 2);
+          }));
         } else {
-          // ICE gathering finished
           resolve(candidates);
         }
       };
@@ -74,7 +93,9 @@
       return;
     }
     try {
-      const data = JSON.parse(document.getElementById('answerData').value);
+      const compactStr = document.getElementById('answerData').value.trim();
+      const jsonStr = decodeFromCompact(compactStr);
+      const data = JSON.parse(jsonStr);
       if(!data.sdp || !data.ice) {
         log("Ongeldige data");
         return;
