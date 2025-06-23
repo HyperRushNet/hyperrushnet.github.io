@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html>
+<head><title>Controller</title></head>
+<body>
+<h1>Controller (Peer 1)</h1>
+
+<button id="startOffer">Maak Offer + ICE</button><br><br>
+
+<label>Offer + ICE (kopieer naar Peer 2):</label><br>
+<textarea id="offerData" style="width:100%; height:150px;" readonly></textarea><br><br>
+
+<label>Answer + ICE plakken (van Peer 2):</label><br>
+<textarea id="answerData" style="width:100%; height:150px;"></textarea><br><br>
+
+<button id="acceptAnswer">Accepteer Answer + ICE</button><br><br>
+
+<button id="sendJump">Jump</button>
+<button id="sendAttack">Attack</button>
+
+<p>Logs:<br><pre id="log"></pre></p>
+
+<script>
+  let pc = null;
+  let dc = null;
+  const logElem = document.getElementById('log');
+
+  function log(msg){
+    logElem.textContent += msg + "\n";
+  }
+
+  function createPeerConnection() {
+    pc = new RTCPeerConnection({iceServers: []});
+    dc = pc.createDataChannel("data");
+    dc.onopen = () => log("DataChannel open!");
+    dc.onmessage = e => log("Ontvangen: " + e.data);
+    dc.onclose = () => log("DataChannel gesloten");
+  }
+
+  async function gatherIceCandidates() {
+    return new Promise(resolve => {
+      let candidates = [];
+      pc.onicecandidate = e => {
+        if (e.candidate) {
+          candidates.push(e.candidate.toJSON());
+          // update output each time
+          document.getElementById('offerData').value = JSON.stringify({
+            sdp: pc.localDescription,
+            ice: candidates
+          }, null, 2);
+        } else {
+          // ICE gathering finished
+          resolve(candidates);
+        }
+      };
+    });
+  }
+
+  document.getElementById('startOffer').onclick = async () => {
+    if (pc) return; // al gestart
+    log("Offer maken...");
+    createPeerConnection();
+
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
+
+    await gatherIceCandidates();
+
+    log("Offer + ICE klaar");
+  };
+
+  document.getElementById('acceptAnswer').onclick = async () => {
+    if (!pc) {
+      log("Start eerst een offer");
+      return;
+    }
+    try {
+      const data = JSON.parse(document.getElementById('answerData').value);
+      if(!data.sdp || !data.ice) {
+        log("Ongeldige data");
+        return;
+      }
+      await pc.setRemoteDescription(data.sdp);
+      for (const c of data.ice) {
+        await pc.addIceCandidate(new RTCIceCandidate(c));
+      }
+      log("Answer + ICE toegevoegd");
+    } catch(e) {
+      log("Fout bij toevoegen: " + e);
+    }
+  };
+
+  document.getElementById('sendJump').onclick = () => {
+    if(dc && dc.readyState === 'open') {
+      dc.send("jump");
+      log("Jump gestuurd");
+    } else {
+      log("DataChannel niet open");
+    }
+  };
+
+  document.getElementById('sendAttack').onclick = () => {
+    if(dc && dc.readyState === 'open') {
+      dc.send("attack");
+      log("Attack gestuurd");
+    } else {
+      log("DataChannel niet open");
+    }
+  };
+</script>
+</body>
+</html>
