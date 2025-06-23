@@ -1,43 +1,65 @@
 <!DOCTYPE html>
 <html>
-<head><title>Game (Peer 2)</title></head>
+<head><title>Game (Peer 2) - Multi QR</title></head>
 <body>
-<h1>Game (Peer 2)</h1>
+<h1>Game (Peer 2) - Genereer Multi QR</h1>
 
-<button id="start">Start en toon QR</button><br><br>
-<canvas id="qrcode" width="250" height="250" style="border:1px solid #ccc"></canvas>
+<label>Offer SDP (JSON):</label><br>
+<textarea id="offerSDP" style="width:100%; height:120px;"></textarea><br><br>
 
-<p>Status:<br><pre id="log"></pre></p>
+<button id="generateQRs">Genereer QR codes</button><br><br>
 
-<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
+<div id="qrcodes"></div>
+
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 
 <script>
-  const log = msg => (document.getElementById('log').textContent += msg + "\n");
+  const QR_CHUNK_SIZE = 100; // pas evt aan voor kleinere/grotere QR's
 
-  let pc = null;
-  let dc = null;
-  let offerSDP = "";
+  document.getElementById('generateQRs').onclick = () => {
+    const offerText = document.getElementById('offerSDP').value.trim();
+    if (!offerText) {
+      alert("Vul de offer SDP in");
+      return;
+    }
 
-  document.getElementById('start').onclick = async () => {
-    if (pc) return;
-    log("PeerConnection maken...");
-    pc = new RTCPeerConnection({iceServers: []});
+    // Comprimeer en base64 encode
+    const compressed = LZString.compressToBase64(offerText);
+    
+    // Split in stukjes
+    let chunks = [];
+    for (let i = 0; i < compressed.length; i += QR_CHUNK_SIZE) {
+      chunks.push(compressed.substring(i, i + QR_CHUNK_SIZE));
+    }
 
-    dc = pc.createDataChannel("data");
-    dc.onopen = () => log("DataChannel open!");
-    dc.onmessage = e => log("Ontvangen: " + e.data);
-    dc.onclose = () => log("DataChannel gesloten");
+    const total = chunks.length;
 
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-    offerSDP = JSON.stringify(offer);
-    const compressed = LZString.compressToBase64(offerSDP);
+    // Maak container leeg
+    const container = document.getElementById('qrcodes');
+    container.innerHTML = "";
 
-    const canvas = document.getElementById('qrcode');
-    QRCode.toCanvas(canvas, compressed, {width:250}, err => {
-      if(err) log("QR error: " + err);
-      else log("QR-code gemaakt, scan met controller");
+    // Genereer QR codes met info: "index/total:data"
+    chunks.forEach((chunk, idx) => {
+      const text = `${idx+1}/${total}:${chunk}`;
+      const div = document.createElement('div');
+      div.style.display = "inline-block";
+      div.style.margin = "10px";
+      div.style.textAlign = "center";
+      container.appendChild(div);
+
+      // QR code canvas
+      const canvas = document.createElement('canvas');
+      div.appendChild(canvas);
+
+      QRCode.toCanvas(canvas, text, {width: 150, margin: 1}, err => {
+        if(err) console.error(err);
+      });
+
+      // Label
+      const label = document.createElement('div');
+      label.textContent = `QR ${idx+1} / ${total}`;
+      div.appendChild(label);
     });
   };
 </script>
