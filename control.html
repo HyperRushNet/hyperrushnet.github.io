@@ -10,8 +10,11 @@
 
 <p>Status:<br><pre id="log"></pre></p>
 
+<!-- html5-qrcode lib -->
 <script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
+<!-- LZ-String lib -->
 <script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+
 <script>
   const logElem = document.getElementById('log');
   function log(msg) { logElem.textContent += msg + "\n"; }
@@ -59,7 +62,6 @@
         log("QR-code gescand!");
         html5QrCode.stop();
         try {
-          // decompress met LZ-string
           const decompressed = LZString.decompressFromUTF16(qrCodeMessage);
           if(!decompressed) throw "Decompressie mislukt";
 
@@ -71,7 +73,7 @@
         }
       },
       errorMessage => {
-        // console.log("Scan error", errorMessage);
+        // scan errors negeren
       }
     ).catch(err => log("Camera starten mislukt: " + err));
   };
