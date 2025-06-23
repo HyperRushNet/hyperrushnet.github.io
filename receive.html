@@ -1,52 +1,34 @@
 <!DOCTYPE html>
 <html>
-<head>
-  <title>Game</title>
-  <style> #qrcode { margin-top: 10px; } </style>
-</head>
+<head><title>Game (Peer 2)</title></head>
 <body>
 <h1>Game (Peer 2)</h1>
 
-<label>Offer + ICE plakken (van Peer 1, compacte string):</label><br>
-<textarea id="offerData" style="width:100%; height:120px;"></textarea><br><br>
+<button id="start">Start en maak QR-code</button><br><br>
 
-<button id="createAnswer">Maak Answer + ICE</button><br><br>
-
-<label>Answer + ICE (scan QR-code op Controller):</label><br>
 <div id="qrcode"></div>
 
-<p>Ontvangen data:<br><pre id="log"></pre></p>
+<p>Status:<br><pre id="log"></pre></p>
 
 <script src="https://cdn.jsdelivr.net/npm/qrcode/build/qrcode.min.js"></script>
 <script>
+  const logElem = document.getElementById('log');
+  function log(msg) { logElem.textContent += msg + "\n"; }
+
   let pc = null;
   let dc = null;
-  const logElem = document.getElementById('log');
 
-  function log(msg) {
-    logElem.textContent += msg + "\n";
-  }
-
-  function decodeFromCompact(str) {
-    return atob(
-      str
-        .toUpperCase()
-        .replace(/p/g, '+')
-        .replace(/s/g, '/')
-        .replace(/e/g, '=')
-    );
+  function encodeCompact(str) {
+    return btoa(str).replace(/\+/g,'p').replace(/\//g,'s').replace(/=/g,'e').toLowerCase();
   }
 
   async function gatherIceCandidates() {
     return new Promise(resolve => {
       let candidates = [];
       pc.onicecandidate = e => {
-        if (e.candidate) {
+        if(e.candidate) {
           candidates.push(e.candidate.toJSON());
-          updateAnswerQRCode(JSON.stringify({
-            sdp: pc.localDescription,
-            ice: candidates
-          }));
+          updateQRCode(JSON.stringify({sdp: pc.localDescription, ice: candidates}));
         } else {
           resolve(candidates);
         }
@@ -54,55 +36,30 @@
     });
   }
 
-  function updateAnswerQRCode(dataStr) {
-    const compact = btoa(dataStr)
-      .replace(/\+/g, 'p')
-      .replace(/\//g, 's')
-      .replace(/=/g, 'e')
-      .toLowerCase();
-    const qrContainer = document.getElementById('qrcode');
-    qrContainer.innerHTML = "";
-    QRCode.toCanvas(qrContainer, compact, { width: 200 }, function (error) {
-      if (error) log("QR code error: " + error);
-      else log("QR code gemaakt");
+  function updateQRCode(jsonStr) {
+    const compact = encodeCompact(jsonStr);
+    const qrDiv = document.getElementById('qrcode');
+    qrDiv.innerHTML = "";
+    QRCode.toCanvas(qrDiv, compact, {width:250}, err => {
+      if(err) log("QR error: " + err);
+      else log("QR-code gemaakt, scan met controller");
     });
   }
 
-  document.getElementById('createAnswer').onclick = async () => {
-    if(pc) return; // voorkom dubbel
-    try {
-      pc = new RTCPeerConnection({iceServers: []});
-      pc.ondatachannel = event => {
-        dc = event.channel;
-        dc.onopen = () => log("DataChannel open!");
-        dc.onmessage = e => log("Ontvangen: " + e.data);
-        dc.onclose = () => log("DataChannel gesloten");
-      };
+  document.getElementById('start').onclick = async () => {
+    if(pc) return;
+    log("PeerConnection maken...");
+    pc = new RTCPeerConnection({iceServers: []});
 
-      const compactStr = document.getElementById('offerData').value.trim();
-      const jsonStr = decodeFromCompact(compactStr);
-      const data = JSON.parse(jsonStr);
+    dc = pc.createDataChannel("data");
+    dc.onopen = () => log("DataChannel open!");
+    dc.onmessage = e => log("Ontvangen: " + e.data);
+    dc.onclose = () => log("DataChannel gesloten");
 
-      if(!data.sdp || !data.ice) {
-        log("Ongeldige data");
-        return;
-      }
+    const offer = await pc.createOffer();
+    await pc.setLocalDescription(offer);
 
-      await pc.setRemoteDescription(data.sdp);
-
-      for(const c of data.ice) {
-        await pc.addIceCandidate(new RTCIceCandidate(c));
-      }
-
-      const answer = await pc.createAnswer();
-      await pc.setLocalDescription(answer);
-
-      await gatherIceCandidates();
-
-      log("Answer + ICE klaar en QR code getoond");
-    } catch(e) {
-      log("Fout bij createAnswer: " + e);
-    }
+    await gatherIceCandidates();
   };
 </script>
 </body>
