@@ -1,0 +1,73 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Blokcode Scanner (Telefoonvriendelijk)</title>
+  <style>
+    #video { border: 1px solid black; width: 100%; max-width: 400px; }
+    #canvas { display: none; }
+  </style>
+</head>
+<body>
+<h1>Blokcode Scanner</h1>
+
+<video id="video" autoplay playsinline></video><br>
+<button onclick="start()">Start Scan</button>
+<button onclick="stop()">Stop</button><br><br>
+
+<textarea id="output" style="width:100%; height:80px;"></textarea><br>
+
+<canvas id="canvas" width="320" height="320"></canvas>
+
+<script>
+let stream;
+
+async function start() {
+  try {
+    stream = await navigator.mediaDevices.getUserMedia({ video: true });
+    document.getElementById('video').srcObject = stream;
+    requestAnimationFrame(process);
+  } catch (err) {
+    alert("Camera toegang geweigerd of niet beschikbaar.");
+  }
+}
+
+function stop() {
+  if (stream) stream.getTracks().forEach(t => t.stop());
+}
+
+function process() {
+  const video = document.getElementById('video');
+  const canvas = document.getElementById('canvas');
+  const ctx = canvas.getContext('2d');
+  ctx.drawImage(video, 0, 0, 320, 320);
+  
+  const imgData = ctx.getImageData(0, 0, 320, 320).data;
+  const size = 32;
+  let bin = '';
+  
+  for (let i = 0; i < size * size; i++) {
+    const x = (i % size) * 10 + 5;
+    const y = Math.floor(i / size) * 10 + 5;
+    const index = (y * 320 + x) * 4;
+    const brightness = (imgData[index] + imgData[index+1] + imgData[index+2]) / 3;
+    bin += brightness < 128 ? '1' : '0';
+  }
+  
+  let bytes = '';
+  for (let i = 0; i < bin.length; i += 8) {
+    const byte = bin.slice(i, i + 8);
+    if (byte.length === 8) bytes += String.fromCharCode(parseInt(byte, 2));
+  }
+  
+  try {
+    const decoded = decodeURIComponent(escape(atob(bytes)));
+    document.getElementById('output').value = decoded;
+  } catch (e) {
+    document.getElementById('output').value = "[nog niet leesbaar]";
+  }
+
+  requestAnimationFrame(process);
+}
+</script>
+</body>
+</html>
