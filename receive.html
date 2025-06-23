@@ -29,26 +29,30 @@
     return bin;
   }
 
-  function binToStr(bin) {
-    let str = "";
-    for(let i=0; i<bin.length; i+=8){
-      let byte = bin.slice(i,i+8);
-      str += String.fromCharCode(parseInt(byte, 2));
-    }
-    return str;
-  }
-
-  async function gatherIceCandidates() {
+  async function gatherIceCandidates(timeoutMs = 3000) {
     return new Promise(resolve => {
       let candidates = [];
+      let done = false;
+
       pc.onicecandidate = e => {
         if(e.candidate) {
           candidates.push(e.candidate.toJSON());
           updateOfferText();
         } else {
-          resolve(candidates);
+          if (!done) {
+            done = true;
+            resolve(candidates);
+          }
         }
       };
+
+      // fallback: stop na timeout ook
+      setTimeout(() => {
+        if (!done) {
+          done = true;
+          resolve(candidates);
+        }
+      }, timeoutMs);
     });
   }
 
@@ -62,7 +66,11 @@
 
   document.getElementById('createOffer').onclick = async () => {
     if(pc) return;
-    pc = new RTCPeerConnection({iceServers: []});
+    log("Offer aan het maken...");
+    
+    pc = new RTCPeerConnection({
+      iceServers: [{ urls: "stun:stun.l.google.com:19302" }]
+    });
     pc._iceCandidates = [];
 
     pc.onicecandidate = e => {
@@ -72,11 +80,10 @@
       }
     };
 
-    log("Offer aan het maken...");
     const offer = await pc.createOffer();
     await pc.setLocalDescription(offer);
 
-    await gatherIceCandidates();
+    await gatherIceCandidates(3000);
 
     log("Offer + ICE klaar als binaire string");
   };
