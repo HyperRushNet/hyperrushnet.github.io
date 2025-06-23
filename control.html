@@ -1,111 +1,78 @@
 <!DOCTYPE html>
 <html>
-<head><title>Controller (Peer 1) - Multi QR Scan</title></head>
+<head><title>Controller (Peer 1)</title></head>
 <body>
-<h1>Controller (Peer 1) - Scan Multi QR codes</h1>
+<h1>Controller (Peer 1)</h1>
 
-<button id="startScan">Start scannen</button><br><br>
-<div id="reader" style="width:320px; height:320px; border:1px solid #ccc;"></div>
+<label>Offer + ICE 0/1-string (typen):</label><br>
+<textarea id="offerBin" style="width:100%; height:150px;"></textarea><br><br>
 
-<p>Status:<br><pre id="log"></pre></p>
+<button id="connect">Verbind met offer</button><br><br>
 
 <button id="sendJump">Jump</button>
 <button id="sendAttack">Attack</button>
 
-<script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+<p>Log:<br><pre id="log"></pre></p>
 
 <script>
+  let pc = null;
+  let dc = null;
   const logElem = document.getElementById('log');
-  const log = msg => {
+
+  function log(msg){
     logElem.textContent += msg + "\n";
-  };
-
-  let pc = null, dc = null;
-  let receivedChunks = {};
-  let totalChunks = 0;
-
-  const html5QrCode = new Html5Qrcode("reader");
-
-  async function setupConnection(offerSDP) {
-    pc = new RTCPeerConnection({iceServers: []});
-    pc.ondatachannel = e => {
-      dc = e.channel;
-      dc.onopen = () => log("DataChannel open!");
-      dc.onmessage = ev => log("Ontvangen: " + ev.data);
-      dc.onclose = () => log("DataChannel gesloten");
-    };
-
-    await pc.setRemoteDescription(offerSDP);
-    const answer = await pc.createAnswer();
-    await pc.setLocalDescription(answer);
-    log("Answer gegenereerd, verbinding wordt opgezet");
-
-    pc.onicecandidate = e => {
-      if(e.candidate) log("ICE: " + JSON.stringify(e.candidate.toJSON()));
-    };
   }
 
-  function tryConnectIfComplete() {
-    if (Object.keys(receivedChunks).length === totalChunks && totalChunks > 0) {
-      // Alle chunks binnen, zet alles in volgorde aan elkaar
-      let combined = "";
-      for(let i=1; i<=totalChunks; i++) {
-        combined += receivedChunks[i];
-      }
-      log("Alle QR codes ontvangen, decompressie...");
+  function binToStr(bin) {
+    let str = "";
+    for(let i=0; i<bin.length; i+=8){
+      let byte = bin.slice(i,i+8);
+      str += String.fromCharCode(parseInt(byte, 2));
+    }
+    return str;
+  }
 
-      const decompressed = LZString.decompressFromBase64(combined);
-      if (!decompressed) {
-        log("Fout bij decompressie");
+  async function connectWithOffer(binStr) {
+    try {
+      const jsonStr = binToStr(binStr.trim());
+      const data = JSON.parse(jsonStr);
+      if(!data.sdp || !data.ice){
+        log("Ongeldige data");
         return;
       }
-      try {
-        const offer = JSON.parse(decompressed);
-        setupConnection(offer);
-      } catch (e) {
-        log("Fout bij parsen JSON: " + e);
+
+      pc = new RTCPeerConnection({iceServers: []});
+      dc = pc.createDataChannel("data");
+      dc.onopen = () => log("DataChannel open!");
+      dc.onmessage = e => log("Ontvangen: " + e.data);
+      dc.onclose = () => log("DataChannel gesloten");
+
+      await pc.setRemoteDescription(data.sdp);
+      for(const c of data.ice){
+        await pc.addIceCandidate(new RTCIceCandidate(c));
       }
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      log("Verbonden met offer, answer gemaakt");
+    } catch(e){
+      log("Fout bij verbinden: " + e);
     }
   }
 
-  document.getElementById('startScan').onclick = () => {
-    receivedChunks = {};
-    totalChunks = 0;
-    logElem.textContent = "";
-    html5QrCode.start(
-      { facingMode: "environment" },
-      { fps: 10, qrbox: 280 },
-      qrMessage => {
-        // Verwacht: "index/total:data"
-        const match = qrMessage.match(/^(\d+)\/(\d+):(.+)$/);
-        if (!match) {
-          log("Ongeldige QR code: " + qrMessage);
-          return;
-        }
-        const [_, idxStr, totalStr, chunk] = match;
-        const idx = parseInt(idxStr);
-        const total = parseInt(totalStr);
-
-        if (totalChunks === 0) {
-          totalChunks = total;
-          log(`Aantal QR codes te scannen: ${totalChunks}`);
-        }
-
-        if (receivedChunks[idx]) {
-          log(`QR ${idx} al gescand`);
-          return;
-        }
-
-        receivedChunks[idx] = chunk;
-        log(`QR ${idx} ontvangen`);
-
-        tryConnectIfComplete();
-      },
-      errorMessage => {
-        // Optioneel: log scan fouten
-      }
-    );
+  document.getElementById('connect').onclick = async () => {
+    if(pc) {
+      log("Al verbonden");
+      return;
+    }
+    const binStr = document.getElementById('offerBin').value;
+    if(!binStr.match(/^[01]+$/)){
+      log("Voer alleen 0 en 1 in");
+      return;
+    }
+    log("Verbinding maken...");
+    await connectWithOffer(binStr);
   };
 
   document.getElementById('sendJump').onclick = () => {
