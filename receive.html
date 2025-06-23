@@ -1,0 +1,80 @@
+<!DOCTYPE html>
+<html>
+<head><title>Game</title></head>
+<body>
+<h1>Game (Peer 2)</h1>
+
+<label>Offer + ICE plakken (van Peer 1):</label><br>
+<textarea id="offerData" style="width:100%; height:150px;"></textarea><br><br>
+
+<button id="createAnswer">Maak Answer + ICE</button><br><br>
+
+<label>Answer + ICE (kopieer naar Peer 1):</label><br>
+<textarea id="answerData" style="width:100%; height:150px;" readonly></textarea><br><br>
+
+<p>Ontvangen data:<br><pre id="log"></pre></p>
+
+<script>
+  let pc = null;
+  let dc = null;
+  const logElem = document.getElementById('log');
+
+  function log(msg) {
+    logElem.textContent += msg + "\n";
+  }
+
+  function createPeerConnection() {
+    pc = new RTCPeerConnection({iceServers: []});
+    pc.ondatachannel = event => {
+      dc = event.channel;
+      dc.onopen = () => log("DataChannel open!");
+      dc.onmessage = e => log("Ontvangen: " + e.data);
+      dc.onclose = () => log("DataChannel gesloten");
+    };
+  }
+
+  async function gatherIceCandidates() {
+    return new Promise(resolve => {
+      let candidates = [];
+      pc.onicecandidate = e => {
+        if (e.candidate) {
+          candidates.push(e.candidate.toJSON());
+          document.getElementById('answerData').value = JSON.stringify({
+            sdp: pc.localDescription,
+            ice: candidates
+          }, null, 2);
+        } else {
+          resolve(candidates);
+        }
+      };
+    });
+  }
+
+  document.getElementById('createAnswer').onclick = async () => {
+    if(pc) return; // voorkom dubbel
+    try {
+      createPeerConnection();
+      const data = JSON.parse(document.getElementById('offerData').value);
+      if(!data.sdp || !data.ice) {
+        log("Ongeldige data");
+        return;
+      }
+      await pc.setRemoteDescription(data.sdp);
+
+      for(const c of data.ice) {
+        await pc.addIceCandidate(new RTCIceCandidate(c));
+      }
+
+      const answer = await pc.createAnswer();
+      await pc.setLocalDescription(answer);
+
+      await gatherIceCandidates();
+
+      log("Answer + ICE klaar");
+    } catch(e) {
+      log("Fout bij createAnswer: " + e);
+    }
+  };
+</script>
+</body>
+</html>
