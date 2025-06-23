@@ -1,131 +1,80 @@
 <!DOCTYPE html>
 <html>
-<head><title>Controller</title></head>
+<head><title>Controller (Peer 1)</title></head>
 <body>
 <h1>Controller (Peer 1)</h1>
 
-<button id="startOffer">Maak Offer + ICE</button><br><br>
+<button id="startScan">Start camera en scan QR-code</button><br><br>
 
-<label>Offer + ICE (kopieer naar Peer 2, geen spaties, kleine letters):</label><br>
-<textarea id="offerData" style="width:100%; height:120px;" readonly></textarea><br><br>
+<div id="reader" style="width:300px; height:300px; border:1px solid #ccc;"></div>
 
-<label>Answer + ICE plakken (van Peer 2):</label><br>
-<textarea id="answerData" style="width:100%; height:150px;"></textarea><br><br>
+<p>Status:<br><pre id="log"></pre></p>
 
-<button id="acceptAnswer">Accepteer Answer + ICE</button><br><br>
-
-<button id="sendJump">Jump</button>
-<button id="sendAttack">Attack</button>
-
-<p>Logs:<br><pre id="log"></pre></p>
-
+<script src="https://unpkg.com/html5-qrcode@2.3.7/minified/html5-qrcode.min.js"></script>
 <script>
+  const logElem = document.getElementById('log');
+  function log(msg) { logElem.textContent += msg + "\n"; }
+
   let pc = null;
   let dc = null;
-  const logElem = document.getElementById('log');
 
-  function log(msg) {
-    logElem.textContent += msg + "\n";
+  function decodeCompact(str) {
+    return atob(str.toUpperCase().replace(/p/g, '+').replace(/s/g, '/').replace(/e/g, '='));
   }
 
-  function createPeerConnection() {
+  async function setupConnection(data) {
+    const { sdp, ice } = data;
+
     pc = new RTCPeerConnection({iceServers: []});
-    dc = pc.createDataChannel("data");
-    dc.onopen = () => log("DataChannel open!");
-    dc.onmessage = e => log("Ontvangen: " + e.data);
-    dc.onclose = () => log("DataChannel gesloten");
+
+    pc.ondatachannel = e => {
+      dc = e.channel;
+      dc.onopen = () => log("DataChannel open!");
+      dc.onmessage = ev => log("Ontvangen: " + ev.data);
+      dc.onclose = () => log("DataChannel gesloten");
+    };
+
+    await pc.setRemoteDescription(sdp);
+
+    for (const c of ice) {
+      await pc.addIceCandidate(new RTCIceCandidate(c));
+    }
+
+    const answer = await pc.createAnswer();
+    await pc.setLocalDescription(answer);
+
+    pc.onicecandidate = e => {
+      if(e.candidate) {
+        // We kunnen hier eventueel candidates verzamelen en versturen, maar vaak is dat niet nodig als beide peers op hetzelfde netwerk zitten
+        log("ICE candidate verzameld");
+      }
+    };
+
+    log("Answer gemaakt en verbinding gestart");
   }
 
-  function encodeToCompact(str) {
-    // Base64 variant: gebruik alleen a-z en 0-9 (letters lowercase)
-    // Encode base64, replace +,/ en = met letters/nummers, en lowercase
-    return btoa(str)
-      .replace(/\+/g, 'p')
-      .replace(/\//g, 's')
-      .replace(/=/g, 'e')
-      .toLowerCase();
-  }
+  document.getElementById('startScan').onclick = () => {
+    const html5QrCode = new Html5Qrcode("reader");
 
-  function decodeFromCompact(str) {
-    // Omgekeerde transformatie
-    return atob(
-      str
-        .toUpperCase()
-        .replace(/p/g, '+')
-        .replace(/s/g, '/')
-        .replace(/e/g, '=')
-    );
-  }
-
-  async function gatherIceCandidates() {
-    return new Promise(resolve => {
-      let candidates = [];
-      pc.onicecandidate = e => {
-        if (e.candidate) {
-          candidates.push(e.candidate.toJSON());
-          document.getElementById('offerData').value = encodeToCompact(JSON.stringify({
-            sdp: pc.localDescription,
-            ice: candidates
-          }));
-        } else {
-          resolve(candidates);
+    html5QrCode.start(
+      { facingMode: "environment" },
+      { fps: 10, qrbox: 250 },
+      qrCodeMessage => {
+        log("QR-code gescand!");
+        html5QrCode.stop();
+        try {
+          const jsonStr = decodeCompact(qrCodeMessage);
+          const data = JSON.parse(jsonStr);
+          if(!data.sdp || !data.ice) throw "Ongeldige data";
+          setupConnection(data);
+        } catch(e) {
+          log("Fout bij decoderen QR: " + e);
         }
-      };
-    });
-  }
-
-  document.getElementById('startOffer').onclick = async () => {
-    if (pc) return; // al gestart
-    log("Offer maken...");
-    createPeerConnection();
-
-    const offer = await pc.createOffer();
-    await pc.setLocalDescription(offer);
-
-    await gatherIceCandidates();
-
-    log("Offer + ICE klaar");
-  };
-
-  document.getElementById('acceptAnswer').onclick = async () => {
-    if (!pc) {
-      log("Start eerst een offer");
-      return;
-    }
-    try {
-      const compactStr = document.getElementById('answerData').value.trim();
-      const jsonStr = decodeFromCompact(compactStr);
-      const data = JSON.parse(jsonStr);
-      if(!data.sdp || !data.ice) {
-        log("Ongeldige data");
-        return;
+      },
+      errorMessage => {
+        // console.log("Scan error", errorMessage);
       }
-      await pc.setRemoteDescription(data.sdp);
-      for (const c of data.ice) {
-        await pc.addIceCandidate(new RTCIceCandidate(c));
-      }
-      log("Answer + ICE toegevoegd");
-    } catch(e) {
-      log("Fout bij toevoegen: " + e);
-    }
-  };
-
-  document.getElementById('sendJump').onclick = () => {
-    if(dc && dc.readyState === 'open') {
-      dc.send("jump");
-      log("Jump gestuurd");
-    } else {
-      log("DataChannel niet open");
-    }
-  };
-
-  document.getElementById('sendAttack').onclick = () => {
-    if(dc && dc.readyState === 'open') {
-      dc.send("attack");
-      log("Attack gestuurd");
-    } else {
-      log("DataChannel niet open");
-    }
+    ).catch(err => log("Camera starten mislukt: " + err));
   };
 </script>
 </body>
