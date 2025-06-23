@@ -1,28 +1,97 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>QR Scanner</title>
-  <script src="https://unpkg.com/html5-qrcode"></script>
+  <title>Eigen Blokjes QR Scanner</title>
+  <style>
+    #video { width: 320px; border:1px solid black; }
+    #canvas { display:none; }
+  </style>
 </head>
 <body>
-  <h2>QR Code Scanner</h2>
-  <div id="reader" style="width: 300px;"></div>
-  <p><strong>Gescande Data:</strong></p>
-  <textarea id="result" rows="4" cols="50" readonly></textarea>
+  <h2>Eigen Blokjes QR Scanner</h2>
+  <video id="video" autoplay playsinline></video><br>
+  <button onclick="startCamera()">Start Camera</button>
+  <button onclick="stopCamera()">Stop Camera</button><br><br>
+  <button onclick="scanBlock()">Scan Blok</button><br><br>
+
+  <textarea id="result" rows="8" cols="50" readonly placeholder="Gescande tekst verschijnt hier..."></textarea>
+  <p id="status"></p>
+
+  <canvas id="canvas" width="160" height="170"></canvas>
 
   <script>
-    const resultBox = document.getElementById("result");
+    const video = document.getElementById('video');
+    const canvas = document.getElementById('canvas');
+    const ctx = canvas.getContext('2d');
 
-    function onScanSuccess(decodedText, decodedResult) {
-      resultBox.value = decodedText;
+    const BLOCK_SIZE = 10;
+    const BLOCKS_PER_ROW = 16;
+    const BLOCKS_PER_COL = 16;
+    const HEADER_ROWS = 1;
+
+    let stream;
+    let parts = {};
+    let totalBlocks = 0;
+
+    function startCamera() {
+      navigator.mediaDevices.getUserMedia({ video: { facingMode: "environment" } })
+        .then(s => { stream = s; video.srcObject = stream; })
+        .catch(e => alert("Camera fout: " + e));
+    }
+    function stopCamera() {
+      if (stream) stream.getTracks().forEach(t => t.stop());
     }
 
-    const html5QrCode = new Html5Qrcode("reader");
-    html5QrCode.start(
-      { facingMode: "environment" }, 
-      { fps: 10, qrbox: 250 },
-      onScanSuccess
-    );
+    function getBit(x,y) {
+      const imageData = ctx.getImageData(x*BLOCK_SIZE+BLOCK_SIZE/2, y*BLOCK_SIZE+BLOCK_SIZE/2, 1,1);
+      const d = imageData.data;
+      // simpele drempel op brightness
+      const brightness = (d[0]+d[1]+d[2])/3;
+      return brightness < 128 ? 1 : 0;
+    }
+
+    function scanBlock() {
+      ctx.drawImage(video, 0, 0, canvas.width, canvas.height);
+
+      // lees header
+      let total = 0, index = 0;
+      for(let i=0; i<8; i++) {
+        total = (total << 1) | getBit(i, 0);
+        index = (index << 1) | getBit(i+8, 0);
+      }
+      totalBlocks = total;
+
+      // lees bits tekst
+      let bits = '';
+      for(let y=1; y<=BLOCKS_PER_COL; y++) {
+        for(let x=0; x<BLOCKS_PER_ROW; x++) {
+          bits += getBit(x, y);
+        }
+      }
+
+      // converteer bits naar chars
+      let text = '';
+      for(let i=0; i<bits.length; i+=8) {
+        const byte = bits.slice(i, i+8);
+        if (byte.length === 8) {
+          text += String.fromCharCode(parseInt(byte, 2));
+        }
+      }
+
+      parts[index] = text;
+
+      // toon status
+      document.getElementById('status').textContent = `Blok ${index+1} van ${totalBlocks} gescand. Gescande blokken: ${Object.keys(parts).length}`;
+
+      // als alles binnen is, toon hele tekst
+      if (Object.keys(parts).length === totalBlocks && totalBlocks>0) {
+        let full = '';
+        for(let i=0; i<totalBlocks; i++) {
+          full += parts[i] || '';
+        }
+        document.getElementById('result').value = full;
+      }
+    }
   </script>
 </body>
 </html>
