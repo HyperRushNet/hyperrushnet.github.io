@@ -2,17 +2,23 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>10 Minutes Till Dawn - Mobile Friendly</title>
   <style>
     body {
       margin: 0;
       background: black;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
+      user-select: none;
+      overflow: hidden;
     }
     iframe {
       width: 100%;
       height: 100vh;
       border: none;
+      touch-action: none; /* voorkom pinch-zoom/scroll */
     }
 
     #touch-controls {
@@ -25,6 +31,7 @@
       box-sizing: border-box;
       z-index: 9999;
       pointer-events: none;
+      -webkit-tap-highlight-color: transparent;
     }
 
     #touch-controls > * {
@@ -47,6 +54,10 @@
       color: black;
       font-weight: bold;
       box-shadow: 0 2px 4px rgba(0,0,0,0.3);
+      user-select: none;
+      -webkit-user-select: none;
+      -moz-user-select: none;
+      -ms-user-select: none;
     }
 
     #dpad div {
@@ -68,64 +79,116 @@
   <iframe id="game-frame" src="https://hyperrushnet.github.io/hrn-action-games/10-minutes-till-dawn/" allowfullscreen></iframe>
 
   <!-- VIRTUELE TOUCH CONTROLS -->
-  <div id="touch-controls">
+  <div id="touch-controls" role="application" aria-label="Virtuele game bediening">
     <!-- Links: D-Pad -->
-    <div id="dpad">
-      <button data-key="ArrowUp">▲</button>
+    <div id="dpad" aria-label="Richting knoppen">
+      <button data-key="ArrowUp" aria-label="Pijl omhoog">▲</button>
       <div>
-        <button data-key="ArrowLeft">◀</button>
-        <button data-key="ArrowDown">▼</button>
-        <button data-key="ArrowRight">▶</button>
+        <button data-key="ArrowLeft" aria-label="Pijl links">◀</button>
+        <button data-key="ArrowDown" aria-label="Pijl omlaag">▼</button>
+        <button data-key="ArrowRight" aria-label="Pijl rechts">▶</button>
       </div>
     </div>
 
     <!-- Rechts: Actieknoppen -->
-    <div id="actions">
-      <button data-key=" ">␣</button> <!-- Spatie -->
-      <button id="shoot-btn">🔫</button> <!-- Schieten (muis) -->
+    <div id="actions" aria-label="Actie knoppen">
+      <button data-key=" " aria-label="Spatie">␣</button>
+      <button id="shoot-btn" aria-label="Schiet knop">🔫</button>
     </div>
   </div>
 
-  <script>
-    const iframe = document.getElementById("game-frame");
+<script>
+  const iframe = document.getElementById("game-frame");
 
-    iframe.addEventListener("load", () => {
-      const gameWindow = iframe.contentWindow;
+  // Hulpfunctie: krijg canvas in iframe (voor mouse event coordinaten)
+  function getGameCanvas() {
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      return doc.querySelector('canvas');
+    } catch {
+      return null;
+    }
+  }
 
-      function triggerKey(key, type = 'keydown') {
-        const event = new KeyboardEvent(type, { key, code: key, bubbles: true });
-        gameWindow.document.dispatchEvent(event);
-      }
+  iframe.addEventListener("load", () => {
+    const gameWindow = iframe.contentWindow;
 
-      function triggerMouse(type) {
-        const event = new MouseEvent(type, { bubbles: true });
-        gameWindow.document.dispatchEvent(event);
-      }
+    function triggerKey(key, type = 'keydown') {
+      const event = new KeyboardEvent(type, {
+        key,
+        code: key,
+        bubbles: true,
+        cancelable: true,
+      });
+      gameWindow.dispatchEvent(event);
+    }
 
-      // Keyboard-knoppen
-      document.querySelectorAll('#touch-controls [data-key]').forEach(btn => {
-        const key = btn.getAttribute('data-key');
-        btn.addEventListener('touchstart', e => {
-          e.preventDefault();
-          triggerKey(key, 'keydown');
-        });
-        btn.addEventListener('touchend', e => {
-          e.preventDefault();
-          triggerKey(key, 'keyup');
-        });
+    // Mouse event met coördinaten op canvas gericht
+    function triggerMouse(type) {
+      const canvas = getGameCanvas();
+      if (!canvas) return;
+
+      const rect = canvas.getBoundingClientRect();
+      const x = rect.left + rect.width / 2;
+      const y = rect.top + rect.height / 2;
+
+      const mouseEvent = new MouseEvent(type, {
+        bubbles: true,
+        cancelable: true,
+        view: gameWindow,
+        clientX: x,
+        clientY: y,
+        button: 0
       });
 
-      // Schietknop (muis)
-      const shootBtn = document.getElementById('shoot-btn');
-      shootBtn.addEventListener('touchstart', e => {
-        e.preventDefault();
-        triggerMouse('mousedown');
+      canvas.dispatchEvent(mouseEvent);
+    }
+
+    // Virtuele toetsen: keydown en keyup, met cancelable check
+    document.querySelectorAll('#touch-controls [data-key]').forEach(btn => {
+      const key = btn.getAttribute('data-key');
+      btn.addEventListener('touchstart', e => {
+        if (e.cancelable) e.preventDefault();
+        triggerKey(key, 'keydown');
       });
-      shootBtn.addEventListener('touchend', e => {
+      btn.addEventListener('touchend', e => {
+        if (e.cancelable) e.preventDefault();
+        triggerKey(key, 'keyup');
+      });
+      // Voor desktop testen
+      btn.addEventListener('mousedown', e => {
         e.preventDefault();
-        triggerMouse('mouseup');
+        triggerKey(key, 'keydown');
+      });
+      btn.addEventListener('mouseup', e => {
+        e.preventDefault();
+        triggerKey(key, 'keyup');
       });
     });
-  </script>
+
+    // Schietknop met echte muis events op canvas, met cancelable check
+    const shootBtn = document.getElementById('shoot-btn');
+    shootBtn.addEventListener('touchstart', e => {
+      if (e.cancelable) e.preventDefault();
+      triggerMouse('mousedown');
+    });
+    shootBtn.addEventListener('touchend', e => {
+      if (e.cancelable) e.preventDefault();
+      triggerMouse('mouseup');
+      triggerMouse('click');
+    });
+    // Desktop support
+    shootBtn.addEventListener('mousedown', e => {
+      e.preventDefault();
+      triggerMouse('mousedown');
+    });
+    shootBtn.addEventListener('mouseup', e => {
+      e.preventDefault();
+      triggerMouse('mouseup');
+      triggerMouse('click');
+    });
+  });
+</script>
+
 </body>
 </html>
