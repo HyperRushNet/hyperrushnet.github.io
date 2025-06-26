@@ -82,6 +82,7 @@
       border-radius: 4rem;
       font-size: 0.875rem;
       letter-spacing: 0.05rem;
+      display: inline-block;
     }
 
     p {
@@ -150,7 +151,17 @@
   <div class="info">
     <h2>We can't find that page</h2>
     <p>We're fairly sure that page used to be here, but seems to have gone missing. We do apologise on its behalf.</p>
-    <a href="./" target="_self" rel="noreferrer noopener">Home</a>
+    <a id="home-button" href="https://jhey.dev" target="_blank" rel="noreferrer noopener">Home</a>
   </div>
+
+  <script>
+    // Verberg de knop als de pagina in een iframe zit
+    if (window.self !== window.top) {
+      const btn = document.getElementById('home-button');
+      if (btn) {
+        btn.style.display = 'none';
+      }
+    }
+  </script>
 </body>
 </html>
