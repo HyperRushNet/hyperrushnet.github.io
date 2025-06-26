@@ -2,36 +2,36 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>10 Minutes Till Dawn - Mobile Friendly</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>10 Minutes Till Dawn - Mobile Fix</title>
   <style>
-    body {
+    html, body {
       margin: 0;
-      background: black;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
-      user-select: none;
+      padding: 0;
       overflow: hidden;
+      background: black;
+      touch-action: none;
+      -webkit-user-select: none;
+      user-select: none;
     }
+
     iframe {
-      width: 100%;
+      width: 100vw;
       height: 100vh;
       border: none;
-      touch-action: none; /* voorkom pinch-zoom/scroll */
     }
 
     #touch-controls {
       position: fixed;
-      bottom: 10px;
+      bottom: 20px;
+      left: 0;
       width: 100%;
-      display: none;
+      display: flex;
       justify-content: space-between;
       padding: 0 20px;
       box-sizing: border-box;
       z-index: 9999;
       pointer-events: none;
-      -webkit-tap-highlight-color: transparent;
     }
 
     #touch-controls > * {
@@ -44,63 +44,51 @@
       gap: 10px;
     }
 
-    #dpad button,
-    #actions button {
+    #dpad div {
+      display: flex;
+      gap: 10px;
+      justify-content: center;
+    }
+
+    button {
       font-size: 20px;
       padding: 12px 16px;
       border-radius: 10px;
-      background: rgba(255, 255, 255, 0.3);
+      background: rgba(255,255,255,0.3);
       border: none;
       color: black;
       font-weight: bold;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.3);
-      user-select: none;
-      -webkit-user-select: none;
-      -moz-user-select: none;
-      -ms-user-select: none;
     }
 
-    #dpad div {
-      display: flex;
-      justify-content: center;
-      gap: 10px;
-    }
-
-    @media (max-width: 768px) {
+    @media (min-width: 769px) {
       #touch-controls {
-        display: flex;
+        display: none;
       }
     }
   </style>
 </head>
 <body>
 
-  <!-- GAME IFRAME -->
-  <iframe id="game-frame" src="https://hyperrushnet.github.io/hrn-action-games/10-minutes-till-dawn/" allowfullscreen></iframe>
+<iframe id="game-frame" src="https://hyperrushnet.github.io/hrn-action-games/10-minutes-till-dawn/" allowfullscreen></iframe>
 
-  <!-- VIRTUELE TOUCH CONTROLS -->
-  <div id="touch-controls" role="application" aria-label="Virtuele game bediening">
-    <!-- Links: D-Pad -->
-    <div id="dpad" aria-label="Richting knoppen">
-      <button data-key="ArrowUp" aria-label="Pijl omhoog">▲</button>
-      <div>
-        <button data-key="ArrowLeft" aria-label="Pijl links">◀</button>
-        <button data-key="ArrowDown" aria-label="Pijl omlaag">▼</button>
-        <button data-key="ArrowRight" aria-label="Pijl rechts">▶</button>
-      </div>
-    </div>
-
-    <!-- Rechts: Actieknoppen -->
-    <div id="actions" aria-label="Actie knoppen">
-      <button data-key=" " aria-label="Spatie">␣</button>
-      <button id="shoot-btn" aria-label="Schiet knop">🔫</button>
+<div id="touch-controls">
+  <div id="dpad">
+    <button data-key="ArrowUp">▲</button>
+    <div>
+      <button data-key="ArrowLeft">◀</button>
+      <button data-key="ArrowDown">▼</button>
+      <button data-key="ArrowRight">▶</button>
     </div>
   </div>
+  <div id="actions">
+    <button data-key=" ">␣</button>
+    <button id="shoot-btn">🔫</button>
+  </div>
+</div>
 
 <script>
   const iframe = document.getElementById("game-frame");
 
-  // Hulpfunctie: krijg canvas in iframe (voor mouse event coordinaten)
   function getGameCanvas() {
     try {
       const doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -110,83 +98,68 @@
     }
   }
 
-  iframe.addEventListener("load", () => {
-    const gameWindow = iframe.contentWindow;
+  function sendKey(key, type = 'keydown') {
+    const event = new KeyboardEvent(type, {
+      key: key,
+      code: key,
+      bubbles: true
+    });
+    iframe.contentWindow.dispatchEvent(event);
+  }
 
-    function triggerKey(key, type = 'keydown') {
-      const event = new KeyboardEvent(type, {
-        key,
-        code: key,
-        bubbles: true,
-        cancelable: true,
-      });
-      gameWindow.dispatchEvent(event);
-    }
+  function sendMouse(type) {
+    const canvas = getGameCanvas();
+    if (!canvas) return;
 
-    // Mouse event met coördinaten op canvas gericht
-    function triggerMouse(type) {
-      const canvas = getGameCanvas();
-      if (!canvas) return;
+    const rect = canvas.getBoundingClientRect();
+    const x = rect.left + rect.width / 2;
+    const y = rect.top + rect.height / 2;
 
-      const rect = canvas.getBoundingClientRect();
-      const x = rect.left + rect.width / 2;
-      const y = rect.top + rect.height / 2;
-
-      const mouseEvent = new MouseEvent(type, {
-        bubbles: true,
-        cancelable: true,
-        view: gameWindow,
-        clientX: x,
-        clientY: y,
-        button: 0
-      });
-
-      canvas.dispatchEvent(mouseEvent);
-    }
-
-    // Virtuele toetsen: keydown en keyup, met cancelable check
-    document.querySelectorAll('#touch-controls [data-key]').forEach(btn => {
-      const key = btn.getAttribute('data-key');
-      btn.addEventListener('touchstart', e => {
-        if (e.cancelable) e.preventDefault();
-        triggerKey(key, 'keydown');
-      });
-      btn.addEventListener('touchend', e => {
-        if (e.cancelable) e.preventDefault();
-        triggerKey(key, 'keyup');
-      });
-      // Voor desktop testen
-      btn.addEventListener('mousedown', e => {
-        e.preventDefault();
-        triggerKey(key, 'keydown');
-      });
-      btn.addEventListener('mouseup', e => {
-        e.preventDefault();
-        triggerKey(key, 'keyup');
-      });
+    const event = new MouseEvent(type, {
+      bubbles: true,
+      cancelable: true,
+      clientX: x,
+      clientY: y,
+      button: 0
     });
 
-    // Schietknop met echte muis events op canvas, met cancelable check
-    const shootBtn = document.getElementById('shoot-btn');
-    shootBtn.addEventListener('touchstart', e => {
+    canvas.dispatchEvent(event);
+  }
+
+  // Knoppen: toets-events
+  document.querySelectorAll('button[data-key]').forEach(btn => {
+    const key = btn.getAttribute('data-key');
+    btn.addEventListener('touchstart', e => {
       if (e.cancelable) e.preventDefault();
-      triggerMouse('mousedown');
+      sendKey(key, 'keydown');
     });
-    shootBtn.addEventListener('touchend', e => {
+    btn.addEventListener('touchend', e => {
       if (e.cancelable) e.preventDefault();
-      triggerMouse('mouseup');
-      triggerMouse('click');
+      sendKey(key, 'keyup');
     });
-    // Desktop support
-    shootBtn.addEventListener('mousedown', e => {
-      e.preventDefault();
-      triggerMouse('mousedown');
-    });
-    shootBtn.addEventListener('mouseup', e => {
-      e.preventDefault();
-      triggerMouse('mouseup');
-      triggerMouse('click');
-    });
+  });
+
+  // Schietknop: muis-events
+  const shootBtn = document.getElementById('shoot-btn');
+  shootBtn.addEventListener('touchstart', e => {
+    if (e.cancelable) e.preventDefault();
+    sendMouse('mousedown');
+  });
+  shootBtn.addEventListener('touchend', e => {
+    if (e.cancelable) e.preventDefault();
+    sendMouse('mouseup');
+    sendMouse('click');
+  });
+
+  // Voor desktop testing
+  shootBtn.addEventListener('mousedown', e => {
+    e.preventDefault();
+    sendMouse('mousedown');
+  });
+  shootBtn.addEventListener('mouseup', e => {
+    e.preventDefault();
+    sendMouse('mouseup');
+    sendMouse('click');
   });
 </script>
 
