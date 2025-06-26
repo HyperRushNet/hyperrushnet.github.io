@@ -1,167 +1,182 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>10 Minutes Till Dawn - Mobile Fix</title>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>10 Minutes Till Dawn</title>
+
+  <script src="Build/UnityLoader.js"></script>
+
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
+      height: 100%;
+      background: #000;
       overflow: hidden;
-      background: black;
-      touch-action: none;
-      -webkit-user-select: none;
       user-select: none;
     }
-
-    iframe {
-      width: 100vw;
-      height: 100vh;
-      border: none;
+    #gameContainer {
+      position: absolute;
+      top: 0; left: 0;
+      width: 100%;
+      height: 100%;
     }
-
-    #touch-controls {
+    canvas {
+      position: absolute;
+      outline: none;
+    }
+    #virtualKeyboard {
       position: fixed;
       bottom: 20px;
-      left: 0;
-      width: 100%;
-      display: flex;
-      justify-content: space-between;
-      padding: 0 20px;
-      box-sizing: border-box;
+      right: 20px;
+      width: 230px;
+      height: 230px;
+      display: grid;
+      grid-template-columns: 70px 70px 70px;
+      grid-template-rows: 70px 70px 70px;
+      gap: 10px;
+      user-select: none;
       z-index: 9999;
-      pointer-events: none;
+      touch-action: none;
     }
-
-    #touch-controls > * {
-      pointer-events: auto;
-    }
-
-    #dpad, #actions {
-      display: flex;
-      flex-direction: column;
-      gap: 10px;
-    }
-
-    #dpad div {
-      display: flex;
-      gap: 10px;
-      justify-content: center;
-    }
-
-    button {
-      font-size: 20px;
-      padding: 12px 16px;
-      border-radius: 10px;
-      background: rgba(255,255,255,0.3);
-      border: none;
-      color: black;
+    #virtualKeyboard button {
+      background: rgba(255,255,255,0.2);
+      border: 1px solid white;
+      border-radius: 5px;
+      font-size: 28px;
+      color: white;
       font-weight: bold;
+      cursor: pointer;
+      outline: none;
+      -webkit-tap-highlight-color: transparent;
     }
-
-    @media (min-width: 769px) {
-      #touch-controls {
-        display: none;
-      }
+    #virtualKeyboard button:active {
+      background: rgba(255,255,255,0.5);
     }
+    #virtualKeyboard button[data-key="KeyW"] { grid-column: 2; grid-row: 1; }
+    #virtualKeyboard button[data-key="KeyA"] { grid-column: 1; grid-row: 2; }
+    #virtualKeyboard button[data-key="KeyS"] { grid-column: 2; grid-row: 2; }
+    #virtualKeyboard button[data-key="KeyD"] { grid-column: 3; grid-row: 2; }
   </style>
 </head>
+
 <body>
+  <div id="gameContainer"></div>
 
-<iframe id="game-frame" src="https://hyperrushnet.github.io/hrn-action-games/10-minutes-till-dawn/" allowfullscreen></iframe>
-
-<div id="touch-controls">
-  <div id="dpad">
-    <button data-key="ArrowUp">▲</button>
-    <div>
-      <button data-key="ArrowLeft">◀</button>
-      <button data-key="ArrowDown">▼</button>
-      <button data-key="ArrowRight">▶</button>
-    </div>
+  <div id="virtualKeyboard">
+    <button data-key="KeyW">W</button>
+    <button data-key="KeyA">A</button>
+    <button data-key="KeyS">S</button>
+    <button data-key="KeyD">D</button>
   </div>
-  <div id="actions">
-    <button data-key=" ">␣</button>
-    <button id="shoot-btn">🔫</button>
-  </div>
-</div>
 
-<script>
-  const iframe = document.getElementById("game-frame");
+  <script>
+    // Instantiate Unity
+    var gameInstance = UnityLoader.instantiate("gameContainer", "Build/10MinutesTillDawnWebGL.json");
 
-  function getGameCanvas() {
-    try {
-      const doc = iframe.contentDocument || iframe.contentWindow.document;
-      return doc.querySelector('canvas');
-    } catch {
-      return null;
+    // Resize canvas to fit window, keep ratio
+    function onResize() {
+      if (!gameInstance || !gameInstance.Module || !gameInstance.Module.canvas) return;
+
+      var canvas = gameInstance.Module.canvas;
+      var container = gameInstance.container;
+
+      var w = window.innerWidth;
+      var h = window.innerHeight;
+
+      var ratio = 675 / 1200;
+
+      if (w * ratio > h) {
+        w = Math.floor(h / ratio);
+      }
+      h = Math.floor(w * ratio);
+
+      container.style.width = canvas.style.width = w + "px";
+      container.style.height = canvas.style.height = h + "px";
+
+      container.style.top = Math.floor((window.innerHeight - h) / 2) + "px";
+      container.style.left = Math.floor((window.innerWidth - w) / 2) + "px";
     }
-  }
+    window.addEventListener("resize", onResize);
+    window.addEventListener("load", onResize);
 
-  function sendKey(key, type = 'keydown') {
-    const event = new KeyboardEvent(type, {
-      key: key,
-      code: key,
-      bubbles: true
+    // Touch to mouse event conversion for clicks
+    function simulateMouseEvent(event, simulatedType) {
+      if (event.touches.length > 0) {
+        var touch = event.touches[0];
+        var simulatedEvent = new MouseEvent(simulatedType, {
+          bubbles: true,
+          cancelable: true,
+          view: window,
+          detail: 1,
+          screenX: touch.screenX,
+          screenY: touch.screenY,
+          clientX: touch.clientX,
+          clientY: touch.clientY,
+          ctrlKey: event.ctrlKey,
+          altKey: event.altKey,
+          shiftKey: event.shiftKey,
+          metaKey: event.metaKey,
+          button: 0,
+          buttons: 1,
+          relatedTarget: null
+        });
+        touch.target.dispatchEvent(simulatedEvent);
+      }
+    }
+
+    // Add touch listeners to canvas when ready
+    var waitForCanvas = setInterval(() => {
+      if (gameInstance && gameInstance.Module && gameInstance.Module.canvas) {
+        var canvas = gameInstance.Module.canvas;
+
+        canvas.addEventListener("touchstart", e => { simulateMouseEvent(e, "mousedown"); e.preventDefault(); }, false);
+        canvas.addEventListener("touchmove", e => { simulateMouseEvent(e, "mousemove"); e.preventDefault(); }, false);
+        canvas.addEventListener("touchend", e => { simulateMouseEvent(e, "mouseup"); e.preventDefault(); }, false);
+
+        // Focus canvas to receive keyboard input
+        canvas.setAttribute("tabindex", "0");
+        canvas.focus();
+
+        clearInterval(waitForCanvas);
+      }
+    }, 100);
+
+    // Virtual keyboard buttons trigger keyboard events on canvas
+    const vk = document.getElementById("virtualKeyboard");
+    vk.addEventListener("pointerdown", e => {
+      if (e.target.tagName !== "BUTTON") return;
+      const keyCode = e.target.getAttribute("data-key");
+      if (!keyCode) return;
+
+      var canvas = gameInstance.Module.canvas;
+      if (!canvas) return;
+
+      // Create and dispatch keydown event
+      var kd = new KeyboardEvent("keydown", { code: keyCode, key: keyCode.replace("Key", ""), bubbles: true });
+      canvas.dispatchEvent(kd);
+      e.target.classList.add("active");
     });
-    iframe.contentWindow.dispatchEvent(event);
-  }
 
-  function sendMouse(type) {
-    const canvas = getGameCanvas();
-    if (!canvas) return;
+    vk.addEventListener("pointerup", e => {
+      if (e.target.tagName !== "BUTTON") return;
+      const keyCode = e.target.getAttribute("data-key");
+      if (!keyCode) return;
 
-    const rect = canvas.getBoundingClientRect();
-    const x = rect.left + rect.width / 2;
-    const y = rect.top + rect.height / 2;
+      var canvas = gameInstance.Module.canvas;
+      if (!canvas) return;
 
-    const event = new MouseEvent(type, {
-      bubbles: true,
-      cancelable: true,
-      clientX: x,
-      clientY: y,
-      button: 0
+      // Create and dispatch keyup event
+      var ku = new KeyboardEvent("keyup", { code: keyCode, key: keyCode.replace("Key", ""), bubbles: true });
+      canvas.dispatchEvent(ku);
+      e.target.classList.remove("active");
     });
 
-    canvas.dispatchEvent(event);
-  }
-
-  // Knoppen: toets-events
-  document.querySelectorAll('button[data-key]').forEach(btn => {
-    const key = btn.getAttribute('data-key');
-    btn.addEventListener('touchstart', e => {
-      if (e.cancelable) e.preventDefault();
-      sendKey(key, 'keydown');
+    // Also handle pointercancel (finger leaving the button)
+    vk.addEventListener("pointercancel", e => {
+      if (e.target.tagName !== "BUTTON") return;
+      e.target.classList.remove("active");
     });
-    btn.addEventListener('touchend', e => {
-      if (e.cancelable) e.preventDefault();
-      sendKey(key, 'keyup');
-    });
-  });
-
-  // Schietknop: muis-events
-  const shootBtn = document.getElementById('shoot-btn');
-  shootBtn.addEventListener('touchstart', e => {
-    if (e.cancelable) e.preventDefault();
-    sendMouse('mousedown');
-  });
-  shootBtn.addEventListener('touchend', e => {
-    if (e.cancelable) e.preventDefault();
-    sendMouse('mouseup');
-    sendMouse('click');
-  });
-
-  // Voor desktop testing
-  shootBtn.addEventListener('mousedown', e => {
-    e.preventDefault();
-    sendMouse('mousedown');
-  });
-  shootBtn.addEventListener('mouseup', e => {
-    e.preventDefault();
-    sendMouse('mouseup');
-    sendMouse('click');
-  });
-</script>
-
+  </script>
 </body>
 </html>
