@@ -1,44 +1,35 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="utf-8" />
-  <title>HyperRushNet Smooth Game Loader met iframe FPS-meter</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="x-dns-prefetch-control" content="on" />
-  <link rel="preconnect" href="https://hyperrushnet.github.io" crossorigin />
+  <meta charset="utf-8">
+  <meta http-equiv="X-UA-Compatible" content="IE=edge">
+  <title>HyperRushNet Game Loader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <style>
     html, body {
       margin: 0;
       padding: 0;
       background: #000;
+      width: 100%;
       height: 100%;
       overflow: hidden;
     }
 
     #wrapper {
-      position: fixed;
-      inset: 0;
-      will-change: transform, opacity, filter;
-      contain: strict;
-      perspective: 1px;
-      isolation: isolate;
+      position: absolute;
+      top: 0; left: 0; right: 0; bottom: 0;
+      width: 100%;
+      height: 100%;
+      background: #000;
     }
 
     iframe {
       position: absolute;
-      inset: 0;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
       border: none;
       display: block;
-
-      filter: blur(0.3px) contrast(1.02) brightness(1.01);
-      backface-visibility: hidden;
-      will-change: transform, opacity, filter;
-      transform: translate3d(0, 0, 0);
-      transition: opacity 33ms linear;
-      contain: strict;
-      image-rendering: pixelated;
     }
   </style>
 </head>
@@ -46,74 +37,77 @@
   <div id="wrapper"></div>
 
   <script>
-    const game = new URLSearchParams(location.search).get("game");
-    const wrapper = document.getElementById("wrapper");
+    // Basis polyfills
+    if (!window.requestAnimationFrame) {
+      window.requestAnimationFrame = function(cb) {
+        return setTimeout(cb, 16);
+      };
+    }
+    if (!window.performance) window.performance = {};
+    if (!performance.now) {
+      performance.now = function() {
+        return Date.now();
+      };
+    }
+
+    // Query helper
+    function getQueryParam(name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(location.search);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
+
+    var game = getQueryParam("game");
+    var wrapper = document.getElementById("wrapper");
 
     if (!game) {
-      wrapper.innerHTML = `
-        <div style="color:white;font-family:sans-serif;text-align:center;padding:2rem">
-          ⚠️ Geen game opgegeven.<br><br>
-          Gebruik bijv.: <code>?game=polytrack</code>
-        </div>`;
+      wrapper.innerHTML = (
+        '<div style="color:white;font-family:sans-serif;text-align:center;padding:2rem">' +
+        '⚠️ Geen game opgegeven.<br><br>' +
+        'Gebruik bijv.: <code>?game=polytrack</code>' +
+        '</div>'
+      );
     } else {
-      const iframe = document.createElement("iframe");
+      var iframe = document.createElement("iframe");
       iframe.src = "/hrn-" + game + "/";
-      iframe.sandbox = "allow-scripts allow-same-origin";
-      iframe.allowFullscreen = true;
-      iframe.loading = "eager";
+      iframe.width = "100%";
+      iframe.height = "100%";
+      iframe.setAttribute("allowfullscreen", "true");
+      iframe.setAttribute("loading", "eager");
+      // iframe.setAttribute("sandbox", "allow-scripts allow-same-origin"); // voeg dit toe als nodig
       wrapper.appendChild(iframe);
 
-      // Inject FPS meter in iframe zodra geladen
+      // ✅ FPS-meter injecteren? Voeg dit toe:
       iframe.onload = function() {
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        const body = doc.body;
+        try {
+          var doc = iframe.contentDocument || iframe.contentWindow.document;
+          var win = iframe.contentWindow;
 
-        const fpsMeter = doc.createElement('div');
-        Object.assign(fpsMeter.style, {
-          position: 'fixed',
-          top: '8px',
-          left: '8px',
-          background: 'rgba(0,0,0,0.6)',
-          color: '#0f0',
-          fontFamily: 'monospace',
-          fontSize: '14px',
-          padding: '4px 8px',
-          zIndex: '9999',
-          borderRadius: '4px',
-          pointerEvents: 'none',
-          userSelect: 'none',
-        });
-        fpsMeter.textContent = 'FPS: --';
-        body.appendChild(fpsMeter);
+          var fpsBox = doc.createElement('div');
+          fpsBox.style.cssText = `
+            position:fixed;top:8px;left:8px;background:rgba(0,0,0,0.6);
+            color:#0f0;font:14px monospace;padding:4px 8px;z-index:9999;
+            pointer-events:none;user-select:none;border-radius:4px;
+          `;
+          fpsBox.textContent = 'FPS: --';
+          doc.body.appendChild(fpsBox);
 
-        let frames = 0;
-        let lastTime = performance.now();
+          var lastTime = performance.now(), frames = 0;
 
-        function updateFPS() {
-          const now = performance.now();
-          frames++;
-          if (now - lastTime >= 1000) {
-            fpsMeter.textContent = 'FPS: ' + frames;
-            frames = 0;
-            lastTime = now;
+          function updateFPS() {
+            var now = performance.now();
+            frames++;
+            if (now - lastTime >= 1000) {
+              fpsBox.textContent = 'FPS: ' + frames;
+              frames = 0;
+              lastTime = now;
+            }
+            win.requestAnimationFrame(updateFPS);
           }
-          iframe.contentWindow.requestAnimationFrame(updateFPS);
+          win.requestAnimationFrame(updateFPS);
+        } catch (e) {
+          console.warn("FPS-meter kon niet worden geïnjecteerd:", e);
         }
-        iframe.contentWindow.requestAnimationFrame(updateFPS);
       };
-
-      // Soft fade on frame stall
-      let last = performance.now();
-      function fadeLoop(now) {
-        const delta = now - last;
-        last = now;
-        if (delta > 100) {
-          iframe.style.opacity = "0.7";
-          requestAnimationFrame(() => iframe.style.opacity = "1");
-        }
-        requestAnimationFrame(fadeLoop);
-      }
-      requestAnimationFrame(fadeLoop);
     }
   </script>
 </body>
