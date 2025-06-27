@@ -2,10 +2,9 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <title>HyperRushNet Smooth Game Loader</title>
+  <title>HyperRushNet Game Loader</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <meta http-equiv="x-dns-prefetch-control" content="on" />
-  <link rel="preconnect" href="https://hyperrushnet.github.io" crossorigin />
   <style>
     html, body {
       margin: 0;
@@ -16,35 +15,32 @@
     }
 
     #wrapper {
-      position: fixed;
-      inset: 0;
-      will-change: transform, opacity, filter;
-      contain: strict;
-      perspective: 1px;
-      isolation: isolate;
+      position: absolute;
+      top: 0; left: 0;
+      right: 0; bottom: 0;
+      overflow: hidden;
+      background: #000;
     }
 
     iframe {
       position: absolute;
-      inset: 0;
+      top: 0; left: 0;
       width: 100%;
       height: 100%;
       border: none;
-      display: block;
 
-      /* Visual smoothing */
-      filter: blur(0.25px) contrast(1.02) brightness(1.01);
-      backface-visibility: hidden;
-      will-change: transform, opacity, filter;
-      transform: translate3d(0, 0, 0);
-      contain: strict;
-      image-rendering: pixelated;
+      /* Visueel smooth: oudere browsers ondersteunen dit */
+      filter: progid:DXImageTransform.Microsoft.BasicImage(opacity=1); /* IE fallback */
+      -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(opacity=1)";
+      -webkit-filter: blur(0.2px);
+      filter: blur(0.2px);
 
-      /* Smooth transition for transforms (GPU-accelerated) */
-      transition:
-        transform 66ms ease-in-out,
-        filter 66ms ease-in-out,
-        opacity 66ms linear;
+      -webkit-transform: translateZ(0);
+      transform: translateZ(0);
+
+      /* Simpele overgang */
+      -webkit-transition: opacity 0.1s linear, transform 0.1s ease-in-out;
+      transition: opacity 0.1s linear, transform 0.1s ease-in-out;
     }
   </style>
 </head>
@@ -52,33 +48,64 @@
   <div id="wrapper"></div>
 
   <script>
-    const game = new URLSearchParams(location.search).get("game");
-    const wrapper = document.getElementById("wrapper");
+    // Basic polyfill voor IE9+ support
+    (function() {
+      if (!window.requestAnimationFrame) {
+        window.requestAnimationFrame = function(callback) {
+          return setTimeout(callback, 16);
+        };
+      }
+      if (!window.performance) {
+        window.performance = {};
+      }
+      if (!performance.now) {
+        performance.now = function() {
+          return new Date().getTime();
+        };
+      }
+    })();
+
+    function getQueryParam(name) {
+      var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
+      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
+    }
+
+    var game = getQueryParam("game");
+    var wrapper = document.getElementById("wrapper");
 
     if (!game) {
-      wrapper.innerHTML = `
-        <div style="color:white;font-family:sans-serif;text-align:center;padding:2rem">
-          ⚠️ Geen game opgegeven.<br><br>
-          Gebruik bijv.: <code>?game=polytrack</code>
-        </div>`;
+      wrapper.innerHTML = (
+        '<div style="color:white;font-family:sans-serif;text-align:center;padding:2rem">' +
+        '⚠️ Geen game opgegeven.<br><br>' +
+        'Gebruik bijv.: <code>?game=polytrack</code>' +
+        '</div>'
+      );
     } else {
-      const iframe = document.createElement("iframe");
-      iframe.src = `/hrn-${game}/`;
-      iframe.sandbox = "allow-scripts allow-same-origin";
-      iframe.allowFullscreen = true;
-      iframe.loading = "eager";
+      var iframe = document.createElement("iframe");
+      iframe.src = "/hrn-" + game + "/";
+      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+      iframe.setAttribute("allowfullscreen", "true");
+      iframe.setAttribute("loading", "eager");
       wrapper.appendChild(iframe);
 
-      // Superlichte micro-glitch voor smooth frame feeling
-      let last = performance.now();
+      // Simuleer lichte pulse bij frame-hapering
+      var last = performance.now();
       function fadeLoop(now) {
-        const delta = now - last;
+        var delta = now - last;
         last = now;
         if (delta > 100) {
-          iframe.style.transform = "scale(0.999)";
-          requestAnimationFrame(() => {
-            iframe.style.transform = "scale(1)";
-          });
+          // Check of transform ondersteund is
+          if ("transform" in iframe.style || "webkitTransform" in iframe.style) {
+            iframe.style.transform = "scale(0.998)";
+            requestAnimationFrame(function() {
+              iframe.style.transform = "scale(1)";
+            });
+          } else {
+            iframe.style.opacity = "0.98";
+            requestAnimationFrame(function() {
+              iframe.style.opacity = "1";
+            });
+          }
         }
         requestAnimationFrame(fadeLoop);
       }
