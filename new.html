@@ -16,9 +16,7 @@
 
     #wrapper {
       position: absolute;
-      top: 0; left: 0;
-      right: 0; bottom: 0;
-      overflow: hidden;
+      top: 0; left: 0; right: 0; bottom: 0;
       background: #000;
     }
 
@@ -29,18 +27,12 @@
       height: 100%;
       border: none;
 
-      /* Visueel smooth: oudere browsers ondersteunen dit */
-      filter: progid:DXImageTransform.Microsoft.BasicImage(opacity=1); /* IE fallback */
-      -ms-filter: "progid:DXImageTransform.Microsoft.BasicImage(opacity=1)";
-      -webkit-filter: blur(0.2px);
-      filter: blur(0.2px);
-
-      -webkit-transform: translateZ(0);
+      /* Performant rendering */
       transform: translateZ(0);
+      backface-visibility: hidden;
 
-      /* Simpele overgang */
-      -webkit-transition: opacity 0.1s linear, transform 0.1s ease-in-out;
-      transition: opacity 0.1s linear, transform 0.1s ease-in-out;
+      /* GEEN blur, filters of overgangen = maximale snelheid */
+      transition: none;
     }
   </style>
 </head>
@@ -48,23 +40,18 @@
   <div id="wrapper"></div>
 
   <script>
-    // Basic polyfill voor IE9+ support
+    // Compatibele polyfills
     (function() {
       if (!window.requestAnimationFrame) {
-        window.requestAnimationFrame = function(callback) {
-          return setTimeout(callback, 16);
-        };
+        window.requestAnimationFrame = function(cb) { return setTimeout(cb, 16); };
       }
-      if (!window.performance) {
-        window.performance = {};
-      }
+      if (!window.performance) window.performance = {};
       if (!performance.now) {
-        performance.now = function() {
-          return new Date().getTime();
-        };
+        performance.now = function() { return new Date().getTime(); };
       }
     })();
 
+    // Haal game-parameter uit URL
     function getQueryParam(name) {
       var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
       return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
@@ -83,33 +70,28 @@
     } else {
       var iframe = document.createElement("iframe");
       iframe.src = "/hrn-" + game + "/";
-      iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
       iframe.setAttribute("allowfullscreen", "true");
       iframe.setAttribute("loading", "eager");
+
+      // LET OP: sandbox is weggelaten voor betere performance
+      // Voeg eventueel terug toe: iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+
       wrapper.appendChild(iframe);
 
-      // Simuleer lichte pulse bij frame-hapering
+      // Zeer lichte fallback-check op performance drops (1x per seconde)
       var last = performance.now();
-      function fadeLoop(now) {
+      setInterval(function () {
+        var now = performance.now();
         var delta = now - last;
         last = now;
         if (delta > 100) {
-          // Check of transform ondersteund is
-          if ("transform" in iframe.style || "webkitTransform" in iframe.style) {
-            iframe.style.transform = "scale(0.998)";
-            requestAnimationFrame(function() {
-              iframe.style.transform = "scale(1)";
-            });
-          } else {
-            iframe.style.opacity = "0.98";
-            requestAnimationFrame(function() {
-              iframe.style.opacity = "1";
-            });
-          }
+          // minimale visuele reset (optioneel)
+          iframe.style.opacity = "0.98";
+          setTimeout(function () {
+            iframe.style.opacity = "1";
+          }, 50);
         }
-        requestAnimationFrame(fadeLoop);
-      }
-      requestAnimationFrame(fadeLoop);
+      }, 1000); // slechts elke seconde check
     }
   </script>
 </body>
