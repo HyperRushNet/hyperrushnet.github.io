@@ -2,10 +2,8 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <title>HyperRushNet Smooth Game Loader</title>
+  <title>HyperRushNet Game Loader</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="x-dns-prefetch-control" content="on" />
-  <link rel="preconnect" href="https://hyperrushnet.github.io" crossorigin />
   <style>
     html, body {
       margin: 0;
@@ -17,29 +15,27 @@
 
     #wrapper {
       position: fixed;
-      inset: 0;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
       will-change: transform, opacity, filter;
       contain: strict;
-      perspective: 1px;
       isolation: isolate;
     }
 
     iframe {
-      position: absolute;
-      inset: 0;
-      width: 100%;
-      height: 100%;
+      width: 1280px;
+      height: 720px;
       border: none;
       display: block;
 
-      /* Smooth rendering + blur glide */
-      filter: blur(0.3px) contrast(1.02) brightness(1.01);
+      /* Rendering optimalisatie */
+      filter: contrast(1.02) brightness(1.01);
       backface-visibility: hidden;
-      will-change: transform, opacity, filter;
-      transform: translate3d(0, 0, 0);
-      transition: opacity 33ms linear;
-      contain: strict;
+      will-change: transform, opacity;
+      transform-origin: top left;
       image-rendering: pixelated;
+      transition: opacity 0.2s ease-in-out;
     }
   </style>
 </head>
@@ -64,15 +60,26 @@
       iframe.loading = "eager";
       wrapper.appendChild(iframe);
 
-      // Soft fade on frame stall
+      // Schaal 1x op basis van viewport tov 1280x720
+      const targetWidth = 1280;
+      const targetHeight = 720;
+      const scaleX = window.innerWidth / targetWidth;
+      const scaleY = window.innerHeight / targetHeight;
+      const scale = Math.min(scaleX, scaleY);
+
+      iframe.style.transform = `scale(${scale})`;
+
+      // Eventueel fade bij framedrop (optioneel, lichtgewicht)
       let last = performance.now();
       function fadeLoop(now) {
         const delta = now - last;
         last = now;
-        if (delta > 100) {
-          iframe.style.opacity = "0.7";
-          requestAnimationFrame(() => iframe.style.opacity = "1");
+
+        if (delta > 34) {
+          iframe.style.opacity = "0.5";
+          setTimeout(() => iframe.style.opacity = "1", 100);
         }
+
         requestAnimationFrame(fadeLoop);
       }
       requestAnimationFrame(fadeLoop);
