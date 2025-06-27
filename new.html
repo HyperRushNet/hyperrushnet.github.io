@@ -1,85 +1,50 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>The Heist – Veilig Gesandboxed</title>
+  <meta charset="utf-8" />
+  <title>HyperRushNet Game Loader</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="x-dns-prefetch-control" content="on">
+  <link rel="preconnect" href="https://hyperrushnet.github.io" crossorigin>
   <style>
     html, body {
       margin: 0;
       padding: 0;
+      background: #000;
       height: 100%;
       overflow: hidden;
-      background-color: #000;
-    }
-
-    #container {
-      position: relative;
-      width: 100%;
-      height: 100%;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-
-    #fallbackMessage {
-      position: absolute;
-      top: 0;
-      left: 0;
-      right: 0;
-      bottom: 0;
-      color: white;
-      background: rgba(0,0,0,0.85);
-      display: none;
-      justify-content: center;
-      align-items: center;
-      font-family: sans-serif;
-      font-size: 1.2rem;
-      text-align: center;
-      padding: 2rem;
     }
   </style>
 </head>
 <body>
-  <div id="container">
-    <iframe
-      id="gameIframe"
-      src="https://hyperrushnet.github.io/hrn-driving-games/theheist/"
-      sandbox="allow-scripts allow-same-origin"
-      allowfullscreen
-    ></iframe>
-    <div id="fallbackMessage">
-      Deze game heeft geprobeerd te navigeren of iets te openen buiten de sandbox. De sessie is geblokkeerd voor je veiligheid.<br><br>
-      <button onclick="location.reload()">Herlaad</button>
-    </div>
-  </div>
-
   <script>
-    const iframe = document.getElementById("gameIframe");
-    const fallback = document.getElementById("fallbackMessage");
+    const params = new URLSearchParams(location.search);
+    const game = params.get('game');
 
-    let originalSrc = iframe.src;
-
-    function checkForEscape() {
-      try {
-        const srcNow = iframe.contentWindow.location.href;
-
-        // Als iframe probeert weg te navigeren
-        if (!srcNow.includes("theheist")) {
-          fallback.style.display = "flex";
-          iframe.style.display = "none";
-        }
-      } catch (e) {
-        // Cross-origin: fallback werkt alleen bij same-origin, maar sandbox voorkomt dit sowieso
-      }
+    if (!game) {
+      document.body.innerHTML = `
+        <div style="color:white;font-family:sans-serif;padding:2rem;text-align:center">
+          ⚠️ Geen game opgegeven.<br><br>
+          Gebruik bijv.: <code>?game=polytrack</code>
+        </div>`;
+    } else {
+      const iframe = document.createElement('iframe');
+      iframe.src = \`/hrn-driving-games/\${encodeURIComponent(game)}/\`;
+      iframe.sandbox = "allow-scripts allow-same-origin";
+      iframe.allowFullscreen = true;
+      iframe.loading = "eager";
+      iframe.style.cssText = \`
+        position:fixed;inset:0;border:0;
+        width:100%;height:100%;
+        display:block;
+        backface-visibility:hidden;
+        will-change:transform;
+        transform:translateZ(0);
+        contain:strict;
+        image-rendering:pixelated;
+      \`;
+      document.body.appendChild(iframe);
     }
-
-    // Herstel navigatie als mogelijk
-    setInterval(checkForEscape, 1000);
   </script>
 </body>
 </html>
