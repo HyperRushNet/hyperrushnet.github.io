@@ -58,7 +58,7 @@
         </div>`;
     } else {
       const iframe = document.createElement("iframe");
-      iframe.src = `/hrn-${encodeURIComponent(game)}/`;
+      iframe.src = `/hrn-$(game)}/`;
       iframe.sandbox = "allow-scripts allow-same-origin";
       iframe.allowFullscreen = true;
       iframe.loading = "eager";
