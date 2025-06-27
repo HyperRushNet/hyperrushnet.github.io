@@ -18,7 +18,7 @@
       top: 50%;
       left: 50%;
       transform: translate(-50%, -50%);
-      will-change: transform, opacity, filter;
+      will-change: transform, opacity;
       contain: strict;
       isolation: isolate;
     }
@@ -29,12 +29,12 @@
       border: none;
       display: block;
 
-      /* Rendering optimalisatie */
+      /* Visuele optimalisaties */
       filter: contrast(1.02) brightness(1.01);
       backface-visibility: hidden;
-      will-change: transform, opacity;
       transform-origin: top left;
       image-rendering: pixelated;
+      will-change: transform, opacity;
       transition: opacity 0.2s ease-in-out;
     }
   </style>
@@ -60,26 +60,23 @@
       iframe.loading = "eager";
       wrapper.appendChild(iframe);
 
-      // Schaal 1x op basis van viewport tov 1280x720
+      // Eenmalig schalen naar venstergrootte t.o.v. 1280×720
       const targetWidth = 1280;
       const targetHeight = 720;
       const scaleX = window.innerWidth / targetWidth;
       const scaleY = window.innerHeight / targetHeight;
       const scale = Math.min(scaleX, scaleY);
-
       iframe.style.transform = `scale(${scale})`;
 
-      // Eventueel fade bij framedrop (optioneel, lichtgewicht)
+      // Optionele fade bij frame drops (lichtgewicht)
       let last = performance.now();
       function fadeLoop(now) {
         const delta = now - last;
         last = now;
-
         if (delta > 34) {
           iframe.style.opacity = "0.5";
           setTimeout(() => iframe.style.opacity = "1", 100);
         }
-
         requestAnimationFrame(fadeLoop);
       }
       requestAnimationFrame(fadeLoop);
