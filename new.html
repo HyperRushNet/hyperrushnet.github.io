@@ -2,8 +2,10 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <title>HyperRushNet Game Loader</title>
+  <title>HyperRushNet Smooth Game Loader</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <meta http-equiv="x-dns-prefetch-control" content="on" />
+  <link rel="preconnect" href="https://hyperrushnet.github.io" crossorigin />
   <style>
     html, body {
       margin: 0;
@@ -15,27 +17,34 @@
 
     #wrapper {
       position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      will-change: transform, opacity;
+      inset: 0;
+      will-change: transform, opacity, filter;
       contain: strict;
+      perspective: 1px;
       isolation: isolate;
     }
 
     iframe {
-      width: 1280px;
-      height: 720px;
+      position: absolute;
+      inset: 0;
+      width: 100%;
+      height: 100%;
       border: none;
       display: block;
 
-      /* Visuele optimalisaties */
-      filter: contrast(1.02) brightness(1.01);
+      /* Visual smoothing */
+      filter: blur(0.25px) contrast(1.02) brightness(1.01);
       backface-visibility: hidden;
-      transform-origin: top left;
+      will-change: transform, opacity, filter;
+      transform: translate3d(0, 0, 0);
+      contain: strict;
       image-rendering: pixelated;
-      will-change: transform, opacity;
-      transition: opacity 0.2s ease-in-out;
+
+      /* Smooth transition for transforms (GPU-accelerated) */
+      transition:
+        transform 66ms ease-in-out,
+        filter 66ms ease-in-out,
+        opacity 66ms linear;
     }
   </style>
 </head>
@@ -60,22 +69,16 @@
       iframe.loading = "eager";
       wrapper.appendChild(iframe);
 
-      // Eenmalig schalen naar venstergrootte t.o.v. 1280×720
-      const targetWidth = 1280;
-      const targetHeight = 720;
-      const scaleX = window.innerWidth / targetWidth;
-      const scaleY = window.innerHeight / targetHeight;
-      const scale = Math.min(scaleX, scaleY);
-      iframe.style.transform = `scale(${scale})`;
-
-      // Optionele fade bij frame drops (lichtgewicht)
+      // Superlichte micro-glitch voor smooth frame feeling
       let last = performance.now();
       function fadeLoop(now) {
         const delta = now - last;
         last = now;
-        if (delta > 34) {
-          iframe.style.opacity = "0.5";
-          setTimeout(() => iframe.style.opacity = "1", 100);
+        if (delta > 100) {
+          iframe.style.transform = "scale(0.999)";
+          requestAnimationFrame(() => {
+            iframe.style.transform = "scale(1)";
+          });
         }
         requestAnimationFrame(fadeLoop);
       }
