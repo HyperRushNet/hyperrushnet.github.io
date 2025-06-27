@@ -2,96 +2,65 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <title>HyperRushNet Game Loader</title>
+  <title>HyperRushNet Game Loader - Downscaled</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="x-dns-prefetch-control" content="on" />
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
-      background: #000;
+      margin: 0; padding: 0;
       height: 100%;
+      background: #000;
       overflow: hidden;
     }
 
-    #wrapper {
+    /* Wrapper die full screen is, maar met transform schaal */
+    #iframe-wrapper {
+      width: 640px;       /* lagere render resolutie */
+      height: 360px;
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
+      top: 50%; left: 50%;
+      transform: translate(-50%, -50%) scale(2);  /* schaal 2x */
+      transform-origin: top left;
+      overflow: hidden;
       background: #000;
+      /* evt border toevoegen om schaal effect zichtbaar te maken:
+      border: 2px solid red; 
+      */
     }
 
     iframe {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%;
-      height: 100%;
+      width: 640px;       /* zelfde als wrapper */
+      height: 360px;
       border: none;
-
-      /* Performant rendering */
-      transform: translateZ(0);
-      backface-visibility: hidden;
-
-      /* GEEN blur, filters of overgangen = maximale snelheid */
-      transition: none;
+      display: block;
+      /* geen extra filters of transitions */
     }
+
   </style>
 </head>
 <body>
-  <div id="wrapper"></div>
+  <div id="iframe-wrapper"></div>
 
   <script>
-    // Compatibele polyfills
-    (function() {
-      if (!window.requestAnimationFrame) {
-        window.requestAnimationFrame = function(cb) { return setTimeout(cb, 16); };
-      }
-      if (!window.performance) window.performance = {};
-      if (!performance.now) {
-        performance.now = function() { return new Date().getTime(); };
-      }
-    })();
-
-    // Haal game-parameter uit URL
     function getQueryParam(name) {
       var match = RegExp('[?&]' + name + '=([^&]*)').exec(window.location.search);
       return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
     }
 
     var game = getQueryParam("game");
-    var wrapper = document.getElementById("wrapper");
+    var wrapper = document.getElementById("iframe-wrapper");
 
     if (!game) {
-      wrapper.innerHTML = (
+      wrapper.innerHTML =
         '<div style="color:white;font-family:sans-serif;text-align:center;padding:2rem">' +
         '⚠️ Geen game opgegeven.<br><br>' +
         'Gebruik bijv.: <code>?game=polytrack</code>' +
-        '</div>'
-      );
+        '</div>';
     } else {
       var iframe = document.createElement("iframe");
       iframe.src = "/hrn-" + game + "/";
-      iframe.setAttribute("allowfullscreen", "true");
-      iframe.setAttribute("loading", "eager");
-
-      // LET OP: sandbox is weggelaten voor betere performance
-      // Voeg eventueel terug toe: iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-
+      iframe.allowFullscreen = true;
+      iframe.loading = "eager";
       wrapper.appendChild(iframe);
-
-      // Zeer lichte fallback-check op performance drops (1x per seconde)
-      var last = performance.now();
-      setInterval(function () {
-        var now = performance.now();
-        var delta = now - last;
-        last = now;
-        if (delta > 100) {
-          // minimale visuele reset (optioneel)
-          iframe.style.opacity = "0.98";
-          setTimeout(function () {
-            iframe.style.opacity = "1";
-          }, 50);
-        }
-      }, 1000); // slechts elke seconde check
     }
   </script>
 </body>
