@@ -2,28 +2,57 @@
 <html lang="nl">
 <head>
   <meta charset="utf-8" />
-  <title>HyperRushNet Game Loader</title>
+  <title>HyperRushNet</title>
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="x-dns-prefetch-control" content="on">
-  <link rel="preconnect" href="https://hyperrushnet.github.io" crossorigin>
+  <meta http-equiv="x-dns-prefetch-control" content="on" />
+  <link rel="preconnect" href="https://hyperrushnet.github.io" crossorigin />
   <style>
     html, body {
       margin: 0;
       padding: 0;
-      background: #000;
+      width: 100%;
       height: 100%;
+      background: #000;
       overflow: hidden;
+    }
+
+    #wrapper {
+      width: 100%;
+      height: 100%;
+      isolation: isolate;
+      will-change: transform;
+      transform: translateZ(0);
+      contain: strict;
+      perspective: 1px;
+    }
+
+    iframe {
+      position: absolute;
+      inset: 0;
+      border: none;
+      width: 100%;
+      height: 100%;
+      display: block;
+
+      /* FPS optimizers */
+      backface-visibility: hidden;
+      transform: translate3d(0, 0, 0);
+      will-change: transform;
+      contain: strict;
+      image-rendering: pixelated;
     }
   </style>
 </head>
 <body>
+  <div id="wrapper"></div>
+
   <script>
     const params = new URLSearchParams(location.search);
     const game = params.get('game');
 
     if (!game) {
-      document.body.innerHTML = `
-        <div style="color:white;font-family:sans-serif;padding:2rem;text-align:center">
+      document.getElementById('wrapper').innerHTML = `
+        <div style="color:white;font-family:sans-serif;text-align:center;padding:2rem">
           ⚠️ Geen game opgegeven.<br><br>
           Gebruik bijv.: <code>?game=polytrack</code>
         </div>`;
@@ -33,17 +62,7 @@
       iframe.sandbox = "allow-scripts allow-same-origin";
       iframe.allowFullscreen = true;
       iframe.loading = "eager";
-      iframe.style.cssText = `
-        position:fixed;inset:0;border:0;
-        width:100%;height:100%;
-        display:block;
-        backface-visibility:hidden;
-        will-change:transform;
-        transform:translateZ(0);
-        contain:strict;
-        image-rendering:pixelated;
-      `;
-      document.body.appendChild(iframe);
+      document.getElementById('wrapper').appendChild(iframe);
     }
   </script>
 </body>
