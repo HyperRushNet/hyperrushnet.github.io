@@ -1,10 +1,10 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
+  <meta charset="UTF-8" />
   <title>404 - Not Found</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@800&family=Roboto:wght@100;300&display=swap" rel="stylesheet">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <link href="https://fonts.googleapis.com/css2?family=Open+Sans:wght@800&family=Roboto:wght@100;300&display=swap" rel="stylesheet" />
   <style>
     :root {
       --button: hsl(44, 0%, 70%);
@@ -15,23 +15,13 @@
       --color: hsl(0, 0%, 98%);
       --lit-header: hsl(53, 0%, 90%);
       --speed: 2s;
+      --swing-x: 0;
+      --swing-y: 0;
     }
 
     *, *::before, *::after {
       box-sizing: border-box;
       transform-style: preserve-3d;
-    }
-
-    @property --swing-x {
-      syntax: '<integer>';
-      inherits: false;
-      initial-value: 0;
-    }
-
-    @property --swing-y {
-      syntax: '<integer>';
-      inherits: false;
-      initial-value: 0;
     }
 
     body {
@@ -48,7 +38,6 @@
     }
 
     h1 {
-      animation: swing var(--speed) infinite alternate ease-in-out;
       font-size: clamp(5rem, 40vmin, 20rem);
       font-family: 'Open Sans', sans-serif;
       margin: 0 0 1rem;
@@ -63,14 +52,13 @@
 
     h1::after {
       content: "404";
-      animation: swing var(--speed) infinite alternate ease-in-out;
       position: absolute;
       top: 0;
       left: 0;
       color: var(--shadow);
       filter: blur(1.5vmin);
       transform: scale(1.05) translate3d(0, 12%, -10vmin)
-        translate(calc((var(--swing-x, 0) * 0.05) * 1%), calc((var(--swing-y) * 0.05) * 1%));
+        translate(calc((var(--swing-x) * 0.05) * 1%), calc((var(--swing-y) * 0.05) * 1%));
     }
 
     a {
@@ -90,7 +78,6 @@
     }
 
     .cloak {
-      animation: swing var(--speed) infinite alternate-reverse ease-in-out;
       height: 100%;
       width: 100%;
       transform-origin: 50% 30%;
@@ -125,20 +112,6 @@
     .info > p {
       margin-bottom: 3rem;
     }
-
-    @keyframes swing {
-      0% {
-        --swing-x: -100;
-        --swing-y: -100;
-      }
-      50% {
-        --swing-y: 0;
-      }
-      100% {
-        --swing-y: -100;
-        --swing-x: 100;
-      }
-    }
   </style>
 </head>
 <body>
@@ -155,13 +128,33 @@
   </div>
 
   <script>
-    // Verberg de knop als de pagina in een iframe zit
+    // Verberg knop als in iframe
     if (window.self !== window.top) {
       const btn = document.getElementById('home-button');
-      if (btn) {
-        btn.style.display = 'none';
-      }
+      if (btn) btn.style.display = 'none';
     }
+
+    // Swing-animatie zonder @property
+    const root = document.documentElement;
+    let start = null;
+
+    function animateSwing(timestamp) {
+      if (!start) start = timestamp;
+      const t = (timestamp - start) / 1000; // seconden
+
+      const freq = 0.30;
+      const amp = 100;
+
+      const x = Math.sin(t * freq * 2 * Math.PI) * amp;
+      const y = Math.cos(t * freq * 2 * Math.PI) * amp;
+
+      root.style.setProperty('--swing-x', x.toFixed(2));
+      root.style.setProperty('--swing-y', y.toFixed(2));
+
+      requestAnimationFrame(animateSwing);
+    }
+
+    requestAnimationFrame(animateSwing);
   </script>
 </body>
 </html>
