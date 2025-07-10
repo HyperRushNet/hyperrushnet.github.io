@@ -1,0 +1,277 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Game Bibliotheek</title>
+<style>
+  * {
+    margin:0; padding:0; box-sizing: border-box;
+  }
+
+  body {
+    font-family: Arial, sans-serif;
+    background: #f3f4f6;
+  }
+
+  #sidebar {
+    position: fixed; top: 0; left: 0; height: 100vh;
+    width: 220px;
+    background: white;
+    padding: 1rem;
+    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+    overflow-y: auto;
+    transform: translateX(-100%);
+    transition: transform 0.3s ease;
+    z-index: 100;
+  }
+  #sidebar.open {
+    transform: translateX(0);
+  }
+
+  #menuToggle {
+    position: fixed;
+    top: 1rem;
+    left: 1rem;
+    background: #1f2937;
+    color: white;
+    border: none;
+    padding: 0.5rem 0.75rem;
+    font-size: 1.5rem;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    z-index: 150;
+  }
+
+  #searchInput {
+    width: 100%;
+    padding: 0.5rem;
+    margin-bottom: 0.5rem;
+    border: 1px solid #ccc;
+    border-radius: 0.375rem;
+  }
+  #searchBtn {
+    width: 100%;
+    padding: 0.5rem;
+    background: #2563eb;
+    color: white;
+    border: none;
+    border-radius: 0.375rem;
+    margin-bottom: 1rem;
+    cursor: pointer;
+  }
+  #searchBtn:hover {
+    background: #1e40af;
+  }
+  #categoryList button {
+    width: 100%;
+    padding: 0.85rem 0.75rem;
+    margin-bottom: 0.5rem;
+    background: #e5e7eb;
+    border: none;
+    border-radius: 0.375rem;
+    cursor: pointer;
+    font-size: 1rem;
+    user-select: none;
+    line-height: 1.2;
+  }
+  #categoryList button:hover {
+    background: #d1d5db;
+  }
+
+  #content {
+    padding: 1rem 10px; /* 10px padding aan beide kanten */
+    margin-left: 0;
+    transition: margin-left 0.3s ease;
+  }
+
+  #gameCardsContainer {
+    display: grid;
+    gap: 16px;
+    /* grid-template-columns zetten we via JS */
+    justify-content: start;
+    width: 100%;
+  }
+
+  .game-card {
+    background: white;
+    padding: 1rem;
+    text-align: center;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+    user-select: none;
+    width: 100%; /* vul de grid cel volledig */
+    box-sizing: border-box;
+  }
+
+  @media (min-width: 768px) {
+    #sidebar {
+      width: 240px;
+      transform: translateX(0);
+    }
+    #content {
+      margin-left: 240px;
+      max-width: calc(100% - 240px);
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+    #menuToggle {
+      display: none;
+    }
+  }
+  @media (min-width: 1025px) {
+    #sidebar {
+      width: 220px;
+    }
+    #content {
+      margin-left: 220px;
+      max-width: calc(100% - 220px);
+      padding-left: 10px;
+      padding-right: 10px;
+    }
+  }
+</style>
+</head>
+<body>
+
+<button id="menuToggle" aria-label="Open menu">☰</button>
+
+<div id="sidebar" aria-label="Sidebar">
+  <input id="searchInput" type="text" placeholder="Zoek spel..." aria-label="Zoek spel" />
+  <button id="searchBtn" aria-label="Zoek">🔍 Zoek</button>
+  <nav id="categoryList" aria-label="Categorieën"></nav>
+</div>
+
+<main id="content" role="main">
+  <div id="gameCardsContainer" aria-live="polite"></div>
+</main>
+
+<script>
+
+  // This is a new version of the site, it is fully responsive, perfect on all devices and has every functionality a gamesite needs, change it if you want! :)
+  const games = [
+    { name: "Zelda", category: "Avontuur" },
+    { name: "FIFA 25", category: "Sport" },
+    { name: "Minecraft", category: "Creatief" },
+    { name: "Call of Duty", category: "Actie" },
+    { name: "SimCity", category: "Simulatie" },
+    { name: "Mario Kart", category: "Race" },
+    { name: "Overwatch", category: "Actie" },
+    { name: "Fortnite", category: "Actie" },
+    { name: "Civilization", category: "Strategie" },
+    { name: "Among Us", category: "Party" },
+  ];
+
+  const categories = [...new Set(games.map(g => g.category))];
+
+  const sidebar = document.getElementById("sidebar");
+  const menuToggle = document.getElementById("menuToggle");
+  const categoryList = document.getElementById("categoryList");
+  const gameCardsContainer = document.getElementById("gameCardsContainer");
+  const searchInput = document.getElementById("searchInput");
+  const searchBtn = document.getElementById("searchBtn");
+
+  menuToggle.addEventListener("click", () => {
+    sidebar.classList.toggle("open");
+  });
+
+  function renderCategories() {
+    categoryList.innerHTML = "";
+
+    const allBtn = document.createElement("button");
+    allBtn.textContent = "Alle games";
+    allBtn.onclick = () => {
+      renderGames(games);
+      if(window.innerWidth < 768) sidebar.classList.remove("open");
+    };
+    categoryList.appendChild(allBtn);
+
+    categories.forEach(cat => {
+      const btn = document.createElement("button");
+      btn.textContent = cat;
+      btn.onclick = () => {
+        filterByCategory(cat);
+        if(window.innerWidth < 768) sidebar.classList.remove("open");
+      };
+      categoryList.appendChild(btn);
+    });
+  }
+
+  function renderGames(gameList) {
+    gameCardsContainer.innerHTML = "";
+    gameList.forEach(game => {
+      const card = document.createElement("div");
+      card.className = "game-card";
+      card.textContent = game.name;
+      gameCardsContainer.appendChild(card);
+    });
+
+    adjustGridColumns(gameList.length);
+  }
+
+  function filterByCategory(category) {
+    const filtered = games.filter(g => g.category === category);
+    renderGames(filtered);
+  }
+
+  function filterBySearch() {
+    const term = searchInput.value.toLowerCase();
+    const filtered = games.filter(g => g.name.toLowerCase().includes(term));
+    renderGames(filtered);
+  }
+
+  searchBtn.addEventListener("click", filterBySearch);
+  searchInput.addEventListener("keypress", e => {
+    if(e.key === "Enter") filterBySearch();
+  });
+
+  function adjustGridColumns(numCards) {
+    if(numCards === 0) {
+      gameCardsContainer.style.gridTemplateColumns = "";
+      return;
+    }
+
+    const containerStyle = getComputedStyle(gameCardsContainer);
+    // We hebben padding-left en padding-right 10px elk (zie CSS)
+    const paddingLeft = parseFloat(containerStyle.paddingLeft);
+    const paddingRight = parseFloat(containerStyle.paddingRight);
+
+    // Breedte container zonder padding
+    const totalWidth = gameCardsContainer.clientWidth - paddingLeft - paddingRight;
+
+    const minCardWidth = 150;  // minimale breedte kaart
+    const gap = 16;            // grid gap in px (zie CSS)
+
+    // Bereken max aantal kaarten per rij (rekening houdend met gaps)
+    // formule: maxCards * minCardWidth + (maxCards -1)*gap <= totalWidth
+    // maxCards <= (totalWidth + gap) / (minCardWidth + gap)
+    let maxCardsPerRow = Math.floor((totalWidth + gap) / (minCardWidth + gap));
+    maxCardsPerRow = Math.max(1, maxCardsPerRow);
+
+    // De breedte per kaart, zodat ze exact de rij vullen met gaps
+    // formule: cardWidth = (totalWidth - (maxCardsPerRow -1)*gap) / maxCardsPerRow
+    const cardWidth = (totalWidth - (maxCardsPerRow - 1)*gap) / maxCardsPerRow;
+
+    // We willen altijd met maxCardsPerRow kolommen werken, ook als minder kaarten
+    // zodat kaarten niet uitrekken
+
+    gameCardsContainer.style.gridTemplateColumns = `repeat(${maxCardsPerRow}, ${cardWidth}px)`;
+
+    // Kaarten breedte moet 100% van grid cel zijn, dus hier niet meer nodig
+    // Maar voor zekerheid: forceer width op kaarten
+    Array.from(gameCardsContainer.children).forEach(card => {
+      card.style.width = `${cardWidth}px`;
+    });
+  }
+
+  renderCategories();
+  renderGames(games);
+
+  window.addEventListener("resize", () => {
+    adjustGridColumns(gameCardsContainer.childElementCount);
+  });
+</script>
+
+</body>
+</html>
