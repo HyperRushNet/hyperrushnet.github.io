@@ -3,6 +3,8 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link id="favicon" rel="icon" href="https://cdn.glitch.global/84403c58-5df2-4a5c-9389-5d4a444f1c5c/thumbnails%2FSGSLOGO.png?1728212450608" type="image/png">
     <title>The HyperRush Network</title>
+    <script src="colorSchemeFavicon.js"></script>
+
   <script>
         // Standaardwaarden voor titel en favicon
         const defaultTitle = "SchoolGS Games";
@@ -906,6 +908,15 @@ function goBack() {
     initializeGames();
     loadTabAndFavicon();
 };
+
+         (async () => {
+        await applyColorSchemeFavicon({
+            light: 'favicon-light.ico',
+            dark: 'favicon-dark.ico',
+            default: 'favicon-default.ico'
+        });
+        // Pas hier eventueel nog andere dingen toe, nu favicon staat goed ingesteld
+    })();
     </script>
 
 </body>
