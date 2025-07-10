@@ -5,24 +5,61 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Game Bibliotheek</title>
   <style>
+    /* --- VOLLEDIGE BROWSER RESET --- */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+      margin: 0;
+      padding: 0;
+      border: 0;
+      font: inherit;
+      vertical-align: baseline;
+      background: none;
+    }
+
+    html, body {
+      height: 100%;
+      font-family: Arial, sans-serif;
+      background-color: #f3f4f6;
+      line-height: 1;
+    }
+
+    /* Verwijder lijststijlen */
+    ul, ol {
+      list-style: none;
+    }
+
+    /* Verwijder links standaard stijl */
+    a {
+      text-decoration: none;
+      color: inherit;
+    }
+
+    /* Verwijder knop- en inputstijl */
+    button, input, select, textarea {
+      all: unset;
+      box-sizing: border-box;
+    }
+
+    /* Verwijder table spacing */
+    table {
+      border-collapse: collapse;
+      border-spacing: 0;
+    }
+
+    /* Optioneel: smooth scroll */
+    html {
+      scroll-behavior: smooth;
+    }
+
+    /* ---------- HIER BEGINT JOUW STIJL ---------- */
+
     :root {
       --sidebar-width: 240px;
       --sidebar-width-desktop: 220px;
     }
 
-    /* Reset & basis */
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-    }
-
-    body {
-      font-family: Arial, sans-serif;
-      background: #f3f4f6;
-    }
-
-    /* Sidebar */
     #sidebar {
       position: fixed;
       top: 0;
@@ -55,14 +92,12 @@
       }
     }
 
-    /* Menu toggle (hamburger) */
     #menuToggle {
       position: fixed;
       top: 1rem;
       left: 1rem;
       background: #1f2937;
       color: white;
-      border: none;
       padding: 0.5rem 0.75rem;
       font-size: 1.5rem;
       border-radius: 0.375rem;
@@ -76,7 +111,6 @@
       }
     }
 
-    /* Zoekbalk + knop */
     #searchWrapper {
       position: relative;
       margin-bottom: 1rem;
@@ -88,6 +122,7 @@
       border: 1px solid #ccc;
       border-radius: 0.375rem;
       font-size: 1rem;
+      background: white;
     }
 
     #searchBtn {
@@ -95,10 +130,7 @@
       top: 50%;
       right: 0.5rem;
       transform: translateY(-50%);
-      background: transparent;
-      border: none;
       cursor: pointer;
-      padding: 0;
       width: 24px;
       height: 24px;
       display: flex;
@@ -116,24 +148,20 @@
       fill: #1558b0;
     }
 
-    /* Categorieknoppen */
     #categoryList button {
       width: 100%;
       padding: 0.85rem 0.75rem;
       margin-bottom: 0.5rem;
       background: #e5e7eb;
-      border: none;
       border-radius: 0.375rem;
       cursor: pointer;
       font-size: 1rem;
-      user-select: none;
     }
 
     #categoryList button:hover {
       background: #d1d5db;
     }
 
-    /* Content */
     #content {
       padding: 1rem 10px;
       transition: margin-left 0.3s ease;
@@ -153,10 +181,10 @@
       }
     }
 
-    /* Gamecards container */
     #gameCardsContainer {
       display: grid;
-      gap: 16px;
+      row-gap: 10px;
+      column-gap: 10px;
       justify-content: start;
       width: 100%;
     }
@@ -237,7 +265,7 @@
     allBtn.textContent = "Alle games";
     allBtn.onclick = () => {
       renderGames(games);
-      if(window.innerWidth < 768) sidebar.classList.remove("open");
+      if (window.innerWidth < 768) sidebar.classList.remove("open");
     };
     categoryList.appendChild(allBtn);
 
@@ -246,7 +274,7 @@
       btn.textContent = cat;
       btn.onclick = () => {
         filterByCategory(cat);
-        if(window.innerWidth < 768) sidebar.classList.remove("open");
+        if (window.innerWidth < 768) sidebar.classList.remove("open");
       };
       categoryList.appendChild(btn);
     });
@@ -293,7 +321,7 @@
     const paddingRight = parseFloat(containerStyle.paddingRight);
     const totalWidth = gameCardsContainer.clientWidth - paddingLeft - paddingRight;
     const minCardWidth = 150;
-    const gap = 16;
+    const gap = 10;
 
     let maxCardsPerRow = Math.floor((totalWidth + gap) / (minCardWidth + gap));
     maxCardsPerRow = Math.max(1, maxCardsPerRow);
