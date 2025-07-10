@@ -1,182 +1,194 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Game Bibliotheek</title>
-<style>
-  /* Algemeen reset en box-sizing */
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-  }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Game Bibliotheek</title>
+  <style>
+    :root {
+      --sidebar-width: 240px;
+      --sidebar-width-desktop: 220px;
+    }
 
-  /* Body styling */
-  body {
-    font-family: Arial, sans-serif;
-    background: #f3f4f6;
-  }
+    /* Reset & basis */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
 
-  /* Sidebar styling */
-  #sidebar {
-    position: fixed; top: 0; left: 0; height: 100vh;
-    width: 220px;
-    background: white;
-    padding: 1rem;
-    box-shadow: 2px 0 5px rgba(0,0,0,0.1);
-    overflow-y: auto;
-    transform: translateX(-100%);
-    transition: transform 0.3s ease;
-    z-index: 100;
-  }
-  #sidebar.open {
-    transform: translateX(0);
-  }
+    body {
+      font-family: Arial, sans-serif;
+      background: #f3f4f6;
+    }
 
-  /* Hamburger menu button */
-  #menuToggle {
-    position: fixed;
-    top: 1rem;
-    left: 1rem;
-    background: #1f2937;
-    color: white;
-    border: none;
-    padding: 0.5rem 0.75rem;
-    font-size: 1.5rem;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    z-index: 150;
-  }
-
-  /* Wrapper zoekbalk + knop */
-  #searchWrapper {
-    position: relative;
-    margin-bottom: 1rem;
-  }
-
-  /* Zoekbalk input */
-  #searchInput {
-    width: 100%;
-    padding: 0.5rem 2.5rem 0.5rem 0.75rem; /* rechts ruimte voor knop */
-    border: 1px solid #ccc;
-    border-radius: 0.375rem;
-    font-size: 1rem;
-  }
-
-  /* Zoek knop met oud Google vergrootglas, rechts in input */
-  #searchBtn {
-    position: absolute;
-    top: 50%;
-    right: 0.5rem;
-    transform: translateY(-50%);
-    background: transparent;
-    border: none;
-    cursor: pointer;
-    padding: 0;
-    width: 24px;
-    height: 24px;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-  }
-  #searchBtn svg {
-    fill: #1a73e8; /* Google blauw */
-    width: 18px;
-    height: 18px;
-  }
-  #searchBtn:hover svg {
-    fill: #1558b0;
-  }
-
-  /* Categorie knoppen */
-  #categoryList button {
-    width: 100%;
-    padding: 0.85rem 0.75rem;
-    margin-bottom: 0.5rem;
-    background: #e5e7eb;
-    border: none;
-    border-radius: 0.375rem;
-    cursor: pointer;
-    font-size: 1rem;
-    user-select: none;
-    line-height: 1.2;
-  }
-  #categoryList button:hover {
-    background: #d1d5db;
-  }
-
-  /* Content area */
-  #content {
-    padding: 1rem 10px;
-    margin-left: 0;
-    transition: margin-left 0.3s ease;
-  }
-
-  /* Container voor gamekaarten */
-  #gameCardsContainer {
-    display: grid;
-    gap: 16px;
-    justify-content: start;
-    width: 100%;
-  }
-
-  /* Elke game kaart - alleen foto */
-  .game-card {
-    background: white;
-    border-radius: 0.5rem;
-    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-    border: 1px solid #e5e7eb;
-    user-select: none;
-    overflow: hidden; /* zodat border-radius ook op afbeelding goed werkt */
-  }
-
-  /* Afbeelding in kaart vult breedte, hoogte = 0.75 * breedte */
-  .game-card img {
-    width: 100%;
-    aspect-ratio: 4 / 3;
-    object-fit: cover;
-    display: block;
-  }
-
-  /* Media queries voor grotere schermen */
-  @media (min-width: 768px) {
+    /* Sidebar */
     #sidebar {
-      width: 240px;
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 100vh;
+      width: var(--sidebar-width);
+      background: white;
+      padding: 1rem;
+      box-shadow: 2px 0 5px rgba(0,0,0,0.1);
+      overflow-y: auto;
+      transform: translateX(-100%);
+      transition: transform 0.3s ease;
+      z-index: 100;
+    }
+
+    #sidebar.open {
       transform: translateX(0);
     }
-    #content {
-      margin-left: 240px;
-      max-width: calc(100% - 240px);
-      padding-left: 10px;
-      padding-right: 10px;
+
+    @media (min-width: 768px) {
+      #sidebar {
+        transform: translateX(0);
+        width: var(--sidebar-width);
+      }
     }
+
+    @media (min-width: 1025px) {
+      #sidebar {
+        width: var(--sidebar-width-desktop);
+      }
+    }
+
+    /* Menu toggle (hamburger) */
     #menuToggle {
-      display: none;
+      position: fixed;
+      top: 1rem;
+      left: 1rem;
+      background: #1f2937;
+      color: white;
+      border: none;
+      padding: 0.5rem 0.75rem;
+      font-size: 1.5rem;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      z-index: 150;
     }
-  }
-  @media (min-width: 1025px) {
-    #sidebar {
-      width: 220px;
+
+    @media (min-width: 768px) {
+      #menuToggle {
+        display: none;
+      }
     }
+
+    /* Zoekbalk + knop */
+    #searchWrapper {
+      position: relative;
+      margin-bottom: 1rem;
+    }
+
+    #searchInput {
+      width: 100%;
+      padding: 0.5rem 2.5rem 0.5rem 0.75rem;
+      border: 1px solid #ccc;
+      border-radius: 0.375rem;
+      font-size: 1rem;
+    }
+
+    #searchBtn {
+      position: absolute;
+      top: 50%;
+      right: 0.5rem;
+      transform: translateY(-50%);
+      background: transparent;
+      border: none;
+      cursor: pointer;
+      padding: 0;
+      width: 24px;
+      height: 24px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+    }
+
+    #searchBtn svg {
+      fill: #1a73e8;
+      width: 18px;
+      height: 18px;
+    }
+
+    #searchBtn:hover svg {
+      fill: #1558b0;
+    }
+
+    /* Categorieknoppen */
+    #categoryList button {
+      width: 100%;
+      padding: 0.85rem 0.75rem;
+      margin-bottom: 0.5rem;
+      background: #e5e7eb;
+      border: none;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-size: 1rem;
+      user-select: none;
+    }
+
+    #categoryList button:hover {
+      background: #d1d5db;
+    }
+
+    /* Content */
     #content {
-      margin-left: 220px;
-      max-width: calc(100% - 220px);
-      padding-left: 20px;
-      padding-right: 20px;
-      margin-top: 0px; // Reset de stijl hier :)
+      padding: 1rem 10px;
+      transition: margin-left 0.3s ease;
     }
-  }
-</style>
+
+    @media (min-width: 768px) {
+      #content {
+        margin-left: var(--sidebar-width);
+        max-width: calc(100% - var(--sidebar-width));
+      }
+    }
+
+    @media (min-width: 1025px) {
+      #content {
+        margin-left: var(--sidebar-width-desktop);
+        max-width: calc(100% - var(--sidebar-width-desktop));
+      }
+    }
+
+    /* Gamecards container */
+    #gameCardsContainer {
+      display: grid;
+      gap: 16px;
+      justify-content: start;
+      width: 100%;
+    }
+
+    .game-card {
+      background: white;
+      border-radius: 0.5rem;
+      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+      border: 1px solid #e5e7eb;
+      user-select: none;
+      overflow: hidden;
+    }
+
+    .game-card img {
+      width: 100%;
+      aspect-ratio: 4 / 3;
+      object-fit: cover;
+      display: block;
+    }
+  </style>
 </head>
 <body>
 
+<!-- Menu knop -->
 <button id="menuToggle" aria-label="Open menu">☰</button>
 
+<!-- Sidebar -->
 <div id="sidebar" aria-label="Sidebar">
   <div id="searchWrapper">
     <input id="searchInput" type="text" placeholder="Zoek spel..." aria-label="Zoek spel" />
     <button id="searchBtn" aria-label="Zoek">
-      <!-- Oud Google vergrootglas icoon (eenvoudige SVG) -->
-      <svg viewBox="0 0 24 24" focusable="false" aria-hidden="true">
+      <svg viewBox="0 0 24 24">
         <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5
                  6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79
                  l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"/>
@@ -186,6 +198,7 @@
   <nav id="categoryList" aria-label="Categorieën"></nav>
 </div>
 
+<!-- Content -->
 <main id="content" role="main">
   <div id="gameCardsContainer" aria-live="polite"></div>
 </main>
@@ -244,15 +257,12 @@
     gameList.forEach(game => {
       const card = document.createElement("div");
       card.className = "game-card";
-
       const img = document.createElement("img");
       img.src = `https://placehold.co/300x225?text=${encodeURIComponent(game.name)}`;
       img.alt = `${game.name} afbeelding`;
-
       card.appendChild(img);
       gameCardsContainer.appendChild(card);
     });
-
     adjustGridColumns(gameList.length);
   }
 
@@ -269,11 +279,11 @@
 
   searchBtn.addEventListener("click", filterBySearch);
   searchInput.addEventListener("keypress", e => {
-    if(e.key === "Enter") filterBySearch();
+    if (e.key === "Enter") filterBySearch();
   });
 
   function adjustGridColumns(numCards) {
-    if(numCards === 0) {
+    if (numCards === 0) {
       gameCardsContainer.style.gridTemplateColumns = "";
       return;
     }
@@ -281,17 +291,14 @@
     const containerStyle = getComputedStyle(gameCardsContainer);
     const paddingLeft = parseFloat(containerStyle.paddingLeft);
     const paddingRight = parseFloat(containerStyle.paddingRight);
-
     const totalWidth = gameCardsContainer.clientWidth - paddingLeft - paddingRight;
-
     const minCardWidth = 150;
     const gap = 16;
 
     let maxCardsPerRow = Math.floor((totalWidth + gap) / (minCardWidth + gap));
     maxCardsPerRow = Math.max(1, maxCardsPerRow);
 
-    const cardWidth = (totalWidth - (maxCardsPerRow - 1)*gap) / maxCardsPerRow;
-
+    const cardWidth = (totalWidth - (maxCardsPerRow - 1) * gap) / maxCardsPerRow;
     gameCardsContainer.style.gridTemplateColumns = `repeat(${maxCardsPerRow}, ${cardWidth}px)`;
   }
 
