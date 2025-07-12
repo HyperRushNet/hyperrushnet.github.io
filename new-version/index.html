@@ -5,7 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Game Bibliotheek</title>
   <style>
-    *, *::before, *::after {
+    *,
+    *::before,
+    *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -253,7 +255,7 @@
     { name: "Among Us", category: "Party" }
   ];
 
-  const categories = [...new Set(games.map(g => g.category))];
+  let activeCategory = null;
 
   const sidebar = document.getElementById("sidebar");
   const menuToggle = document.getElementById("menuToggle");
@@ -262,7 +264,7 @@
   const searchInput = document.getElementById("searchInput");
   const searchBtn = document.getElementById("searchBtn");
 
-  let currentCategory = null;
+  const categories = [...new Set(games.map(g => g.category))];
 
   menuToggle.addEventListener("click", () => {
     sidebar.classList.toggle("open");
@@ -274,7 +276,7 @@
     const allBtn = document.createElement("button");
     allBtn.textContent = "Alle games";
     allBtn.onclick = () => {
-      currentCategory = null;
+      activeCategory = null;
       renderGames(games);
       if (window.innerWidth < 768) sidebar.classList.remove("open");
     };
@@ -284,9 +286,8 @@
       const btn = document.createElement("button");
       btn.textContent = cat;
       btn.onclick = () => {
-        currentCategory = cat;
-        const filtered = games.filter(g => g.category === cat);
-        renderGames(filtered);
+        activeCategory = cat;
+        filterAndRender();
         if (window.innerWidth < 768) sidebar.classList.remove("open");
       };
       categoryList.appendChild(btn);
@@ -315,17 +316,10 @@
       card.appendChild(title);
       gameCardsContainer.appendChild(card);
     });
-    adjustGridColumns(gameList.length);
-  }
 
-  function filterBySearch() {
-    const term = searchInput.value.toLowerCase();
-    const baseList = currentCategory
-      ? games.filter(g => g.category === currentCategory)
-      : games;
-
-    const filtered = baseList.filter(g => g.name.toLowerCase().includes(term));
-    renderGames(filtered);
+    requestAnimationFrame(() => {
+      adjustGridColumns(gameList.length);
+    });
   }
 
   function adjustGridColumns(numCards) {
@@ -348,16 +342,35 @@
     gameCardsContainer.style.gridTemplateColumns = `repeat(${maxCardsPerRow}, ${cardWidth}px)`;
   }
 
-  searchBtn.addEventListener("click", filterBySearch);
+  function filterAndRender() {
+    const term = searchInput.value.toLowerCase();
+    let filtered = games;
+
+    if (activeCategory) {
+      filtered = filtered.filter(g => g.category === activeCategory);
+    }
+
+    if (term) {
+      filtered = filtered.filter(g => g.name.toLowerCase().includes(term));
+    }
+
+    renderGames(filtered);
+  }
+
+  searchBtn.addEventListener("click", filterAndRender);
   searchInput.addEventListener("keypress", e => {
-    if (e.key === "Enter") filterBySearch();
+    if (e.key === "Enter") filterAndRender();
   });
 
   renderCategories();
   renderGames(games);
-  window.addEventListener("resize", () => {
+
+  // Resize observer voor constante layout update
+  const resizeObserver = new ResizeObserver(() => {
     adjustGridColumns(gameCardsContainer.childElementCount);
   });
+
+  resizeObserver.observe(gameCardsContainer);
 </script>
 
 </body>
