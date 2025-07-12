@@ -201,7 +201,7 @@
     .game-fade {
       position: absolute;
       inset: 0;
-background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
       z-index: 1;
       pointer-events: none;
     }
@@ -357,9 +357,14 @@ background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
   renderCategories();
   renderGames(games);
 
-  window.addEventListener("resize", () => {
+  function handleResize() {
     adjustGridColumns(gameCardsContainer.childElementCount);
-  });
+  }
+
+  window.addEventListener("resize", handleResize);
+
+  const resizeObserver = new ResizeObserver(handleResize);
+  resizeObserver.observe(gameCardsContainer);
 </script>
 
 </body>
