@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Game Bibliotheek</title>
   <style>
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -221,10 +219,8 @@
 </head>
 <body>
 
-<!-- Menu knop -->
 <button id="menuToggle" aria-label="Open menu">☰</button>
 
-<!-- Sidebar -->
 <div id="sidebar" aria-label="Sidebar">
   <div id="searchWrapper">
     <input id="searchInput" type="text" placeholder="Zoek spel..." aria-label="Zoek spel" />
@@ -239,7 +235,6 @@
   <nav id="categoryList" aria-label="Categorieën"></nav>
 </div>
 
-<!-- Content -->
 <main id="content" role="main">
   <div id="gameCardsContainer" aria-live="polite"></div>
 </main>
@@ -255,47 +250,7 @@
     { name: "Overwatch", category: "Actie" },
     { name: "Fortnite", category: "Actie" },
     { name: "Civilization", category: "Strategie" },
-    { name: "Among Us", category: "Party" },
-    { name: "Zelda", category: "Avontuur" },
-    { name: "FIFA 25", category: "Sport" },
-    { name: "Minecraft", category: "Creatief" },
-    { name: "Call of Duty", category: "Actie" },
-    { name: "SimCity", category: "Simulatie" },
-    { name: "Mario Kart", category: "Race" },
-    { name: "Overwatch", category: "Actie" },
-    { name: "Fortnite", category: "Actie" },
-    { name: "Civilization", category: "Strategie" },
-    { name: "Among Us", category: "Party" },
-    { name: "Zelda", category: "Avontuur" },
-    { name: "FIFA 25", category: "Sport" },
-    { name: "Minecraft", category: "Creatief" },
-    { name: "Call of Duty", category: "Actie" },
-    { name: "SimCity", category: "Simulatie" },
-    { name: "Mario Kart", category: "Race" },
-    { name: "Overwatch", category: "Actie" },
-    { name: "Fortnite", category: "Actie" },
-    { name: "Civilization", category: "Strategie" },
-    { name: "Among Us", category: "Party" },
-    { name: "Zelda", category: "Avontuur" },
-    { name: "FIFA 25", category: "Sport" },
-    { name: "Minecraft", category: "Creatief" },
-    { name: "Call of Duty", category: "Actie" },
-    { name: "SimCity", category: "Simulatie" },
-    { name: "Mario Kart", category: "Race" },
-    { name: "Overwatch", category: "Actie" },
-    { name: "Fortnite", category: "Actie" },
-    { name: "Civilization", category: "Strategie" },
-    { name: "Among Us", category: "Party" },
-    { name: "Zelda", category: "Avontuur" },
-    { name: "FIFA 25", category: "Sport" },
-    { name: "Minecraft", category: "Creatief" },
-    { name: "Call of Duty", category: "Actie" },
-    { name: "SimCity", category: "Simulatie" },
-    { name: "Mario Kart", category: "Race" },
-    { name: "Overwatch", category: "Actie" },
-    { name: "Fortnite", category: "Actie" },
-    { name: "Civilization", category: "Strategie" },
-    { name: "Among Us", category: "Party" },
+    { name: "Among Us", category: "Party" }
   ];
 
   const categories = [...new Set(games.map(g => g.category))];
@@ -307,6 +262,8 @@
   const searchInput = document.getElementById("searchInput");
   const searchBtn = document.getElementById("searchBtn");
 
+  let currentCategory = null;
+
   menuToggle.addEventListener("click", () => {
     sidebar.classList.toggle("open");
   });
@@ -317,6 +274,7 @@
     const allBtn = document.createElement("button");
     allBtn.textContent = "Alle games";
     allBtn.onclick = () => {
+      currentCategory = null;
       renderGames(games);
       if (window.innerWidth < 768) sidebar.classList.remove("open");
     };
@@ -326,7 +284,9 @@
       const btn = document.createElement("button");
       btn.textContent = cat;
       btn.onclick = () => {
-        filterByCategory(cat);
+        currentCategory = cat;
+        const filtered = games.filter(g => g.category === cat);
+        renderGames(filtered);
         if (window.innerWidth < 768) sidebar.classList.remove("open");
       };
       categoryList.appendChild(btn);
@@ -358,21 +318,15 @@
     adjustGridColumns(gameList.length);
   }
 
-  function filterByCategory(category) {
-    const filtered = games.filter(g => g.category === category);
-    renderGames(filtered);
-  }
-
   function filterBySearch() {
     const term = searchInput.value.toLowerCase();
-    const filtered = games.filter(g => g.name.toLowerCase().includes(term));
+    const baseList = currentCategory
+      ? games.filter(g => g.category === currentCategory)
+      : games;
+
+    const filtered = baseList.filter(g => g.name.toLowerCase().includes(term));
     renderGames(filtered);
   }
-
-  searchBtn.addEventListener("click", filterBySearch);
-  searchInput.addEventListener("keypress", e => {
-    if (e.key === "Enter") filterBySearch();
-  });
 
   function adjustGridColumns(numCards) {
     if (numCards === 0) {
@@ -394,17 +348,16 @@
     gameCardsContainer.style.gridTemplateColumns = `repeat(${maxCardsPerRow}, ${cardWidth}px)`;
   }
 
+  searchBtn.addEventListener("click", filterBySearch);
+  searchInput.addEventListener("keypress", e => {
+    if (e.key === "Enter") filterBySearch();
+  });
+
   renderCategories();
   renderGames(games);
-
-  function handleResize() {
+  window.addEventListener("resize", () => {
     adjustGridColumns(gameCardsContainer.childElementCount);
-  }
-
-  window.addEventListener("resize", handleResize);
-
-  const resizeObserver = new ResizeObserver(handleResize);
-  resizeObserver.observe(gameCardsContainer);
+  });
 </script>
 
 </body>
