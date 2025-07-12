@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Favorietenlijst</title>
+  <style>
+    body {
+      font-family: sans-serif;
+      padding: 2rem;
+    }
+    button {
+      padding: 8px 16px;
+      margin: 0.5rem 0;
+      background: gold;
+      border: none;
+      border-radius: 6px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    ul {
+      list-style: none;
+      padding-left: 0;
+    }
+    li {
+      margin-bottom: 8px;
+    }
+    li a {
+      text-decoration: none;
+      color: black;
+      margin-right: 10px;
+    }
+    .remove-btn {
+      background: #e74c3c;
+      color: white;
+      border: none;
+      padding: 4px 10px;
+      border-radius: 4px;
+      cursor: pointer;
+    }
+  </style>
+</head>
+<body>
+  <h2>⭐ Mijn favorieten</h2>
+  <button onclick="opslaanFavoriet()">Voeg deze pagina toe</button>
+
+  <ul id="favorietenLijst"></ul>
+
+  <script>
+    const favorietenKey = 'favorieten';
+    const url = window.location.href;
+    const titel = document.title;
+
+    function haalFavorieten() {
+      return JSON.parse(localStorage.getItem(favorietenKey) || '[]');
+    }
+
+    function opslaanFavoriet() {
+      let favorieten = haalFavorieten();
+      if (!favorieten.find(fav => fav.url === url)) {
+        favorieten.push({ url, titel });
+        localStorage.setItem(favorietenKey, JSON.stringify(favorieten));
+        toonFavorieten();
+        alert("Pagina opgeslagen als favoriet.");
+      } else {
+        alert("Deze pagina is al opgeslagen.");
+      }
+    }
+
+    function verwijderFavoriet(teVerwijderenUrl) {
+      let favorieten = haalFavorieten().filter(fav => fav.url !== teVerwijderenUrl);
+      localStorage.setItem(favorietenKey, JSON.stringify(favorieten));
+      toonFavorieten();
+    }
+
+    function toonFavorieten() {
+      const lijst = document.getElementById('favorietenLijst');
+      const favorieten = haalFavorieten();
+
+      lijst.innerHTML = '';
+      if (favorieten.length === 0) {
+        lijst.innerHTML = '<li><em>Geen favorieten opgeslagen.</em></li>';
+        return;
+      }
+
+      favorieten.forEach(fav => {
+        const li = document.createElement('li');
+        li.innerHTML = `
+          <a href="${fav.url}" target="_blank">${fav.titel}</a>
+          <button class="remove-btn" onclick="verwijderFavoriet('${fav.url}')">Verwijder</button>
+        `;
+        lijst.appendChild(li);
+      });
+    }
+
+    // Bij laden
+    toonFavorieten();
+  </script>
+</body>
+</html>
