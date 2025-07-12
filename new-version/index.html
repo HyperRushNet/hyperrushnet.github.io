@@ -181,15 +181,19 @@
       width: 100%;
     }
 
-    .game-card {
-      position: relative;
-      background: white;
-      border-radius: 0.5rem;
-      box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      border: 1px solid #e5e7eb;
-      user-select: none;
-      overflow: hidden;
-    }
+    
+  .game-card {
+    position: relative;
+    background: white;
+    border-radius: 0.5rem;
+    box-shadow: 0 2px 4px rgba(0,0,0,0.05);
+    border: 1px solid #e5e7eb;
+    user-select: none;
+    overflow: hidden;
+
+    /* ✅ Animatie toegevoegd */
+    transition: transform 0.3s ease, width 0.3s ease;
+  }
 
     .game-card img {
       width: 100%;
