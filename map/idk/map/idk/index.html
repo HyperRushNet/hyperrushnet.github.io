@@ -2,28 +2,43 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8">
-  <title>Domain Detector Demo</title>
+  <title>Domein & Pad Info</title>
   <style>
     body {
       font-family: sans-serif;
       padding: 2rem;
-      background: #f7f7f7;
+      background-color: #f9f9f9;
+      color: #333;
+      line-height: 1.6;
+    }
+    h1 {
+      color: #0055aa;
+    }
+    ul {
+      list-style-type: none;
+      padding-left: 0;
+    }
+    li {
+      margin-bottom: 0.5em;
     }
     code {
-      background: #eee;
-      padding: 2px 4px;
+      background-color: #eee;
+      padding: 2px 6px;
       border-radius: 4px;
     }
   </style>
 </head>
 <body>
 
-  <h1>🌐 Domein Informatie</h1>
+  <h1>🔍 Domein & Pad Informatie</h1>
   <ul>
-    <li><strong>Volledige Hostname:</strong> <code id="fullHost"></code></li>
+    <li><strong>Volledige host:</strong> <code id="fullHost"></code></li>
     <li><strong>Subdomein:</strong> <code id="subdomain"></code></li>
     <li><strong>Domein:</strong> <code id="domain"></code></li>
     <li><strong>TLD:</strong> <code id="tld"></code></li>
+    <li><strong>Volledig pad (pathname):</strong> <code id="pathname"></code></li>
+    <li><strong>Map + submappen:</strong> <code id="directories"></code></li>
+    <li><strong>Bestandsnaam:</strong> <code id="filename"></code></li>
     <li><strong>Productieomgeving:</strong> <code id="isProd"></code></li>
     <li><strong>Localhost:</strong> <code id="isLocalhost"></code></li>
   </ul>
@@ -34,48 +49,48 @@
       const parts = fullHost.split('.');
       const subdomains = parts.length > 2 ? parts.slice(0, -2).join('.') : null;
       const domain = parts.slice(-2).join('.');
-      const tld = parts.pop();
+      const tld = parts[parts.length - 1];
+      
+      const pathname = window.location.pathname;
+      const pathParts = pathname.split('/').filter(p => p.length > 0);
+      const filename = pathParts.length > 0 && pathParts[pathParts.length - 1].includes('.')
+        ? pathParts.pop()
+        : '(geen)';
+      const directories = pathParts.join('/') || '(root)';
 
       return {
-        getFullHost() {
-          return fullHost;
-        },
-        getSubdomain() {
-          return subdomains;
-        },
-        getDomain() {
-          return domain;
-        },
-        getTLD() {
-          return tld;
-        },
-        isProduction() {
-          const prodList = ['hyperrushnet.com', 'myapp.com'];
-          return prodList.includes(domain);
-        },
-        isLocalhost() {
-          return fullHost === 'localhost' || fullHost === '127.0.0.1';
-        },
-        isSubdomainOf(baseDomain) {
-          return domain === baseDomain && !!subdomains;
-        }
+        getFullHost: () => fullHost,
+        getSubdomain: () => subdomains,
+        getDomain: () => domain,
+        getTLD: () => tld,
+        getPathname: () => pathname,
+        getDirectories: () => directories,
+        getFilename: () => filename,
+        isProduction: () => ['hyperrushnet.com', 'myapp.com'].includes(domain),
+        isLocalhost: () => fullHost === 'localhost' || fullHost === '127.0.0.1'
       };
     })();
 
-    // Output naar pagina
+    // Weergeven op pagina
     document.getElementById('fullHost').textContent = domainDetector.getFullHost();
     document.getElementById('subdomain').textContent = domainDetector.getSubdomain() || '(geen)';
     document.getElementById('domain').textContent = domainDetector.getDomain();
     document.getElementById('tld').textContent = domainDetector.getTLD();
+    document.getElementById('pathname').textContent = domainDetector.getPathname();
+    document.getElementById('directories').textContent = domainDetector.getDirectories();
+    document.getElementById('filename').textContent = domainDetector.getFilename();
     document.getElementById('isProd').textContent = domainDetector.isProduction() ? 'Ja' : 'Nee';
     document.getElementById('isLocalhost').textContent = domainDetector.isLocalhost() ? 'Ja' : 'Nee';
 
-    // Console log voor devs
-    console.log("Domain info:", {
+    // Console log voor developers
+    console.log("🔎 Domein & Pad Info:", {
       fullHost: domainDetector.getFullHost(),
       subdomain: domainDetector.getSubdomain(),
       domain: domainDetector.getDomain(),
       tld: domainDetector.getTLD(),
+      pathname: domainDetector.getPathname(),
+      directories: domainDetector.getDirectories(),
+      filename: domainDetector.getFilename(),
       isProduction: domainDetector.isProduction(),
       isLocalhost: domainDetector.isLocalhost()
     });
