@@ -54,6 +54,20 @@
     "category": "Platformer",
     "img": "/images/amidst-the-sky.jpg",
     "link": "/action-games/amidst-the-clouds"
+  },
+    {
+    "number": 9,
+    "name": "Angry Sharks",
+    "category": "Casual",
+    "img": "/images/angry-sharks.jpg",
+    "link": "/action-games/angry-sharks"
+  },
+    {
+    "number": 10,
+    "name": "Apple Shooter",
+    "category": "Casual",
+    "img": "/images/apple-shooter.jpg",
+    "link": "/action-games/apple-shooter"
   }
 
 ]
