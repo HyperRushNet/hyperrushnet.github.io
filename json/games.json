@@ -12,6 +12,13 @@
     "category": "Battle",
     "img": "/images/1v1-lol.jpg",
     "link": "/action-games/1v1-lol/"
+  },
+  {
+    "number": 3,
+    "name": "Offline Paradise",
+    "category": "Platformer",
+    "img": "/images/offline-paradise.jpg",
+    "link": "/action-games/OfflineParadise/"
   }
 
 ]
