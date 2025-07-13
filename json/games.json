@@ -47,6 +47,13 @@
     "category": "Battle",
     "img": "/images/alien-hominid.jpg",
     "link": "/action-games/alienhominid"
+  },
+  {
+    "number": 8,
+    "name": "Amidst The Sky",
+    "category": "Platformer",
+    "img": "/images/amidst-the-sky.jpg",
+    "link": "/action-games/amidst-the-clouds"
   }
 
 ]
