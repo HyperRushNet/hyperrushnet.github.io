@@ -5,9 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Game Bibliotheek</title>
   <style>
-    *,
-    *::before,
-    *::after {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -117,17 +115,16 @@
     }
 
     #categoryList button {
-  width: 100%;
-  padding: 0.85rem 0.75rem;
-  margin-bottom: 0.5rem;
-  background: #e5e7eb;
-  border-radius: 0.375rem;
-  cursor: pointer;
-  font-size: 1rem;
-  text-align: left;
-  padding-left: 1rem;
-}
-
+      width: 100%;
+      padding: 0.85rem 0.75rem;
+      margin-bottom: 0.5rem;
+      background: #e5e7eb;
+      border-radius: 0.375rem;
+      cursor: pointer;
+      font-size: 1rem;
+      text-align: left;
+      padding-left: 1rem;
+    }
 
     #categoryList button:hover {
       background: #d1d5db;
@@ -199,11 +196,14 @@
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 6px 8px;
+      padding: 6px 15px;
       font-size: 1rem;
       text-align: center;
       color: white;
       z-index: 2;
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: clip;
     }
   </style>
 </head>
@@ -285,12 +285,22 @@
 
       const title = document.createElement("div");
       title.className = "game-title-overlay";
-      title.textContent = `${game.name}`;
+      title.textContent = game.name;
 
       card.appendChild(img);
       card.appendChild(fade);
       card.appendChild(title);
       gameCardsContainer.appendChild(card);
+
+      // ✅ Truncatie toepassen na render
+      requestAnimationFrame(() => {
+        let original = game.name;
+        let text = original;
+        while (title.scrollWidth > title.clientWidth && text.length > 2) {
+          text = text.slice(0, -3) + "..";
+          title.textContent = text;
+        }
+      });
     });
 
     requestAnimationFrame(() => {
@@ -342,7 +352,6 @@
     if (e.key === "Enter") filterAndRender();
   });
 
-  // Load external JSON
   fetch("/json/games.json")
     .then(res => res.json())
     .then(data => {
