@@ -1,0 +1,23 @@
+[
+  {
+    "number": 1,
+    "name": "Zelda",
+    "category": "Avontuur",
+    "img": "https://placehold.co/300x225?text=Zelda",
+    "link": "https://zelda.com"
+  },
+  {
+    "number": 2,
+    "name": "Minecraft",
+    "category": "Creatief",
+    "img": "https://placehold.co/300x225?text=Minecraft",
+    "link": "https://minecraft.net"
+  },
+  {
+    "number": 3,
+    "name": "FIFA 25",
+    "category": "Sport",
+    "img": "https://placehold.co/300x225?text=FIFA+25",
+    "link": "https://ea.com/fifa"
+  }
+]
