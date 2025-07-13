@@ -40,6 +40,13 @@
     "category": "Strategy",
     "img": "/images/a-dark-room.jpg",
     "link": "/action-games/adarkroom"
+  },
+      {
+    "number": 7,
+    "name": "Alien Hominid",
+    "category": "Battle",
+    "img": "/images/alien-hominid.jpg",
+    "link": "/action-games/alienhominid"
   }
 
 ]
