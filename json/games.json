@@ -1,23 +1,11 @@
 [
   {
     "number": 1,
-    "name": "Zelda",
-    "category": "Avontuur",
-    "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcRnu-pGNXlDbaXz3eO41RjxzcexUZA7zfhGZQ&s",
-    "link": "https://zelda.com"
-  },
-  {
-    "number": 2,
-    "name": "Minecraft",
-    "category": "Creatief",
-    "img": "https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcTTxYbV0WhMh-kBrhgR0E-uTxy72SmKijgtUw&s",
-    "link": "https://minecraft.net"
-  },
-  {
-    "number": 3,
-    "name": "FIFA 25",
-    "category": "Sport",
-    "img": "https://placehold.co/300x225?text=FIFA+25",
-    "link": "https://ea.com/fifa"
+    "name": "10 Minutes Till Dawn",
+    "category": "Survival",
+    "img": "/images/10-minutes-till-dawn.jpg",
+    "link": "/action-games/10-minutes-till-dawn/"
   }
+  
+
 ]
