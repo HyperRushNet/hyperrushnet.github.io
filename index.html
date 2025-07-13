@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Game Bibliotheek</title>
   <style>
-    *, *::before, *::after {
+     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -196,7 +196,7 @@
       bottom: 0;
       left: 0;
       right: 0;
-      padding: 6px 15px;
+      padding: 6px 8px;
       font-size: 1rem;
       text-align: center;
       color: white;
@@ -272,6 +272,10 @@
   function renderGames(games) {
     gameCardsContainer.innerHTML = "";
     games.forEach(game => {
+      const wrapper = document.createElement("div");
+      wrapper.className = "game-card-wrapper";
+      wrapper.style.position = "relative";
+
       const card = document.createElement("div");
       card.className = "game-card";
       card.onclick = () => window.open(game.link, "_blank");
@@ -287,20 +291,11 @@
       title.className = "game-title-overlay";
       title.textContent = game.name;
 
+      wrapper.appendChild(card);
       card.appendChild(img);
       card.appendChild(fade);
       card.appendChild(title);
-      gameCardsContainer.appendChild(card);
-
-      // ✅ Truncatie toepassen na render
-      requestAnimationFrame(() => {
-        let original = game.name;
-        let text = original;
-        while (title.scrollWidth > title.clientWidth && text.length > 2) {
-          text = text.slice(0, -3) + "..";
-          title.textContent = text;
-        }
-      });
+      gameCardsContainer.appendChild(wrapper);
     });
 
     requestAnimationFrame(() => {
@@ -309,23 +304,16 @@
   }
 
   function adjustGridColumns(numCards) {
-    if (numCards === 0) {
-      gameCardsContainer.style.gridTemplateColumns = "";
-      return;
-    }
-
     const containerStyle = getComputedStyle(gameCardsContainer);
-    const paddingLeft = parseFloat(containerStyle.paddingLeft);
-    const paddingRight = parseFloat(containerStyle.paddingRight);
-    const totalWidth = gameCardsContainer.clientWidth - paddingLeft - paddingRight;
-    const minCardWidth = 150;
-    const gap = 10;
+    const totalWidth = gameCardsContainer.clientWidth;
+    const minCardWidth = 160;
+    const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 12;
 
-    let maxCardsPerRow = Math.floor((totalWidth + gap) / (minCardWidth + gap));
-    maxCardsPerRow = Math.max(1, maxCardsPerRow);
+    let maxPerRow = Math.floor((totalWidth + gap) / (minCardWidth + gap));
+    maxPerRow = Math.max(1, maxPerRow);
 
-    const cardWidth = (totalWidth - (maxCardsPerRow - 1) * gap) / maxCardsPerRow;
-    gameCardsContainer.style.gridTemplateColumns = `repeat(${maxCardsPerRow}, ${cardWidth}px)`;
+    const cardWidth = (totalWidth - (maxPerRow - 1) * gap) / maxPerRow;
+    gameCardsContainer.style.gridTemplateColumns = `repeat(${maxPerRow}, ${cardWidth}px)`;
   }
 
   function filterAndRender() {
@@ -341,7 +329,6 @@
     }
 
     renderGames(filtered);
-
     if (window.innerWidth < 768 && sidebar.classList.contains("open")) {
       sidebar.classList.remove("open");
     }
