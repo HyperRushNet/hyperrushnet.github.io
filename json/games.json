@@ -19,6 +19,27 @@
     "category": "Platformer",
     "img": "/images/offline-paradise.jpg",
     "link": "/action-games/OfflineParadise/"
+  },
+  {
+    "number": 4,
+    "name": "Adam and Eve 5 Part 2",
+    "category": "Puzzle",
+    "img": "/images/adam-eve-2.jpg",
+    "link": "/action-games/adam-eve-2"
+  },
+  {
+    "number": 5,
+    "name": "Adam and Eve 5 Part 1",
+    "category": "Puzzle",
+    "img": "/images/adam-eve-1.jpg",
+    "link": "/action-games/adam-eve"
+  },
+    {
+    "number": 6,
+    "name": "A Dark Room",
+    "category": "Horror",
+    "img": "/images/a-dark-room.jpg",
+    "link": "/action-games/adarkroom"
   }
 
 ]
