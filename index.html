@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Game Bibliotheek</title>
   <style>
-     *, *::before, *::after {
+    *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
       padding: 0;
@@ -24,6 +24,8 @@
     :root {
       --sidebar-width: 240px;
       --sidebar-width-desktop: 220px;
+      --gap: 10px;
+      --min-card-width: 160px;
     }
 
     #sidebar {
@@ -124,6 +126,7 @@
       font-size: 1rem;
       text-align: left;
       padding-left: 1rem;
+      transition: background 0.2s;
     }
 
     #categoryList button:hover {
@@ -151,8 +154,8 @@
 
     #gameCardsContainer {
       display: grid;
-      row-gap: 10px;
-      column-gap: 10px;
+      row-gap: var(--gap);
+      column-gap: var(--gap);
       justify-content: start;
       width: 100%;
       transition: all 0.3s ease;
@@ -169,11 +172,15 @@
       text-decoration: none;
       transition: transform 0.3s ease, width 0.3s ease;
       color: inherit;
+      cursor: pointer;
+      display: flex;
+      flex-direction: column;
     }
 
     .game-card:hover {
       transform: scale(1.03);
       box-shadow: 0 4px 10px rgba(0,0,0,0.1);
+      z-index: 5;
     }
 
     .game-card img {
@@ -181,14 +188,22 @@
       aspect-ratio: 4 / 3;
       object-fit: cover;
       display: block;
+      border-top-left-radius: 0.5rem;
+      border-top-right-radius: 0.5rem;
+      user-select: none;
     }
 
     .game-fade {
       position: absolute;
-      inset: 0;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.5), rgba(0, 0, 0, 0));
-      z-index: 1;
+      bottom: 0;
+      left: 0;
+      right: 0;
+      height: 50%;
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
       pointer-events: none;
+      border-bottom-left-radius: 0.5rem;
+      border-bottom-right-radius: 0.5rem;
+      z-index: 2;
     }
 
     .game-title-overlay {
@@ -200,10 +215,11 @@
       font-size: 1rem;
       text-align: center;
       color: white;
-      z-index: 2;
+      z-index: 3;
       white-space: nowrap;
       overflow: hidden;
-      text-overflow: clip;
+      text-overflow: ellipsis;
+      user-select: none;
     }
   </style>
 </head>
@@ -272,10 +288,6 @@
   function renderGames(games) {
     gameCardsContainer.innerHTML = "";
     games.forEach(game => {
-      const wrapper = document.createElement("div");
-      wrapper.className = "game-card-wrapper";
-      wrapper.style.position = "relative";
-
       const card = document.createElement("div");
       card.className = "game-card";
       card.onclick = () => window.open(game.link, "_blank");
@@ -291,28 +303,24 @@
       title.className = "game-title-overlay";
       title.textContent = game.name;
 
-      wrapper.appendChild(card);
       card.appendChild(img);
       card.appendChild(fade);
       card.appendChild(title);
-      gameCardsContainer.appendChild(wrapper);
+      gameCardsContainer.appendChild(card);
     });
 
-    requestAnimationFrame(() => {
-      adjustGridColumns(games.length);
-    });
+    adjustGridColumns();
   }
 
-  function adjustGridColumns(numCards) {
-    const containerStyle = getComputedStyle(gameCardsContainer);
-    const totalWidth = gameCardsContainer.clientWidth;
-    const minCardWidth = 160;
-    const gap = parseFloat(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 12;
+  function adjustGridColumns() {
+    const containerWidth = gameCardsContainer.clientWidth;
+    const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 10;
+    const minCardWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--min-card-width')) || 160;
 
-    let maxPerRow = Math.floor((totalWidth + gap) / (minCardWidth + gap));
+    let maxPerRow = Math.floor((containerWidth + gap) / (minCardWidth + gap));
     maxPerRow = Math.max(1, maxPerRow);
 
-    const cardWidth = (totalWidth - (maxPerRow - 1) * gap) / maxPerRow;
+    const cardWidth = (containerWidth - (maxPerRow - 1) * gap) / maxPerRow;
     gameCardsContainer.style.gridTemplateColumns = `repeat(${maxPerRow}, ${cardWidth}px)`;
   }
 
@@ -339,7 +347,7 @@
     if (e.key === "Enter") filterAndRender();
   });
 
-  fetch("/json/games.json")
+  fetch("https://hyperrushnet.github.io/json/games.json")
     .then(res => res.json())
     .then(data => {
       allGames = data;
@@ -351,11 +359,9 @@
       gameCardsContainer.innerHTML = "<p>Kon de games niet laden.</p>";
     });
 
-  const resizeObserver = new ResizeObserver(() => {
-    adjustGridColumns(gameCardsContainer.childElementCount);
+  window.addEventListener("resize", () => {
+    adjustGridColumns();
   });
-
-  resizeObserver.observe(gameCardsContainer);
 </script>
 
 </body>
