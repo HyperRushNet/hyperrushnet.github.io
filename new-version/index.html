@@ -359,6 +359,11 @@
     }
 
     renderGames(filtered);
+
+    // Sidebar sluiten op mobiel na zoeken
+    if (window.innerWidth < 768 && sidebar.classList.contains("open")) {
+      sidebar.classList.remove("open");
+    }
   }
 
   searchBtn.addEventListener("click", filterAndRender);
