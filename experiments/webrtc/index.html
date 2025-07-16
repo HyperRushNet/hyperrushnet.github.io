@@ -1,0 +1,487 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>WebRTC Multi-Peer Demo (Combined SDP/ICE) 🐐</title>
+    <style>
+        body { font-family: Arial, sans-serif; margin: 20px; }
+        .tab { display: none; }
+        .tab.active { display: block; }
+        .tab-buttons { margin-bottom: 20px; }
+        .tab-button { padding: 10px 20px; cursor: pointer; }
+        .tab-button.active { background: #007bff; color: white; }
+        .container { max-width: 800px; margin: auto; }
+        textarea { width: 100%; height: 100px; margin: 10px 0; }
+        .log { border: 1px solid #ccc; padding: 10px; height: 200px; overflow-y: auto; }
+        .error { color: red; }
+        .connected { color: green; }
+        button { padding: 8px 16px; margin: 5px; }
+        input { padding: 8px; margin: 5px; }
+        .controller-entry { margin-bottom: 15px; padding: 10px; border: 1px solid #eee; background-color: #f9f9f9; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="tab-buttons">
+            <button class="tab-button active" onclick="switchTab('host')">Host</button>
+            <button class="tab-button" onclick="switchTab('controller')">Controller</button>
+        </div>
+        <div id="host" class="tab active">
+            <h2>Host Interface</h2>
+            <div id="host-connected" class="connected"></div>
+            <div id="host-connection-inputs">
+                <h3>New Controller Connection</h3>
+                <label for="new-controller-id-input">New Controller ID (for its answer/ICE):</label>
+                <input type="text" id="new-controller-id-input" placeholder="Generated after processing offer" readonly>
+                <h3>Paste Combined Controller Offer/ICE</h3>
+                <textarea id="host-combined-offer-ice" placeholder="Paste the controller's combined offer and ICE here"></textarea>
+                <button onclick="hostProcessNewOffer()">Process New Controller Offer</button>
+            </div>
+            
+            <hr>
+            <h3>Existing Connections Management</h3>
+            <div id="host-active-connections">
+                </div>
+            <hr>
+
+            <h3>Message Log (All Connections)</h3>
+            <div id="host-log" class="log"></div>
+            <input id="host-message" placeholder="Type message to all controllers">
+            <button onclick="hostSendMessage()">Send Message to All</button>
+        </div>
+
+        <div id="controller" class="tab">
+            <h2>Controller Interface</h2>
+            <input id="controller-name" placeholder="Enter your name">
+            <button onclick="controllerGenerateOffer()">Generate Offer</button>
+            <h3>Your Combined Offer/ICE (Share with Host)</h3>
+            <textarea id="controller-combined-offer-ice" readonly></textarea>
+            <h3>Paste Host Combined Answer/ICE</h3>
+            <textarea id="controller-combined-answer-ice"></textarea>
+            <button onclick="controllerProcessAnswer()">Process Answer</button>
+            <div id="controller-status" class="connected"></div>
+            <h3>Message Log</h3>
+            <div id="controller-log" class="log"></div>
+            <input id="controller-message" placeholder="Type message">
+            <button onclick="controllerSendMessage()">Send Message</button>
+        </div>
+    </div>
+
+    <script>
+        // Utility to generate random UUID for controller IDs
+        function generateUUID() {
+            return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+                const r = Math.random() * 16 | 0;
+                return (c === 'x' ? r : (r & 0x3 | 0x8)).toString(16);
+            });
+        }
+
+        // Switch between Host and Controller tabs
+        function switchTab(tabId) {
+            document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+            document.querySelectorAll('.tab-button').forEach(btn => btn.classList.remove('active'));
+            document.getElementById(tabId).classList.add('active');
+            document.querySelector(`.tab-button[onclick="switchTab('${tabId}')"]`).classList.add('active');
+        }
+
+        // Host state
+        const hostConnections = new Map(); // Map<controllerId, {peer: RTCPeerConnection, channel: RTCDataChannel, name: string, combinedAnswer: string}>
+        const hostLog = document.getElementById('host-log');
+
+        // Controller state
+        let controllerPeer = null;
+        let controllerChannel = null;
+        let controllerId = null;
+        let controllerName = '';
+        const controllerLog = document.getElementById('controller-log');
+        let controllerIceCandidates = []; // Still track them temporarily for gathering
+
+        // Log messages to DOM efficiently
+        function logMessage(element, message, isError = false) {
+            const div = document.createElement('div');
+            if (isError) div.classList.add('error');
+            div.textContent = message;
+            element.appendChild(div);
+            element.scrollTop = element.scrollHeight;
+        }
+
+        /**
+         * Encodes SDP and ICE candidates into a single base64 string.
+         * Format: { sdp: <base64_sdp>, ice: <base64_ice_candidates> }
+         */
+        function encodeCombinedData(sdp, iceCandidates) {
+            const data = {
+                sdp: btoa(JSON.stringify(sdp)),
+                ice: btoa(JSON.stringify(iceCandidates))
+            };
+            return btoa(JSON.stringify(data));
+        }
+
+        /**
+         * Decodes a combined base64 string back into SDP and ICE candidates.
+         */
+        function decodeCombinedData(encodedData) {
+            try {
+                const decodedJson = JSON.parse(atob(encodedData));
+                return {
+                    sdp: JSON.parse(atob(decodedJson.sdp)),
+                    ice: JSON.parse(atob(decodedJson.ice))
+                };
+            } catch (e) {
+                throw new Error(`Failed to decode combined data: ${e.message}`);
+            }
+        }
+
+        // Update host connected controllers list
+        function updateHostConnectedList() {
+            const connectedDiv = document.getElementById('host-connected');
+            const activeConnectionsDiv = document.getElementById('host-active-connections');
+            
+            connectedDiv.innerHTML = `<strong>Connected Controllers: ${hostConnections.size}</strong><br>`;
+            activeConnectionsDiv.innerHTML = '';
+
+            if (hostConnections.size === 0) {
+                connectedDiv.innerHTML += 'None';
+            } else {
+                hostConnections.forEach((conn, id) => {
+                    const entryDiv = document.createElement('div');
+                    entryDiv.classList.add('controller-entry');
+                    entryDiv.innerHTML = `
+                        <h4>Controller: ${conn.name || `ID: ${id.substring(0, 8)}...`}</h4>
+                        <p>Status: <span class="${conn.channel && conn.channel.readyState === 'open' ? 'connected' : 'error'}">${conn.channel ? conn.channel.readyState : 'Not initialized'}</span></p>
+                        <label>Host Answer (copy and share with ${conn.name || 'this controller'}):</label>
+                        <textarea readonly>${conn.combinedAnswer || 'Generating...'}</textarea>
+                    `;
+                    activeConnectionsDiv.appendChild(entryDiv);
+                    connectedDiv.innerHTML += `<div>${conn.name || `ID: ${id.substring(0, 8)}...`}</div>`;
+                });
+            }
+        }
+
+        // --- Host Functions ---
+
+        // Host: Process a new controller offer and establish a new RTCPeerConnection
+        async function hostProcessNewOffer() {
+            const combinedInput = document.getElementById('host-combined-offer-ice').value;
+
+            if (!combinedInput) {
+                logMessage(hostLog, 'Please paste the combined controller offer/ICE.', true);
+                return;
+            }
+
+            const controllerSessionId = generateUUID(); // Unique ID for this specific controller's session
+            let hostPeerForController = new RTCPeerConnection({
+                iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+            });
+            let hostIceCandidatesForController = [];
+            let hostIceGatheringDone = false; // Flag to track ICE gathering completion
+
+            // Store placeholder for this new connection
+            hostConnections.set(controllerSessionId, { 
+                peer: hostPeerForController, 
+                channel: null, 
+                name: 'Pending ' + controllerSessionId.substring(0, 8), 
+                combinedAnswer: '' // This will store the combined answer/ICE
+            });
+            updateHostConnectedList(); // Update UI to show pending connection
+
+            hostPeerForController.onicecandidate = event => {
+                if (event.candidate) {
+                    hostIceCandidatesForController.push(event.candidate);
+                } else {
+                    // All ICE candidates gathered
+                    hostIceGatheringDone = true;
+                    logMessage(hostLog, `All Host ICE candidates gathered for ${controllerSessionId.substring(0, 8)}...`);
+                }
+
+                // Use queueMicrotask to ensure UI update happens after all synchronous ICE processing for this event cycle
+                queueMicrotask(() => {
+                    const conn = hostConnections.get(controllerSessionId);
+                    if (conn && conn.peer.localDescription) { // Ensure localDescription is set
+                        conn.combinedAnswer = encodeCombinedData(conn.peer.localDescription, hostIceCandidatesForController);
+                        hostConnections.set(controllerSessionId, conn);
+                        updateHostConnectedList(); // Re-render to show updated combined answer
+                    }
+                });
+            };
+
+            hostPeerForController.ondatachannel = event => {
+                const channel = event.channel;
+                logMessage(hostLog, `Incoming DataChannel from controller ${controllerSessionId.substring(0, 8)}...`);
+
+                // Update the channel for this specific connection entry
+                const conn = hostConnections.get(controllerSessionId);
+                if (conn) {
+                    conn.channel = channel;
+                    hostConnections.set(controllerSessionId, conn);
+                } else {
+                    logMessage(hostLog, `Warning: DataChannel received for unknown controller ID ${controllerSessionId.substring(0, 8)}...`, true);
+                    return;
+                }
+
+                channel.onopen = () => {
+                    logMessage(hostLog, `Connection opened with controller ${conn.name}`);
+                    updateHostConnectedList();
+                };
+
+                channel.onmessage = msgEvent => {
+                    queueMicrotask(() => { // Process message in a microtask
+                        try {
+                            const data = JSON.parse(msgEvent.data);
+                            // If it's the first message and it contains a name, update it
+                            if (data.name && conn.name.startsWith('Pending')) {
+                                conn.name = data.name;
+                                hostConnections.set(controllerSessionId, conn);
+                                updateHostConnectedList(); // Update UI with proper name
+                            }
+                            logMessage(hostLog, `[${conn.name}] ${data.message}`);
+                        } catch (e) {
+                            logMessage(hostLog, `Error parsing message from ${conn.name}: ${e.message}`, true);
+                        }
+                    });
+                };
+
+                channel.onclose = () => {
+                    logMessage(hostLog, `Connection closed with ${conn.name}`);
+                    hostConnections.delete(controllerSessionId);
+                    updateHostConnectedList();
+                };
+
+                channel.onerror = error => {
+                    logMessage(hostLog, `DataChannel error with ${conn.name}: ${error.message}`, true);
+                };
+            };
+
+            try {
+                document.getElementById('host-combined-offer-ice').value = '';
+                document.getElementById('new-controller-id-input').value = controllerSessionId; // Show the ID for user reference
+
+                const decoded = decodeCombinedData(combinedInput);
+                
+                await hostPeerForController.setRemoteDescription(new RTCSessionDescription(decoded.sdp));
+                logMessage(hostLog, `Controller offer processed for ${controllerSessionId.substring(0, 8)}...`);
+
+                // Add ICE candidates in microtasks for potentially better performance
+                decoded.ice.forEach(candidate => {
+                    if (candidate && candidate.candidate) {
+                        queueMicrotask(async () => {
+                            try {
+                                await hostPeerForController.addIceCandidate(new RTCIceCandidate(candidate));
+                            } catch (e) {
+                                // Ignore errors for duplicate candidates (can happen with trickling and combined approach)
+                                if (!e.message.includes('cannot add ICE candidate more than once')) {
+                                    logMessage(hostLog, `Error adding ICE candidate for ${controllerSessionId.substring(0, 8)}...: ${e.message}`, true);
+                                }
+                            }
+                        });
+                    }
+                });
+                logMessage(hostLog, `Controller ICE candidates scheduled for addition for ${controllerSessionId.substring(0, 8)}...`);
+
+                const answer = await hostPeerForController.createAnswer();
+                await hostPeerForController.setLocalDescription(answer);
+
+                // Initial update with pending combined answer, will be finalized when ICE gathering completes
+                queueMicrotask(() => {
+                    const conn = hostConnections.get(controllerSessionId);
+                    if (conn) {
+                        // Update combinedAnswer with the SDP part immediately, ICE will be added by onicecandidate event
+                        conn.combinedAnswer = encodeCombinedData(hostPeerForController.localDescription, hostIceCandidatesForController);
+                        hostConnections.set(controllerSessionId, conn);
+                        updateHostConnectedList(); // Re-render to show initial combined answer
+                    }
+                });
+                
+                logMessage(hostLog, `Answer generated for ${controllerSessionId.substring(0, 8)}... Share with controller. Collecting Host ICE candidates...`);
+
+            } catch (e) {
+                logMessage(hostLog, `Error processing new offer for ${controllerSessionId.substring(0, 8)}...: ${e.message}`, true);
+                hostConnections.delete(controllerSessionId); // Clean up if error
+                updateHostConnectedList();
+            }
+        }
+
+        // Host: Send message to all connected controllers
+        function hostSendMessage() {
+            const message = document.getElementById('host-message').value;
+            if (!message) {
+                logMessage(hostLog, 'Please enter a message to send.', true);
+                return;
+            }
+
+            let sentCount = 0;
+            if (hostConnections.size === 0) {
+                logMessage(hostLog, 'No controllers connected to send messages to.', true);
+            }
+
+            for (const [id, { channel, name }] of hostConnections) {
+                if (channel && channel.readyState === 'open') {
+                    // Send message in a microtask
+                    queueMicrotask(() => {
+                        channel.send(JSON.stringify({ name: 'Host', message }));
+                        logMessage(hostLog, `Message sent to ${name || id.substring(0, 8)}...`);
+                    });
+                    sentCount++;
+                } else {
+                    logMessage(hostLog, `Channel to ${name || id.substring(0, 8)}... is not open. State: ${channel?.readyState}`, true);
+                }
+            }
+            if (sentCount > 0) {
+                logMessage(hostLog, `Host: ${message}`);
+            }
+            document.getElementById('host-message').value = '';
+        }
+
+        // --- Controller Functions ---
+
+        // Controller: Generate offer
+        async function controllerGenerateOffer() {
+            controllerName = document.getElementById('controller-name').value;
+            if (!controllerName) {
+                logMessage(controllerLog, 'Please enter your name before generating an offer.', true);
+                return;
+            }
+
+            try {
+                if (controllerPeer) {
+                    controllerPeer.close();
+                    controllerPeer = null;
+                    controllerChannel = null;
+                    logMessage(controllerLog, 'Closed existing controller connection.');
+                    document.getElementById('controller-status').textContent = 'Disconnected';
+                }
+
+                controllerPeer = new RTCPeerConnection({
+                    iceServers: [{ urls: 'stun:stun.l.google.com:19302' }]
+                });
+                controllerId = generateUUID(); // Assign a unique ID for this controller instance
+                controllerIceCandidates = [];
+                let controllerIceGatheringDone = false; // Flag to track ICE gathering completion
+
+                controllerPeer.onicecandidate = event => {
+                    if (event.candidate) {
+                        controllerIceCandidates.push(event.candidate);
+                    } else {
+                        // All ICE candidates gathered
+                        controllerIceGatheringDone = true;
+                        logMessage(controllerLog, 'All Controller ICE candidates gathered.');
+                    }
+
+                    // Use queueMicrotask to ensure UI update happens after all synchronous ICE processing for this event cycle
+                    queueMicrotask(() => {
+                        if (controllerPeer.localDescription) {
+                            document.getElementById('controller-combined-offer-ice').value = encodeCombinedData(controllerPeer.localDescription, controllerIceCandidates);
+                        }
+                    });
+                };
+
+                controllerChannel = controllerPeer.createDataChannel('chat');
+                controllerChannel.onopen = () => {
+                    document.getElementById('controller-status').textContent = 'Connected to Host';
+                    logMessage(controllerLog, 'Connected to Host!');
+                    // Send initial message with controller name in a microtask
+                    queueMicrotask(() => {
+                        controllerChannel.send(JSON.stringify({ name: controllerName, message: `Hello! 🙃` }));
+                    });
+                };
+                controllerChannel.onmessage = event => {
+                    queueMicrotask(() => { // Process message in a microtask
+                        try {
+                            const { name, message } = JSON.parse(event.data);
+                            logMessage(controllerLog, `[${name}] ${message}`);
+                        } catch (e) {
+                            logMessage(controllerLog, `Error parsing message from Host: ${e.message}`, true);
+                        }
+                    });
+                };
+                controllerChannel.onclose = () => {
+                    document.getElementById('controller-status').textContent = 'Disconnected';
+                    logMessage(controllerLog, 'Disconnected from Host.');
+                };
+                controllerChannel.onerror = error => {
+                    logMessage(controllerLog, `DataChannel error: ${error.message}`, true);
+                };
+
+                const offer = await controllerPeer.createOffer();
+                await controllerPeer.setLocalDescription(offer);
+                // Initial update with only SDP, ICE will be added as it gathers
+                queueMicrotask(() => {
+                    document.getElementById('controller-combined-offer-ice').value = encodeCombinedData(controllerPeer.localDescription, []);
+                });
+                logMessage(controllerLog, 'Offer generated. Share with Host. Gathering ICE candidates...');
+            } catch (e) {
+                logMessage(controllerLog, `Error generating offer: ${e.message}`, true);
+            }
+        }
+
+        // Controller: Process host answer and ICE candidates
+        async function controllerProcessAnswer() {
+            const combinedInput = document.getElementById('controller-combined-answer-ice').value;
+
+            if (!combinedInput || !controllerPeer) {
+                logMessage(controllerLog, 'Please generate an offer first and paste the combined answer from the Host.', true);
+                return;
+            }
+
+            try {
+                document.getElementById('controller-combined-answer-ice').value = '';
+
+                const decoded = decodeCombinedData(combinedInput);
+
+                await controllerPeer.setRemoteDescription(new RTCSessionDescription(decoded.sdp));
+                logMessage(controllerLog, 'Host answer processed by Controller.');
+
+                // Add ICE candidates in microtasks for potentially better performance
+                decoded.ice.forEach(candidate => {
+                    if (candidate && candidate.candidate) {
+                        queueMicrotask(async () => {
+                            try {
+                                await controllerPeer.addIceCandidate(new RTCIceCandidate(candidate));
+                            } catch (e) {
+                                // Ignore errors for duplicate candidates
+                                if (!e.message.includes('cannot add ICE candidate more than once')) {
+                                    logMessage(controllerLog, `Error adding ICE candidate: ${e.message}`, true);
+                                }
+                            }
+                        });
+                    }
+                });
+                logMessage(controllerLog, 'Host ICE candidates scheduled for addition by Controller.');
+                
+                logMessage(controllerLog, 'Answer and ICE candidates processed. Waiting for connection...');
+            } catch (e) {
+                logMessage(controllerLog, `Error processing answer: ${e.message}`, true);
+            }
+        }
+
+        // Controller: Send message
+        function controllerSendMessage() {
+            const message = document.getElementById('controller-message').value;
+            if (!message) {
+                logMessage(controllerLog, 'Please enter a message to send.', true);
+                return;
+            }
+
+            if (!controllerChannel || controllerChannel.readyState !== 'open') {
+                logMessage(controllerLog, 'Not connected to Host. Please establish a connection first.', true);
+                return;
+            }
+
+            try {
+                // Send message in a microtask
+                queueMicrotask(() => {
+                    controllerChannel.send(JSON.stringify({ name: controllerName, message }));
+                    logMessage(controllerLog, `${controllerName}: ${message}`);
+                });
+                document.getElementById('controller-message').value = '';
+            } catch (e) {
+                logMessage(controllerLog, `Failed to send message: ${e.message}`, true);
+            }
+        }
+
+        // Initial tab load
+        switchTab('host');
+    </script>
+</body>
+</html>
