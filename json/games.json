@@ -82,5 +82,19 @@
     "category": "Shooter",
     "img": "/images/awesome-tanks-2.jpg",
     "link": "/action-games/awesome-tanks-2"
+  },
+  {
+    "number": 13,
+    "name": "The Backrooms 2D",
+    "category": "Horror",
+    "img": "/images/the-backrooms-2d.jpg",
+    "link": "/action-games/backrooms-2d"
+  },
+  {
+    "number": 14,
+    "name": "The Backrooms",
+    "category": "Horror",
+    "img": "/images/the-backrooms.jpg",
+    "link": "/action-games/backrooms"
   }
 ]
