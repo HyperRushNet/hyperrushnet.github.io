@@ -6,7 +6,7 @@
     "img": "/images/10-minutes-till-dawn.jpg",
     "link": "/action-games/10-minutes-till-dawn/"
   },
-    {
+  {
     "number": 2,
     "name": "1v1.lol",
     "category": "Battle",
@@ -34,14 +34,14 @@
     "img": "/images/adam-eve-1.jpg",
     "link": "/action-games/adam-eve"
   },
-    {
+  {
     "number": 6,
     "name": "A Dark Room",
     "category": "Strategy",
     "img": "/images/a-dark-room.jpg",
     "link": "/action-games/adarkroom"
   },
-      {
+  {
     "number": 7,
     "name": "Alien Hominid",
     "category": "Battle",
@@ -50,24 +50,37 @@
   },
   {
     "number": 8,
-    "name": "Amidst The Sky",
-    "category": "Platformer",
-    "img": "/images/amidst-the-sky.jpg",
-    "link": "/action-games/amidst-the-clouds"
-  },
-    {
-    "number": 9,
     "name": "Angry Sharks",
     "category": "Casual",
     "img": "/images/angry-sharks.jpg",
     "link": "/action-games/angry-sharks"
   },
-    {
-    "number": 10,
+  {
+    "number": 9,
     "name": "Apple Shooter",
     "category": "Casual",
     "img": "/images/apple-shooter.jpg",
     "link": "/action-games/apple-shooter"
+  },
+  {
+    "number": 10,
+    "name": "Arcane Archer",
+    "category": "Survival",
+    "img": "/images/arcane-archer.jpg",
+    "link": "/action-games/arcane-archer"
+  },
+  {
+    "number": 11,
+    "name": "Avalanche",
+    "category": "Survival",
+    "img": "/images/avalanche.jpg",
+    "link": "/action-games/avalanche"
+  },
+  {
+    "number": 12,
+    "name": "Awesome Tanks 2",
+    "category": "Shooter",
+    "img": "/images/awesome-tanks-2.jpg",
+    "link": "/action-games/awesome-tanks-2"
   }
-
 ]
