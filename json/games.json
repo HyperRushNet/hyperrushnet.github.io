@@ -103,5 +103,12 @@
     "category": "Battle",
     "img": "/images/bacon-may-die.jpg",
     "link": "/action-games/bacon-may-die"
+  },
+  {
+    "number": 16,
+    "name": "The Black Night",
+    "category": "Challenge",
+    "img": "/images/the-black-knight.jpg",
+    "link": "/action-games/blackknight"
   }
 ]
