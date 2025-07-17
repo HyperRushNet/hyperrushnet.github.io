@@ -1,1 +1,52 @@
-Idk, random map for random things :)
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Project Files | The HyperRush Network</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: white; padding: 20px; }
+    #buttons {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 10px;
+    }
+    button {
+      background: #222;
+      color: white;
+      border: 1px solid #444;
+      padding: 10px 16px;
+      cursor: pointer;
+    }
+    button:hover {
+      background: #333;
+    }
+  </style>
+</head>
+<body>
+  <div id="buttons">Laden...</div>
+
+  <script>
+    const container = document.getElementById("buttons");
+    fetch("https://api.github.com/repos/HyperRushNet/hyperrushnet.github.io/contents/projects")
+      .then(res => res.json())
+      .then(files => {
+        container.innerHTML = "";
+        files.forEach(file => {
+          if (file.type === "file" && !file.name.toLowerCase().startsWith("index")) {
+            const name = file.name.replace(/\.[^/.]+$/, "");
+            const url = "https://hyperrushnet.github.io/projects/" + file.name;
+
+            const btn = document.createElement("button");
+            btn.textContent = name;
+            btn.onclick = () => location.href = url;
+            container.appendChild(btn);
+          }
+        });
+      })
+      .catch(err => {
+        container.textContent = "Fout bij laden.";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
