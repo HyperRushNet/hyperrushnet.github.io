@@ -96,5 +96,12 @@
     "category": "Horror",
     "img": "/images/the-backrooms.jpg",
     "link": "/action-games/backrooms"
+  },
+  {
+    "number": 15,
+    "name": "Bacon May Die",
+    "category": "Battle",
+    "img": "/images/bacon-may-die.jpg",
+    "link": "/action-games/bacon-may-die"
   }
 ]
