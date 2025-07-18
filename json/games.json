@@ -110,5 +110,12 @@
     "category": "Challenge",
     "img": "/images/the-black-knight.jpg",
     "link": "/action-games/blackknight"
+  },
+  {
+    "number": 17,
+    "name": "Blumgi Slime",
+    "category": "Platformer",
+    "img": "/images/blumgi-slime.jpg",
+    "link": "/action-games/blumgi-slime"
   }
 ]
