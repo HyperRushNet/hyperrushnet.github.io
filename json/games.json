@@ -117,5 +117,26 @@
     "category": "Platformer",
     "img": "/images/blumgi-slime.jpg",
     "link": "/action-games/blumgi-slime"
+  },
+  {
+    "number": 18,
+    "name": "Bob The Robber 4",
+    "category": "Adventure",
+    "img": "/images/bob-the-robber-4.jpg",
+    "link": "/action-games/bob-the-robber-4"
+  },
+  {
+    "number": 19,
+    "name": "Bomb It 7",
+    "category": "Battle",
+    "img": "/images/bomb-it-7.jpg",
+    "link": "/action-games/bomb-it-7.jpg"
+  },
+    {
+    "number": 20,
+    "name": "Boxel Rebound",
+    "category": "Platformer",
+    "img": "/images/boxel-rebound.jpg",
+    "link": "/action-games/boxel-rebound"
   }
 ]
