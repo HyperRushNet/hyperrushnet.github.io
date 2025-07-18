@@ -138,5 +138,19 @@
     "category": "Platformer",
     "img": "/images/boxel-rebound.jpg",
     "link": "/action-games/boxel-rebound"
+  },
+    {
+    "number": 21,
+    "name": "Bullet Force",
+    "category": "Battle",
+    "img": "/images/bullet-force.jpg",
+    "link": "/action-games/bullet-force"
+  },
+    {
+    "number": 22,
+    "name": "Burrito Bison Revenge",
+    "category": "Casual",
+    "img": "/images/burrito-bison-revenge.jpg",
+    "link": "/action-games/burrito-bison-revenge"
   }
 ]
