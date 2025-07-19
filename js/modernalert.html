@@ -13,7 +13,6 @@
   container.style.position = 'fixed';
   container.style.top = '20px';
   container.style.right = '20px';
-  container.style.width = '320px';
   container.style.display = 'flex';
   container.style.flexDirection = 'column';
   container.style.gap = '10px';
@@ -45,7 +44,8 @@
         white-space: normal;
         overflow-wrap: break-word;
         word-break: break-word;
-        max-width: 320px;
+        width: 100%;
+        max-width: min(320px, 50vw);
         min-width: 180px;
       }
       .alert.show {
