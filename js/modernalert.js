@@ -1,0 +1,140 @@
+<!DOCTYPE html><html lang="nl"><head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>Alerts strak</title></head><body>
+<div id="alerts"></div>
+<button onclick="Alerts.show('Item toegevoegd! Lang bericht dat naar volgende regel moet','success')">Toon Success</button>
+<button onclick="Alerts.show('Fout opgetreden! Lang bericht dat moet wrappen','error')">Toon Error</button>
+<button onclick="Alerts.show('Waarschuwing! Nog langere tekst die naar regel 2 moet','warning')">Toon Waarschuwing</button>
+<button onclick="Alerts.show('Info bericht met lange tekst die moet wrappen','info')">Toon Info</button>
+<script>
+(() => {
+  const ICONS = {success:'check-circle',error:'x-circle',warning:'alert-triangle',info:'info'};
+  const COLORS = {success:'#a6f1a6',error:'#f1a6a6',warning:'#f1eba6',info:'#a6c6f1'};
+  const duration = 2500;
+  const container = document.getElementById('alerts');
+  container.style.position = 'fixed';
+  container.style.top = '20px';
+  container.style.right = '20px';
+  container.style.width = '320px';
+  container.style.display = 'flex';
+  container.style.flexDirection = 'column';
+  container.style.gap = '10px';
+  container.style.zIndex = '2147483647';
+  container.style.pointerEvents = 'none';
+
+  function createStyle(){
+    if(document.querySelector('style[data-alerts]')) return;
+    const style=document.createElement('style');
+    style.setAttribute('data-alerts','');
+    style.textContent = `
+      .alert {
+        pointer-events: auto;
+        position: relative;
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        padding: 10px 14px;
+        border-radius: 6px;
+        font-family: system-ui,sans-serif;
+        font-weight: 600;
+        font-size: 13px;
+        color: #111;
+        background: var(--bg);
+        box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+        opacity: 0;
+        transform: translateX(10px);
+        transition: opacity 0.3s ease, transform 0.3s ease;
+        white-space: normal;
+        overflow-wrap: break-word;
+        word-break: break-word;
+        max-width: 320px;
+        min-width: 180px;
+      }
+      .alert.show {
+        opacity: 1;
+        transform: translateX(0);
+      }
+      .alert.pre-fade {
+        opacity: 1;
+        transform: translateX(0);
+        transition: none;
+      }
+      .alert.fade {
+        opacity: 0;
+        transition: opacity 0.3s ease;
+      }
+      .alert i {
+        flex-shrink: 0;
+        width: 24px;
+        height: 24px;
+        stroke: #111;
+        fill: none;
+        stroke-width: 2;
+        margin-right: 16px;
+      }
+      .alert span {
+        flex-grow: 1;
+      }
+      .bar {
+        position: absolute;
+        bottom: 0;
+        left: 0;
+        height: 3px;
+        width: 100%;
+        background: rgba(0,0,0,0.1);
+        border-radius: 0 0 6px 6px;
+        overflow: hidden;
+      }
+      .bar > div {
+        height: 100%;
+        background: rgba(0,0,0,0.3);
+        animation: shrink linear forwards;
+      }
+      @keyframes shrink {
+        from { width: 100%; }
+        to { width: 0; }
+      }
+    `;
+    document.head.appendChild(style);
+  }
+
+  let featherLoaded = false;
+  function loadFeather(callback) {
+    if (featherLoaded) return callback();
+    const script = document.createElement('script');
+    script.src = "/js/icons.js";
+    script.onload = () => {
+      featherLoaded = true;
+      callback();
+    };
+    document.head.appendChild(script);
+  }
+
+  window.Alerts = {
+    duration,
+    show(msg, type = 'info', dur = duration) {
+      createStyle();
+      const alert = document.createElement('div');
+      alert.className = 'alert';
+      alert.style.setProperty('--bg', COLORS[type] || COLORS.info);
+      alert.innerHTML = `<i data-feather="${ICONS[type] || 'info'}"></i><span>${msg}</span><div class="bar"><div style="animation-duration:${dur}ms"></div></div>`;
+      container.appendChild(alert);
+      
+      loadFeather(() => {
+        feather.replace();
+        requestAnimationFrame(() => alert.classList.add('show'));
+      });
+
+      setTimeout(() => {
+        alert.classList.remove('show');
+        alert.classList.add('pre-fade');
+      }, dur - 200);
+
+      setTimeout(() => {
+        alert.classList.remove('pre-fade');
+        alert.classList.add('fade');
+        alert.addEventListener('transitionend', () => alert.remove(), { once: true });
+      }, dur);
+    }
+  };
+})();
+</script>
+</body></html>
