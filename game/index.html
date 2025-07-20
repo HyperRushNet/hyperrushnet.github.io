@@ -31,22 +31,21 @@
 <div id="error" style="display:none;"></div>
 
 <script>
-  function getNumberFromQuery() {
-    const raw = location.search; // e.g. ?123
-    if (!raw || !raw.startsWith('?')) return null;
-    const number = raw.substring(1);
-    return /^\d+$/.test(number) ? number : null;
+  function getGameNumber() {
+    const params = new URLSearchParams(window.location.search);
+    const nr = params.get("nr");
+    return /^\d+$/.test(nr) ? nr : null;
   }
 
   async function loadGame() {
-    const number = getNumberFromQuery();
+    const number = getGameNumber();
     const iframe = document.getElementById("gameFrame");
     const error = document.getElementById("error");
 
     if (!number) {
       iframe.style.display = "none";
       error.style.display = "block";
-      error.textContent = "Geen geldig nummer in URL (gebruik: /game/?123)";
+      error.textContent = "Geen geldig 'nr' in de URL (bijv: ?nr=123)";
       return;
     }
 
