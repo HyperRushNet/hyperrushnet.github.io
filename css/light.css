@@ -19,8 +19,8 @@
   --color-bg-dark-magenta: #1a052f;
   --color-gray-dark: #1e1e2f;
   --color-magenta: #8a3ffc;
-  --color-white-faded: rgba(255,255,255,0.85);
-  --color-white-soft: #eee;
+  --color-white-faded: rgba(255,255,255,0.6);
+  --color-white-soft: #ddd;
   --color-shadow: rgba(0,0,0,0.7);
   --color-accent: #a16eff;
   --color-accent-hover: #8a3ffc;
@@ -32,14 +32,10 @@ html, body {
   font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
   color: var(--color-white-faded);
   background:
-    radial-gradient(circle at center, rgba(138,63,252,0.25) 0%, transparent 60%),
-    radial-gradient(circle at 80% 20%, rgba(26,5,47,0.3) 0%, transparent 50%),
-    radial-gradient(circle at 20% 80%, rgba(138,63,252,0.15) 0%, transparent 70%),
-    url('/images/universe-background-blur.avif') center/cover no-repeat,
-    url('/images/universe-background.avif') center/cover no-repeat;
-  background-blend-mode: screen, screen, screen, normal, normal;
-  -webkit-font-smoothing: antialiased;
-  -moz-osx-font-smoothing: grayscale;
+    radial-gradient(circle at center, rgba(138,63,252,0.12) 0%, transparent 60%),
+    radial-gradient(circle at 80% 20%, rgba(26,5,47,0.15) 0%, transparent 50%),
+    radial-gradient(circle at 20% 80%, rgba(138,63,252,0.1) 0%, transparent 70%);
+  background-color: var(--color-bg-dark);
   overflow-y: scroll;
 }
 
@@ -51,15 +47,16 @@ html, body {
   width: var(--sidebar-width);
   background: var(--color-bg-dark-magenta);
   padding: 1.5rem 1rem;
-  box-shadow: 2px 0 15px var(--color-shadow);
+  box-shadow: 2px 0 10px var(--color-shadow);
   overflow-y: auto;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
   z-index: 100;
   color: var(--color-white-soft);
-  font-weight: 600;
-  letter-spacing: 0.02em;
+  font-weight: 400;
+  letter-spacing: 0.03em;
   user-select: none;
+  font-size: 0.9rem;
 }
 
 #sidebar.open {
@@ -85,12 +82,12 @@ html, body {
   top: 1rem; left: 1rem;
   background: var(--color-bg-dark-magenta);
   color: var(--color-white-soft);
-  padding: 0.4rem 0.75rem;
-  font-size: 1.6rem;
-  border-radius: 0.375rem;
+  padding: 0.3rem 0.6rem;
+  font-size: 1.3rem;
+  border-radius: 0.3rem;
   cursor: pointer;
   z-index: 150;
-  box-shadow: 0 0 8px var(--color-accent);
+  box-shadow: 0 0 5px var(--color-accent);
   user-select: none;
   transition: background-color 0.3s ease;
 }
@@ -108,14 +105,14 @@ html, body {
 /* Search wrapper/input/button */
 #searchWrapper {
   position: relative;
-  margin-bottom: 1.25rem;
+  margin-bottom: 1rem;
 }
 
 #searchInput {
   width: 100%;
-  padding: 0.5rem 2.75rem 0.5rem 0.75rem;
-  border-radius: 0.375rem;
-  font-size: 1rem;
+  padding: 0.45rem 2.5rem 0.45rem 0.6rem;
+  border-radius: 0.3rem;
+  font-size: 0.9rem;
   background: var(--color-gray-dark);
   border: 1px solid transparent;
   color: var(--color-white-soft);
@@ -123,7 +120,7 @@ html, body {
 }
 
 #searchInput::placeholder {
-  color: rgba(255,255,255,0.5);
+  color: rgba(255,255,255,0.4);
 }
 
 #searchInput:focus {
@@ -139,8 +136,8 @@ html, body {
   right: 0.5rem;
   transform: translateY(-50%);
   cursor: pointer;
-  width: 24px;
-  height: 24px;
+  width: 20px;
+  height: 20px;
   display: flex;
   align-items: center;
   justify-content: center;
@@ -154,22 +151,22 @@ html, body {
 
 #searchBtn svg {
   fill: currentColor;
-  width: 18px;
-  height: 18px;
+  width: 16px;
+  height: 16px;
 }
 
 /* Category Buttons */
 #categoryList button {
   width: 100%;
-  padding: 0.75rem 1rem;
-  margin-bottom: 0.5rem;
+  padding: 0.6rem 0.8rem;
+  margin-bottom: 0.4rem;
   background: var(--color-gray-dark);
-  border-radius: 0.375rem;
+  border-radius: 0.3rem;
   cursor: pointer;
-  font-size: 1rem;
+  font-size: 0.9rem;
   text-align: left;
   color: var(--color-white-faded);
-  font-weight: 600;
+  font-weight: 400;
   border: 1px solid transparent;
   transition: background-color 0.2s ease, border-color 0.2s ease;
   user-select: none;
@@ -219,66 +216,54 @@ html, body {
 .game-card {
   position: relative;
   background: var(--color-gray-dark);
-  border-radius: 0.5rem;
-  box-shadow: 0 4px 15px rgba(0,0,0,0.5);
+  border-radius: 0.4rem;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.4);
   border: 1px solid transparent;
   overflow: hidden;
-  color: var(--color-white-soft);
+  color: var(--color-white-faded);
   cursor: pointer;
   display: flex;
-  flex-direction: column;
-  transition: transform 0.3s ease, border-color 0.3s ease, box-shadow 0.3s ease;
+  flex-direction: row;
+  align-items: center;
+  gap: 0.75rem;
+  padding: 0.4rem 0.6rem;
+  transition: border-color 0.3s ease, box-shadow 0.3s ease;
 }
 
 .game-card:hover {
-  transform: scale(1.05);
-  box-shadow: 0 10px 30px var(--color-accent);
   border-color: var(--color-accent);
-  z-index: 5;
+  box-shadow: 0 6px 15px var(--color-accent);
+  color: var(--color-white-soft);
+  z-index: 2;
 }
 
-/* Game Card Image */
+/* Small thumbnail on left */
 .game-card img {
-  width: 100%;
-  aspect-ratio: 4 / 3;
+  width: 60px;
+  height: 45px;
+  border-radius: 0.25rem;
   object-fit: cover;
-  border-top-left-radius: 0.5rem;
-  border-top-right-radius: 0.5rem;
+  flex-shrink: 0;
   user-select: none;
+  filter: brightness(0.9);
   transition: filter 0.3s ease;
 }
 
 .game-card:hover img {
-  filter: brightness(1.1);
+  filter: brightness(1);
 }
 
-/* Fade overlay at bottom */
-.game-fade {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  height: 50%;
-  background: linear-gradient(to top, rgba(26,5,47,0.8), transparent);
-  pointer-events: none;
-  border-bottom-left-radius: 0.5rem;
-  border-bottom-right-radius: 0.5rem;
-  z-index: 2;
-}
-
-/* Title Overlay */
+/* Title text */
 .game-title-overlay {
-  position: absolute;
-  bottom: 0; left: 0; right: 0;
-  padding: 6px 8px;
-  font-size: 1rem;
-  text-align: center;
-  color: var(--color-white-soft);
-  z-index: 3;
+  flex-grow: 1;
+  font-size: 0.9rem;
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+  font-weight: 400;
+  color: inherit;
   user-select: none;
-  font-weight: 700;
-  text-shadow: 0 0 5px var(--color-accent);
+  text-shadow: none;
 }
 
 /* Scrollbar for sidebar */
