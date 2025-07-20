@@ -66,10 +66,10 @@
   z-index: 99;
   backdrop-filter: blur(10px);
   -webkit-backdrop-filter: blur(10px); 
-   width: 20px;
-   max-width: 20px;
-   height: 20px;
-   max-height: 20px;
+   width: 40px;
+   max-width: 40px;
+   height: 40px;
+   max-height: 40px;
 }
 
 
