@@ -9,30 +9,30 @@
   <script src="/js/main.js" defer></script>
 </head>
 <body>
-  <button id="menuToggle" aria-label="Open menu">
-    <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true" focusable="false">
-      <path d="M4 6h16M4 12h16M4 18h16" stroke="white" stroke-width="2" stroke-linecap="round"/>
-    </svg>
-  </button>
+  <div id="appWrapper">
+    <button id="menuToggle" aria-label="Open menu">
+      <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true" focusable="false">
+        <path d="M4 6h16M4 12h16M4 18h16" stroke="white" stroke-width="2" stroke-linecap="round"/>
+      </svg>
+    </button>
 
-  <div id="overlay" aria-hidden="true"></div>
-
-  <div id="sidebar" aria-label="Sidebar">
-    <div id="searchWrapper">
-      <input id="searchInput" type="text" placeholder="Zoek spel..." aria-label="Zoek spel" />
-      <button id="searchBtn" aria-label="Zoek">
-        <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
-          <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5
-            6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79
-            l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"/>
-        </svg>
-      </button>
+    <div id="sidebar" aria-label="Sidebar">
+      <div id="searchWrapper">
+        <input id="searchInput" type="text" placeholder="Zoek spel..." aria-label="Zoek spel" />
+        <button id="searchBtn" aria-label="Zoek">
+          <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
+            <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5
+              6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79
+              l5 4.99L20.49 19l-4.99-5zM10 14a4 4 0 110-8 4 4 0 010 8z"/>
+          </svg>
+        </button>
+      </div>
+      <nav id="categoryList" aria-label="Categorieën"></nav>
     </div>
-    <nav id="categoryList" aria-label="Categorieën"></nav>
-  </div>
 
-  <main id="content" role="main">
-    <div id="gameCardsContainer" aria-live="polite"></div>
-  </main>
+    <main id="content" role="main">
+      <div id="gameCardsContainer" aria-live="polite"></div>
+    </main>
+  </div>
 </body>
 </html>
