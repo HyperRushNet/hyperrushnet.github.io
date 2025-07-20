@@ -18,6 +18,14 @@ menuToggle.addEventListener("click", () => {
   if (isOpen) updateOverlaySize();
 });
 
+appWrapper.addEventListener("click", (e) => {
+  if (sidebar.classList.contains("open") && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+    sidebar.classList.remove("open");
+    appWrapper.classList.remove("active");
+    document.body.classList.remove("lock-scroll");
+  }
+});
+
 function updateOverlaySize() {
   const overlay = appWrapper.querySelector("::after");
   if (overlay) {
@@ -63,6 +71,7 @@ function renderCategories() {
         appWrapper.classList.remove("active");
         document.body.classList.remove("lock-scroll");
       }
+*L
     };
     categoryList.appendChild(btn);
   });
