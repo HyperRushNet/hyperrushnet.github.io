@@ -82,7 +82,7 @@ function renderGames(games) {
     const card = document.createElement("div");
     card.className = "game-card";
     card.onclick = () => {
-      window.location.href = `/game?${game.number}`;
+      window.location.href = `/game?nr=${game.number}`;
     };
 
     const img = document.createElement("img");
