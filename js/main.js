@@ -81,9 +81,12 @@ function renderGames(games) {
   games.forEach(game => {
     const card = document.createElement("div");
     card.className = "game-card";
-    card.onclick = () => window.open(game.link, "_blank");
+    card.onclick = () => {
+      window.location.href = `/game#${game.number}`;
+    };
 
     const img = document.createElement("img");
+    img.loading = "lazy";
     img.src = game.img;
     img.alt = `${game.name} afbeelding`;
 
@@ -103,7 +106,7 @@ function renderGames(games) {
           delete img.dataset.retrying;
         };
         testImg.onerror = function () {
-          // blijf doorgaan tot hij lukt
+          // blijf proberen
         };
         testImg.src = originalSrc + "?t=" + Date.now();
       }, 5000);
@@ -161,7 +164,7 @@ searchInput.addEventListener("keypress", e => {
   if (e.key === "Enter") filterAndRender();
 });
 
-fetch("https://hyperrushnet.github.io/json/games.json")
+fetch("/json/games.json")
   .then(res => res.json())
   .then(data => {
     allGames = data;
