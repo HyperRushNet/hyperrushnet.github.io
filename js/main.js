@@ -8,16 +8,18 @@ const categoryList = document.getElementById("categoryList");
 const gameCardsContainer = document.getElementById("gameCardsContainer");
 const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
-const overlay = document.getElementById("overlay");
+const appWrapper = document.getElementById("appWrapper");
 
 menuToggle.addEventListener("click", () => {
   const isOpen = sidebar.classList.toggle("open");
-  overlay.classList.toggle("active", isOpen);
+  appWrapper.classList.toggle("active", isOpen);
 });
 
-overlay.addEventListener("click", () => {
-  sidebar.classList.remove("open");
-  overlay.classList.remove("active");
+appWrapper.addEventListener("click", (e) => {
+  if (e.target === appWrapper && sidebar.classList.contains("open")) {
+    sidebar.classList.remove("open");
+    appWrapper.classList.remove("active");
+  }
 });
 
 function renderCategories() {
@@ -30,7 +32,7 @@ function renderCategories() {
     renderGames(allGames);
     if (window.innerWidth < 768) {
       sidebar.classList.remove("open");
-      overlay.classList.remove("active");
+      appWrapper.classList.remove("active");
     }
   };
   categoryList.appendChild(allBtn);
@@ -43,7 +45,7 @@ function renderCategories() {
       filterAndRender();
       if (window.innerWidth < 768) {
         sidebar.classList.remove("open");
-        overlay.classList.remove("active");
+        appWrapper.classList.remove("active");
       }
     };
     categoryList.appendChild(btn);
@@ -125,7 +127,7 @@ function filterAndRender() {
   renderGames(filtered);
   if (window.innerWidth < 768 && sidebar.classList.contains("open")) {
     sidebar.classList.remove("open");
-    overlay.classList.remove("active");
+    appWrapper.classList.remove("active");
   }
 }
 
