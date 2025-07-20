@@ -53,18 +53,21 @@
       }
     }
 
-    #menuToggle {
-      position: fixed;
-      top: 1rem;
-      left: 1rem;
-      background: #1f2937;
-      color: white;
-      padding: 0.5rem 0.75rem;
-      font-size: 1.5rem;
-      border-radius: 0.375rem;
-      cursor: pointer;
-      z-index: 150;
-    }
+#menuToggle {
+  position: fixed;
+  top: 1rem;
+  left: 1rem;
+  background-color: rgba(0, 0, 0, 0.5);
+  color: white;
+  padding: 0.5rem 0.75rem;
+  font-size: 1.5rem;
+  border-radius: 0.375rem;
+  cursor: pointer;
+  z-index: 99;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px); 
+}
+
 
     @media (min-width: 768px) {
       #menuToggle {
