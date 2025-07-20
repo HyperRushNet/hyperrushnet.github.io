@@ -3,9 +3,9 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Herwerkte Overlay + Sidebar</title>
+  <title>Snelle Overlay Fix</title>
   <style>
-    /* 🔁 CSS RESET (modern) */
+    /* 🔁 CSS RESET */
     *, *::before, *::after {
       box-sizing: border-box;
       margin: 0;
@@ -14,28 +14,27 @@
     }
     html, body {
       height: 100%;
-      font-family: Arial, sans-serif;
+      font-family: sans-serif;
       background: #111;
       color: white;
       overflow-x: hidden;
-    }
-
-    :root {
-      --sidebar-width: 240px;
     }
 
     body.lock-scroll {
       overflow: hidden;
     }
 
-    /* 🔷 Sidebar */
+    :root {
+      --sidebar-width: 240px;
+    }
+
     #sidebar {
       position: fixed;
       top: 0;
       left: 0;
       width: var(--sidebar-width);
       height: 100vh;
-      background: #1b1b2f;
+      background: #222;
       transform: translateX(-100%);
       transition: transform 0.3s ease;
       z-index: 1001;
@@ -47,15 +46,17 @@
       transform: translateX(0);
     }
 
-    /* 🔷 Overlay */
     #overlay {
       position: fixed;
-      inset: 0;
-      background: rgba(0, 0, 0, 0.6);
+      left: 0;
+      top: 0;
+      width: 100vw;
+      height: 100vh;
+      background: rgba(0,0,0,0.6);
       backdrop-filter: blur(4px);
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.2s ease;
       z-index: 1000;
     }
 
@@ -64,7 +65,6 @@
       pointer-events: auto;
     }
 
-    /* 🔷 Toggle knop */
     #menuToggle {
       position: fixed;
       top: 1rem;
@@ -90,19 +90,18 @@
         transform: translateX(0);
       }
       #overlay {
-        display: none;
+        display: none !important;
       }
     }
 
-    /* 🔷 Content */
     #content {
       padding: 2rem;
     }
 
     .line {
+      background: #333;
       margin: 1rem 0;
       padding: 1rem;
-      background: #222;
       border-radius: 4px;
     }
   </style>
@@ -112,7 +111,7 @@
     <h2>Menu</h2>
     <ul>
       <li><a href="#" style="color:white">Home</a></li>
-      <li><a href="#" style="color:white">Over</a></li>
+      <li><a href="#" style="color:white">Games</a></li>
       <li><a href="#" style="color:white">Contact</a></li>
     </ul>
   </div>
@@ -121,11 +120,9 @@
   <div id="menuToggle">&#9776;</div>
 
   <div id="content">
-    <h1>Inhoud</h1>
-    <p>Scroll naar beneden om te testen.</p>
-    <div id="scroller">
-      <!-- JS voegt hier 100 regels toe -->
-    </div>
+    <h1>Testpagina</h1>
+    <p>Met scrollbare inhoud + instant overlay fix bij schermveranderingen.</p>
+    <div id="scroller"></div>
   </div>
 
   <script>
@@ -137,6 +134,7 @@
       const open = sidebar.classList.toggle("open");
       overlay.classList.toggle("active", open);
       document.body.classList.toggle("lock-scroll", open);
+      if (open) updateOverlaySize();
     });
 
     overlay.addEventListener("click", () => {
@@ -145,17 +143,27 @@
       document.body.classList.remove("lock-scroll");
     });
 
-    // Extra fix: als schermhoogte verandert → overlay forceren
+    function updateOverlaySize() {
+      overlay.style.width = `${window.innerWidth}px`;
+      overlay.style.height = `${window.innerHeight}px`;
+    }
+
+    // update overlay size on every frame during resize
+    let resizeWatching = false;
     window.addEventListener("resize", () => {
-      if (overlay.classList.contains("active")) {
-        overlay.style.display = "none";
-        // force reflow
-        void overlay.offsetWidth;
-        overlay.style.display = "";
+      if (!resizeWatching) {
+        resizeWatching = true;
+        requestAnimationFrame(() => {
+          updateOverlaySize();
+          resizeWatching = false;
+        });
       }
     });
 
-    // Scroll-inhoud genereren
+    // init size (in case menu is open on load)
+    updateOverlaySize();
+
+    // voeg 100 regels toe om scrollen te testen
     const scroller = document.getElementById("scroller");
     for (let i = 1; i <= 100; i++) {
       const div = document.createElement("div");
