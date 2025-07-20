@@ -27,7 +27,7 @@
       left: 0;
       height: 100vh;
       width: var(--sidebar-width);
-      background: white;
+      background: #0c032b;
       padding: 1rem;
       box-shadow: 2px 0 5px rgba(0,0,0,0.1);
       overflow-y: auto;
@@ -159,7 +159,7 @@
       background: white;
       border-radius: 0.5rem;
       box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-      border: 1px solid #e5e7eb;
+      border: none;
       user-select: none;
       overflow: hidden;
       text-decoration: none;
@@ -192,7 +192,7 @@
       left: 0;
       right: 0;
       height: 50%;
-      background: linear-gradient(to top, rgba(0, 0, 0, 0.5), transparent);
+      background: linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent);
       pointer-events: none;
       border-bottom-left-radius: 0.5rem;
       border-bottom-right-radius: 0.5rem;
