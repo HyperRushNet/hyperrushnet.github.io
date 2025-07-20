@@ -147,6 +147,12 @@ fetch("https://hyperrushnet.github.io/json/games.json")
 
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimeout);
+  // overlay verbergen als menuToggle niet zichtbaar is (breed scherm)
+  if (window.innerWidth >= 768 && overlay.classList.contains("active")) {
+    overlay.classList.remove("active");
+    sidebar.classList.remove("open");
+  }
+
   let count = 0;
   const maxCount = 10;
   const interval = setInterval(() => {
