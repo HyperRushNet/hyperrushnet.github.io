@@ -71,7 +71,6 @@ function renderCategories() {
         appWrapper.classList.remove("active");
         document.body.classList.remove("lock-scroll");
       }
-*L
     };
     categoryList.appendChild(btn);
   });
