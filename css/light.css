@@ -11,15 +11,17 @@
 html, body {
   height: 100%;
   font-family: Arial, sans-serif;
-  background-color: #0b0f1a;
+  background-color: #030b17;
   background-image: 
-    radial-gradient(circle at 20% 30%, rgba(255, 255, 255, 0.08) 0%, transparent 60%),
-    radial-gradient(circle at 80% 20%, rgba(255, 255, 255, 0.06) 0%, transparent 55%),
-    radial-gradient(circle at 50% 80%, rgba(255, 255, 255, 0.04) 0%, transparent 50%),
-    radial-gradient(circle at 70% 60%, rgba(255, 255, 255, 0.07) 0%, transparent 50%);
+    radial-gradient(circle at 10% 20%, rgba(255,255,255,0.1) 1px, transparent 20%),
+    radial-gradient(circle at 70% 10%, rgba(255,255,255,0.08) 1px, transparent 25%),
+    radial-gradient(circle at 50% 80%, rgba(255,255,255,0.05) 1px, transparent 30%),
+    radial-gradient(ellipse at 60% 60%, rgba(0,80,180,0.12), transparent 70%),
+    radial-gradient(ellipse at 30% 70%, rgba(100,0,150,0.09), transparent 60%),
+    radial-gradient(ellipse at 80% 40%, rgba(255,255,255,0.04), transparent 60%);
   background-repeat: no-repeat;
   background-size: cover;
-  color: #f9f9f9;
+  color: #e0e0e0;
 }
 
 :root {
@@ -35,9 +37,9 @@ html, body {
   left: 0;
   height: 100vh;
   width: var(--sidebar-width);
-  background: #111827;
+  background: rgba(15, 23, 42, 0.95);
   padding: 1rem;
-  box-shadow: 2px 0 5px rgba(0,0,0,0.4);
+  box-shadow: 2px 0 10px rgba(0,0,0,0.5);
   overflow-y: auto;
   transform: translateX(-100%);
   transition: transform 0.3s ease;
@@ -66,7 +68,7 @@ html, body {
   position: fixed;
   top: 1rem;
   left: 1rem;
-  background: #374151;
+  background: #334155;
   color: white;
   padding: 0.5rem 0.75rem;
   font-size: 1.5rem;
@@ -89,11 +91,11 @@ html, body {
 #searchInput {
   width: 100%;
   padding: 0.5rem 2.5rem 0.5rem 0.75rem;
-  border: 1px solid #444;
+  border: 1px solid #555;
   border-radius: 0.375rem;
   font-size: 1rem;
-  background: #1f2937;
-  color: white;
+  background: #1e293b;
+  color: #fff;
 }
 
 #searchBtn {
@@ -134,7 +136,7 @@ html, body {
 }
 
 #categoryList button:hover {
-  background: #374151;
+  background: #334155;
 }
 
 #content {
@@ -167,15 +169,15 @@ html, body {
 
 .game-card {
   position: relative;
-  background: #1f2937;
+  background: #1e293b;
   border-radius: 0.5rem;
-  box-shadow: 0 2px 4px rgba(0,0,0,0.4);
-  border: 1px solid #374151;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.4);
+  border: 1px solid #334155;
   user-select: none;
   overflow: hidden;
   text-decoration: none;
   transition: transform 0.3s ease, width 0.3s ease;
-  color: #f9f9f9;
+  color: #f1f5f9;
   cursor: pointer;
   display: flex;
   flex-direction: column;
