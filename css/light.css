@@ -25,6 +25,19 @@ body::before {
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
+  filter: blur(12px) brightness(0.6);
+  z-index: -2;
+  pointer-events: none;
+}
+
+body::after {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background: rgba(0, 0, 0, 0.4);
   z-index: -1;
   pointer-events: none;
 }
@@ -174,7 +187,7 @@ body::before {
   background: white;
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  border: 1px solid #e5e7eb;
+  /* border: 1px solid #e5e7eb; verwijderd */
   user-select: none;
   overflow: hidden;
   text-decoration: none;
