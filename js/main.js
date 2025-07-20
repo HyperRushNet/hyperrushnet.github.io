@@ -1,6 +1,7 @@
 let allGames = [];
 let activeCategory = null;
 let resizeTimeout;
+let resizeWatching = false;
 
 const sidebar = document.getElementById("sidebar");
 const menuToggle = document.getElementById("menuToggle");
@@ -13,6 +14,26 @@ const appWrapper = document.getElementById("appWrapper");
 menuToggle.addEventListener("click", () => {
   const isOpen = sidebar.classList.toggle("open");
   appWrapper.classList.toggle("active", isOpen);
+  document.body.classList.toggle("lock-scroll", isOpen);
+  if (isOpen) updateOverlaySize();
+});
+
+function updateOverlaySize() {
+  const overlay = appWrapper.querySelector("::after");
+  if (overlay) {
+    overlay.style.width = `${window.innerWidth}px`;
+    overlay.style.height = `${window.innerHeight}px`;
+  }
+}
+
+window.addEventListener("resize", () => {
+  if (!resizeWatching) {
+    resizeWatching = true;
+    requestAnimationFrame(() => {
+      updateOverlaySize();
+      resizeWatching = false;
+    });
+  }
 });
 
 function renderCategories() {
@@ -26,6 +47,7 @@ function renderCategories() {
     if (window.innerWidth < 768) {
       sidebar.classList.remove("open");
       appWrapper.classList.remove("active");
+      document.body.classList.remove("lock-scroll");
     }
   };
   categoryList.appendChild(allBtn);
@@ -39,6 +61,7 @@ function renderCategories() {
       if (window.innerWidth < 768) {
         sidebar.classList.remove("open");
         appWrapper.classList.remove("active");
+        document.body.classList.remove("lock-scroll");
       }
     };
     categoryList.appendChild(btn);
@@ -121,6 +144,7 @@ function filterAndRender() {
   if (window.innerWidth < 768 && sidebar.classList.contains("open")) {
     sidebar.classList.remove("open");
     appWrapper.classList.remove("active");
+    document.body.classList.remove("lock-scroll");
   }
 }
 
@@ -151,4 +175,7 @@ window.addEventListener("resize", () => {
   }, 1000);
 });
 
-document.addEventListener("DOMContentLoaded", adjustGridColumns);
+document.addEventListener("DOMContentLoaded", () => {
+  adjustGridColumns();
+  updateOverlaySize();
+});
