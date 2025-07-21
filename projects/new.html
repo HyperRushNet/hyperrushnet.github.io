@@ -1,84 +1,90 @@
 <!DOCTYPE html>
 <html>
 <head>
-  <title>Secure Sandbox</title>
   <meta charset="UTF-8">
+  <title>Veilige Game Embed</title>
+  <script src="/js/hrn-notifications.min.js"></script>
   <style>
-    body {
+    html, body {
       margin: 0;
+      padding: 0;
+      height: 100%;
       background: black;
     }
     iframe {
-      width: 100vw;
-      height: 100vh;
+      width: 100%;
+      height: 100%;
       border: none;
       display: block;
     }
   </style>
-  <script src="/js/hrn-notifications.min.js"></script>
 </head>
 <body>
-  <iframe id="game" sandbox="allow-scripts allow-same-origin" src="https://hyperrushnet.github.io/action-games/bacon-may-die/"></iframe>
+  <div id="game-container"></div>
 
   <script>
-    const iframe = document.getElementById("game");
+    // De URL van je spel
+    const game = {
+      link: "https://hyperrushnet.github.io/action-games/bacon-may-die/"
+    };
 
-    iframe.onload = () => {
+    // Creëer sandboxed iframe ZONDER redirect-permissies
+    const iframe = document.createElement("iframe");
+    iframe.src = game.link;
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin"); // geen top-navigation!
+    iframe.setAttribute("allowfullscreen", "true");
+    document.getElementById("game-container").appendChild(iframe);
+
+    // Blokkeer alle pogingen tot window.open
+    const originalOpen = window.open;
+    window.open = function (url, target, features) {
+      if (window.hrn?.notifications) {
+        hrn.notifications.show("Redirect blocked!", "info", "2500");
+      }
+      return null;
+    };
+
+    // Blokkeer alle pogingen tot window.location-verandering in parent
+    Object.defineProperty(window, 'location', {
+      configurable: false,
+      enumerable: true,
+      get: () => location,
+      set: (val) => {
+        if (window.hrn?.notifications) {
+          hrn.notifications.show("Redirect blocked!", "info", "2500");
+        }
+      }
+    });
+
+    // Extra beveiliging: observer die navigatiepogingen binnen iframe detecteert
+    iframe.addEventListener("load", () => {
       try {
-        const win = iframe.contentWindow;
+        const iframeWin = iframe.contentWindow;
 
-        // 🔒 Blokkeer redirect via top.*
-        if (win && win.top !== window) {
-          Object.defineProperty(win, 'top', {
-            get() {
-              if (typeof hrn !== "undefined") {
+        // Override binnen iframe als same-origin
+        if (iframeWin && iframeWin !== window) {
+          iframeWin.open = function () {
+            if (window.hrn?.notifications) {
+              hrn.notifications.show("Redirect blocked!", "info", "2500");
+            }
+            return null;
+          };
+
+          Object.defineProperty(iframeWin, 'location', {
+            configurable: false,
+            enumerable: true,
+            get: () => iframeWin.location,
+            set: () => {
+              if (window.hrn?.notifications) {
                 hrn.notifications.show("Redirect blocked!", "info", "2500");
               }
-              return new Proxy(window, {
-                get(target, prop) {
-                  if (typeof hrn !== "undefined") {
-                    hrn.notifications.show("Redirect blocked!", "info", "2500");
-                  }
-                  return typeof target[prop] === 'function' ? () => {} : null;
-                },
-                set() {
-                  if (typeof hrn !== "undefined") {
-                    hrn.notifications.show("Redirect blocked!", "info", "2500");
-                  }
-                  return true;
-                }
-              });
             }
           });
         }
-
-        // 🎮 Injecteer FPS-meter
-        const doc = win.document;
-        const fpsBox = doc.createElement("div");
-        fpsBox.style.cssText = `
-          position:fixed;top:8px;left:8px;background:rgba(0,0,0,0.6);
-          color:#0f0;font:14px monospace;padding:4px 8px;z-index:9999;
-          pointer-events:none;user-select:none;border-radius:4px;
-        `;
-        fpsBox.textContent = "FPS: --";
-        doc.body.appendChild(fpsBox);
-
-        let lastTime = performance.now(), frames = 0;
-        function updateFPS() {
-          const now = performance.now();
-          frames++;
-          if (now - lastTime >= 1000) {
-            fpsBox.textContent = "FPS: " + frames;
-            frames = 0;
-            lastTime = now;
-          }
-          win.requestAnimationFrame(updateFPS);
-        }
-        win.requestAnimationFrame(updateFPS);
       } catch (e) {
-        console.warn("FPS meter of redirect blocker mislukt:", e);
+        // Cross-origin iframe: geen toegang, maar sandbox voorkomt redirect sowieso
       }
-    };
+    });
   </script>
 </body>
 </html>
