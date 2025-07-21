@@ -1,161 +1,55 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="utf-8" />
-  <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-  <title>Loading... - HyperRush</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Loading Game...</title>
   <style>
-    html, body {
-      margin: 0; padding: 0;
-      background: #000;
-      width: 100%; height: 100%;
-      overflow: hidden;
-      color: white;
-      font-family: sans-serif;
-    }
-    #wrapper {
-      position: absolute;
-      inset: 0;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 1rem;
-      box-sizing: border-box;
-    }
-    iframe {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
-      border: none;
-      display: block;
-    }
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    iframe { width: 100%; height: 100%; border: none; }
   </style>
-  <meta http-equiv="Content-Security-Policy"
-    content="
-      default-src 'self';
-      script-src 'self';
-      style-src 'self' 'unsafe-inline';
-      img-src 'self' data:;
-      connect-src 'self';
-      form-action 'self';
-      base-uri 'self';
-      frame-ancestors 'none';
-    "
-  />
 </head>
 <body>
-  <div id="wrapper">Loading...</div>
+<script>
+(async () => {
+  const params = new URLSearchParams(location.search);
+  const nr = parseInt(params.get("nr"));
+  if (!nr) return document.body.innerText = "❌ Geen geldig ?nr= meegegeven.";
 
-  <script>
-    function getQueryParam(name) {
-      const match = new RegExp('[?&]' + name + '=([^&]*)').exec(location.search);
-      return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
+  let games = [];
+  try {
+    const res = await fetch("/json/games.json");
+    games = await res.json();
+  } catch (e) {
+    return document.body.innerText = "❌ Kan games.json niet laden.";
+  }
+
+  const game = games.find(g => g.number === nr);
+  if (!game) return document.body.innerText = "❌ Game niet gevonden.";
+
+  document.title = `${game.name} - HyperRush`;
+
+  const iframe = document.createElement("iframe");
+  iframe.src = game.link;
+  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  document.body.appendChild(iframe);
+
+  const blockerScript = `/*! RedirectBlocker v1.1 | MIT */(()=>{const a=b=>window.hrn?.notifications?.show("Redirect blocked!","info","3000"),c=window.open;window.open=function(b,d,...e){return d&&(d.includes("_top")||d.includes("_parent"))?(a("window.open → "+d),null):c.apply(this,[b,d,...e])},location.assign=function(b){a("location.assign")},location.replace=function(b){a("location.replace")};const d=(b,c)=>{try{const d=Object.getOwnPropertyDescriptor(b,"location");(!d||d.configurable)&&Object.defineProperty(b,"location",{configurable:!0,enumerable:!0,get:()=>window.location,set:d=>{a(c+".location = "+d)}})}catch(e){}};d(window,"window"),d(top,"top"),d(parent,"parent"),document.addEventListener("click",b=>{let c=b.target;for(;c&&c!==document;){if("A"===c.tagName&&c.href){a("<a href>"),b.preventDefault();break}c=c.parentNode}},!0)})();`;
+
+  iframe.onload = () => {
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      const notifyScript = doc.createElement("script");
+      notifyScript.src = "/js/hrn-notifications.min.js";
+      notifyScript.onload = () => {
+        const blocker = doc.createElement("script");
+        blocker.textContent = blockerScript;
+        doc.head.appendChild(blocker);
+      };
+      doc.head.appendChild(notifyScript);
+    } catch (e) {
+      console.warn("Injectie mislukt:", e);
     }
-
-    const nrRaw = getQueryParam("nr");
-    const wrapper = document.getElementById("wrapper");
-
-    if (!nrRaw) {
-      wrapper.innerHTML = '⚠️ No game number provided.<br><br>Use e.g.: <code>?nr=1</code>';
-      document.title = 'No game - HyperRush';
-    } else {
-      const nr = parseInt(nrRaw, 10);
-      if (isNaN(nr) || nr < 1) {
-        wrapper.innerHTML = '⚠️ Invalid game number.<br><br>Use a positive number like <code>?nr=1</code>';
-        document.title = 'Invalid game - HyperRush';
-      } else {
-        fetch('/json/games.json').then(r => {
-          if (!r.ok) throw new Error('Could not load games.json');
-          return r.json();
-        }).then(games => {
-          const game = games.find(g => g.number === nr);
-          if (!game) {
-            wrapper.innerHTML = `⚠️ No game found with number ${nr}.`;
-            document.title = 'Game not found - HyperRush';
-            return;
-          }
-
-          document.title = `${game.name} - HyperRush`;
-
-          // Betere validatie: alleen absolute root-URL's, geen "..", geen externe URL's
-          if (typeof game.link !== 'string' || !/^\/[a-zA-Z0-9\-_/]+$/.test(game.link)) {
-            wrapper.innerHTML = '⚠️ Invalid game link.';
-            document.title = 'Invalid game - HyperRush';
-            return;
-          }
-
-          const iframe = document.createElement('iframe');
-
-          // Zeer strikte sandbox: alleen scripts en same-origin (maar geen top-navigatie of popups)
-          iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-          iframe.src = game.link;
-          iframe.width = '100%';
-          iframe.height = '100%';
-          iframe.setAttribute('allowfullscreen', 'true');
-          iframe.setAttribute('loading', 'eager');
-
-          wrapper.innerHTML = '';
-          wrapper.appendChild(iframe);
-
-          // Blokkeer window.open in de hoofd pagina voor top/self/parent targets
-          const originalOpen = window.open;
-          window.open = function(url, target, features) {
-            if (['_top', '_parent', '_self'].includes(target)) {
-              console.warn('Blocked window.open targeting top/parent/self');
-              return null;
-            }
-            return originalOpen.call(window, url, target, features);
-          };
-
-          // Extra: luister naar postMessages van iframe om clicks/navigaties te blokkeren
-          window.addEventListener('message', e => {
-            if (e.source === iframe.contentWindow) {
-              if (e.data === 'navigateAttemptBlocked') {
-                console.warn('Navigatiepoging geblokkeerd vanuit iframe');
-              }
-            }
-          });
-
-          // FPS meter injectie
-          iframe.onload = () => {
-            try {
-              const doc = iframe.contentDocument || iframe.contentWindow.document;
-              const win = iframe.contentWindow;
-
-              const fpsBox = doc.createElement('div');
-              fpsBox.style.cssText = `
-                position:fixed;top:8px;left:8px;background:rgba(0,0,0,0.6);
-                color:#0f0;font:14px monospace;padding:4px 8px;z-index:9999;
-                pointer-events:none;user-select:none;border-radius:4px;
-              `;
-              fpsBox.textContent = 'FPS: --';
-              doc.body.appendChild(fpsBox);
-
-              let lastTime = performance.now(), frames = 0;
-              function updateFPS() {
-                const now = performance.now();
-                frames++;
-                if (now - lastTime >= 1000) {
-                  fpsBox.textContent = 'FPS: ' + frames;
-                  frames = 0;
-                  lastTime = now;
-                }
-                win.requestAnimationFrame(updateFPS);
-              }
-              win.requestAnimationFrame(updateFPS);
-            } catch(e) {
-              console.warn("FPS meter injection failed:", e);
-            }
-          };
-        }).catch(err => {
-          wrapper.innerHTML = '⚠️ Error loading games.json.<br><br>' + err.message;
-          document.title = 'Loading error - HyperRush';
-        });
-      }
-    }
-  </script>
+  };
+})();
+</script>
 </body>
 </html>
