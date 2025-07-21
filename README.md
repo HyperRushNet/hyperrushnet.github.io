@@ -1,5 +1,5 @@
 # The HyperRush Network v2.
-![Screenshot van de game](https://media.istockphoto.com/id/1353994069/vector/neon-futuristic-game-controller.jpg?s=612x612&w=0&k=20&c=ar9BzcuxY8RalO-k3N7ZDQdeVVFvmtJM80OJWETomec=)
+![Screenshot van de game](https://acloserlisten.com/wp-content/uploads/2020/01/games-banner-1140x400-1.png)
 
 
 Play instantly. No hassle. Just games.
