@@ -1,24 +1,52 @@
 <!DOCTYPE html>
-<html>
-<head><title>Redirect blocker iframe</title></head>
-<body style="margin:0">
-<iframe id="gameFrame" src="./game.html" style="width:100vw; height:100vh;" sandbox="allow-scripts"></iframe>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Iframe Redirect Blocker zonder reset</title>
+  <style>
+    iframe { width: 600px; height: 400px; border: 1px solid black; }
+  </style>
+</head>
+<body>
+
+<h2>Parent pagina</h2>
+<iframe id="myIframe" src="/action-games/bacon-may-die"></iframe>
 
 <script>
-  const iframe = document.getElementById('gameFrame');
+(function(){
+  const iframe = document.getElementById("myIframe");
+  let lastUrl = null;
+  let locked = false;
 
-  // Prevent iframe navigations (sandbox zonder allow-top-navigation)
-  iframe.addEventListener('load', () => {
-    // iframe geladen, scripts binnenin kunnen niet top-level navigeren
-    // alleen detecteren als iframe zelf van URL verandert:
-    let lastSrc = iframe.src;
-    setInterval(() => {
-      if(iframe.src !== lastSrc) {
-        alert('Redirect blocked!');
-        iframe.src = lastSrc; // revert
+  iframe.onload = () => {
+    try {
+      lastUrl = iframe.contentWindow.location.href;
+    } catch (e) {}
+  };
+
+  setInterval(() => {
+    if (locked) return;
+    try {
+      const currentUrl = iframe.contentWindow.location.href;
+      if (lastUrl && currentUrl !== lastUrl) {
+        // Redirect gedetecteerd
+        locked = true;
+        alert("Redirect binnen iframe is geblokkeerd!");
+        iframe.contentWindow.history.back(); // Terug naar vorige pagina (geen reset)
+        setTimeout(() => {
+          // Geef tijd om terug te gaan, dan update lastUrl
+          lastUrl = iframe.contentWindow.location.href;
+          locked = false;
+        }, 500);
+      } else {
+        lastUrl = currentUrl;
       }
-    }, 500);
-  });
+    } catch (e) {
+      // Cross-origin? Dan kunnen we niks doen
+    }
+  }, 200); // check elke 200ms
+})();
 </script>
+
 </body>
 </html>
