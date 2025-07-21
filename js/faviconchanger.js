@@ -1,8 +1,8 @@
 (() => {
     const options = {
-        default: '/icons/dark.jpg',
-        dark: '/icons/light.jpg',
-        light: '/icons/dark.jpg'
+        default: '/icons/dark.png',
+        dark: '/icons/light.png',
+        light: '/icons/dark.png'
     };
 
     if (!options.light || !options.dark) {
