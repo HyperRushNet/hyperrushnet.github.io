@@ -1,4 +1,4 @@
 User-agent: *
-Disallow:
+Disallow: 
 
 Sitemap: https://hyperrushnet.github.io/sitemap.xml
