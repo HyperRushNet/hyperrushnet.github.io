@@ -1,104 +1,39 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html>
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Iframe redirect blocker + FPS</title>
-<style>
-  html, body {
-    margin: 0; padding: 0; height: 100%; overflow: hidden;
-    background: #000;
-    color: #0f0;
-    font-family: monospace;
-  }
-  #gameFrame {
-    position: fixed;
-    top: 0; left: 0; width: 100%; height: 100%;
-    border: none;
-  }
-  #fpsCounter {
-    position: fixed;
-    top: 5px; right: 5px;
-    background: rgba(0,0,0,0.7);
-    color: #0f0;
-    padding: 4px 8px;
-    font-size: 14px;
-    font-weight: bold;
-    z-index: 9999;
-    user-select: none;
-  }
-</style>
+  <title>Iframe Loader + RedirectBlocker</title>
+  <style>
+    html, body { margin: 0; height: 100%; overflow: hidden; }
+    iframe { border: 0; width: 100%; height: 100%; }
+  </style>
 </head>
 <body>
 
-<iframe id="gameFrame" sandbox="allow-scripts allow-same-origin"></iframe>
-<div id="fpsCounter">FPS: 0</div>
-
 <script>
-const iframe = document.getElementById('gameFrame');
-const fpsCounter = document.getElementById('fpsCounter');
-iframe.src = 'https://hyperrushnet.github.io/action-games/bacon-may-die/';
+  // 👇 Hier verander je de URL van de game die in de iframe moet
+  const iframeURL = "https://hyperrushnet.github.io/action-games/bacon-may-die/";
 
-window.addEventListener('message', e => {
-  if(e.source === iframe.contentWindow && e.data === 'redirect_attempt') {
-    alert('Redirect binnen iframe geblokkeerd!');
-  }
-});
+  // Voeg de iframe toe
+  const iframe = document.createElement("iframe");
+  iframe.id = "gameframe";
+  iframe.src = iframeURL;
+  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  document.body.appendChild(iframe);
 
-iframe.addEventListener('load', () => {
-  try {
-    const iw = iframe.contentWindow;
-    const idoc = iframe.contentDocument || iw.document;
-    if (!iw || !idoc) return;
+  // De blocker als inline script (één lijn, MIT licensed)
+  const scriptContent = `/*! RedirectBlocker v1.0 | MIT License */(()=>{const a=b=>alert("🔒 Redirect geblokkeerd: "+b),c=window.open;window.open=function(b,d,...e){return d&&(d.includes("_top")||d.includes("_parent"))?(a("window.open → "+d),null):c.apply(this,[b,d,...e])},location.assign=function(b){a("location.assign")},location.replace=function(b){a("location.replace")};const d=(b,c)=>{try{const d=Object.getOwnPropertyDescriptor(b,"location");(!d||d.configurable)&&Object.defineProperty(b,"location",{configurable:!0,enumerable:!0,get:()=>window.location,set:d=>{a(c+".location = "+d)}})}catch(e){}};d(window,"window"),d(top,"top"),d(parent,"parent"),document.addEventListener("click",b=>{let c=b.target;for(;c&&c!==document;){if("A"===c.tagName&&c.href){a("<a href>"),b.preventDefault();break}c=c.parentNode}},!0)})();`;
 
-    // Inject script dat redirect methods overschrijft en postMessage stuurt
-    const script = idoc.createElement('script');
-    script.textContent = `
-      (function(){
-        function notifyRedirect() {
-          window.parent.postMessage('redirect_attempt', '*');
-          alert('Redirect geblokkeerd door parent!');
-        }
-        // Override location assign/replace/href setter
-        window.location.assign = function(url) { notifyRedirect(); };
-        window.location.replace = function(url) { notifyRedirect(); };
-        Object.defineProperty(window.location, 'href', {
-          set: function(url) { notifyRedirect(); },
-          get: function() { return window.location.toString(); }
-        });
-        // Override history API pushState/replaceState
-        const origPush = history.pushState;
-        history.pushState = function(state,title,url){
-          notifyRedirect();
-          return origPush.apply(this, arguments);
-        };
-        const origReplace = history.replaceState;
-        history.replaceState = function(state,title,url){
-          notifyRedirect();
-          return origReplace.apply(this, arguments);
-        };
-      })();
-    `;
-    idoc.head.appendChild(script);
-  } catch(e) {
-    console.warn('Iframe injectie mislukt:', e);
-  }
-});
-
-// FPS meter
-let lastTime = performance.now();
-let frames = 0;
-function updateFPS() {
-  const now = performance.now();
-  frames++;
-  if (now - lastTime >= 1000) {
-    fpsCounter.textContent = 'FPS: ' + frames;
-    frames = 0;
-    lastTime = now;
-  }
-  requestAnimationFrame(updateFPS);
-}
-updateFPS();
+  // Injecteer script na load
+  iframe.addEventListener("load", () => {
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      const script = doc.createElement("script");
+      script.textContent = scriptContent;
+      doc.head.appendChild(script);
+    } catch (e) {
+      console.warn("Script injectie mislukt:", e);
+    }
+  });
 </script>
 
 </body>
