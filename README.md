@@ -1,5 +1,5 @@
 # The HyperRush Network v2.
-![Screenshot van de game](https://acloserlisten.com/wp-content/uploads/2020/01/games-banner-1140x400-1.png)
+![Screenshot van de game](https://raw.githubusercontent.com/HyperRushNet/images/refs/heads/main/banner.jpg)
 
 
 Play instantly. No hassle. Just games.
