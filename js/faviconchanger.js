@@ -4,7 +4,7 @@
         dark: '/icons/light.png',
         light: '/icons/dark.png'
     };
-
+ 
     if (!options.light || !options.dark) {
         console.error('Vereist: opties met light en dark favicon URLs.');
         return;
