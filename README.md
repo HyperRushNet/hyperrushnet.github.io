@@ -1,4 +1,4 @@
-# The HyperRush Network 
+# The HyperRush Network v2.1
 
 Play instantly. No hassle. Just games.
 
