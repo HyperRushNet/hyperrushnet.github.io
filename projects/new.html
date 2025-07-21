@@ -1,12 +1,11 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-  <meta charset="UTF-8">
-  <title>Veilige Game</title>
+  <meta charset="UTF-8" />
+  <title>Veilige Game Embed</title>
   <style>
     html, body {
       margin: 0;
-      padding: 0;
       height: 100%;
       overflow: hidden;
       background: black;
@@ -33,56 +32,42 @@
   <div id="game-container"></div>
 
   <script>
-    const game = {
-      link: "https://hyperrushnet.github.io/action-games/bacon-may-die/"
-    };
-
     const iframe = document.createElement("iframe");
-    iframe.src = game.link;
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+    iframe.src = "https://hyperrushnet.github.io/action-games/bacon-may-die/";
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin"); // top-navigation geblokkeerd
     iframe.setAttribute("allowfullscreen", "true");
+
     document.getElementById("game-container").appendChild(iframe);
 
-    // Redirect via window.open blokkeren
+    // Detecteer redirectpogingen via window blur (soms veroorzaakt door poging tot top redirect)
+    let lastFocus = Date.now();
+    window.onblur = () => {
+      setTimeout(() => {
+        if (document.activeElement === document.body && Date.now() - lastFocus < 1000) {
+          alert("Redirect blocked!");
+        }
+      }, 200);
+    };
+
+    // Detecteer DOM-wijzigingen aan iframe (sommige engines proberen iframe te vervangen bij redirect)
+    const observer = new MutationObserver((mutations) => {
+      for (const m of mutations) {
+        for (const n of m.removedNodes) {
+          if (n === iframe) {
+            alert("Redirect attempt blocked!");
+          }
+        }
+      }
+    });
+
+    observer.observe(document.getElementById("game-container"), { childList: true });
+
+    // Prevent window.open global
     const originalOpen = window.open;
-    window.open = function (url, target, features) {
+    window.open = function () {
       alert("Redirect blocked!");
       return null;
     };
-
-    // Redirect via window.location blokkeren
-    Object.defineProperty(window, 'location', {
-      configurable: false,
-      enumerable: true,
-      get: () => location,
-      set: (val) => {
-        alert("Redirect blocked!");
-      }
-    });
-
-    // Probeer redirectpoging binnen iframe ook te vangen (same-origin only)
-    iframe.addEventListener("load", () => {
-      try {
-        const frameWin = iframe.contentWindow;
-        if (frameWin && frameWin !== window) {
-          frameWin.open = function () {
-            alert("Redirect blocked!");
-            return null;
-          };
-
-          Object.defineProperty(frameWin, 'location', {
-            configurable: false,
-            enumerable: true,
-            get: () => frameWin.location,
-            set: () => {
-              alert("Redirect blocked!");
-            }
-          });
-        }
-      } catch (e) {
-        // Cross-origin iframe: sandbox voorkomt redirect al
-      }
-    });
   </script>
 </body>
 </html>
