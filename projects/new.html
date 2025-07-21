@@ -3,14 +3,13 @@
 <head>
   <meta charset="UTF-8">
   <title>Veilige Game</title>
-  <script src="/js/hrn-notifications.min.js"></script>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       overflow: hidden;
-      background-color: black;
+      background: black;
     }
 
     #game-container {
@@ -44,36 +43,30 @@
     iframe.setAttribute("allowfullscreen", "true");
     document.getElementById("game-container").appendChild(iframe);
 
-    // Blokkeer window.open wereldwijd
+    // Redirect via window.open blokkeren
     const originalOpen = window.open;
     window.open = function (url, target, features) {
-      if (window.hrn?.notifications) {
-        hrn.notifications.show("Redirect blocked!", "info", "2500");
-      }
+      alert("Redirect blocked!");
       return null;
     };
 
-    // Blokkeer window.location (extern redirect)
+    // Redirect via window.location blokkeren
     Object.defineProperty(window, 'location', {
       configurable: false,
       enumerable: true,
       get: () => location,
       set: (val) => {
-        if (window.hrn?.notifications) {
-          hrn.notifications.show("Redirect blocked!", "info", "2500");
-        }
+        alert("Redirect blocked!");
       }
     });
 
-    // Probeer ook binnen iframe redirect via open/location te blokkeren (alleen same-origin)
+    // Probeer redirectpoging binnen iframe ook te vangen (same-origin only)
     iframe.addEventListener("load", () => {
       try {
         const frameWin = iframe.contentWindow;
         if (frameWin && frameWin !== window) {
           frameWin.open = function () {
-            if (window.hrn?.notifications) {
-              hrn.notifications.show("Redirect blocked!", "info", "2500");
-            }
+            alert("Redirect blocked!");
             return null;
           };
 
@@ -82,14 +75,12 @@
             enumerable: true,
             get: () => frameWin.location,
             set: () => {
-              if (window.hrn?.notifications) {
-                hrn.notifications.show("Redirect blocked!", "info", "2500");
-              }
+              alert("Redirect blocked!");
             }
           });
         }
       } catch (e) {
-        // Cross-origin? Geen toegang, maar sandbox dekt het.
+        // Cross-origin iframe: sandbox voorkomt redirect al
       }
     });
   </script>
