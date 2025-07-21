@@ -1,5 +1,5 @@
 # The HyperRush Network v2.
-![Screenshot van de game](https://hyperrushnet.github.io/icons/light.png)
+![Screenshot van de game](https://online.maryville.edu/wp-content/uploads/sites/97/2023/10/MVU-BFADM-2020-Q4-Skyscraper-Future-of-Video-Games-Trends-Technology-Types-header-v2-1000x523-1.jpg)
 
 
 Play instantly. No hassle. Just games.
