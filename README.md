@@ -1,5 +1,5 @@
 # The HyperRush Network v2.
-![Screenshot van de game](https://raw.githubusercontent.com/HyperRushNet/images/refs/heads/main/banner.jpg)
+![Screenshot van de game](https://raw.githubusercontent.com/HyperRushNet/images/refs/heads/main/banner-large.jpg)
 
 
 Play instantly. No hassle. Just games.
