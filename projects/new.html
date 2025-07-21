@@ -1,51 +1,84 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
 <head>
-  <meta charset="utf-8" />
-  <title>Loading... - HyperRush</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-
-  <!-- Notificatiebibliotheek -->
-  <script src="/js/hrn-notifications.min.js"></script>
-
+  <title>Secure Sandbox</title>
+  <meta charset="UTF-8">
   <style>
-    html, body {
-      margin: 0; padding: 0;
-      background: #000;
-      width: 100%; height: 100%;
-      overflow: hidden;
-      color: white;
-      font-family: sans-serif;
-    }
-    #wrapper {
-      position: absolute;
-      inset: 0;
-      background: #000;
-      display: flex;
-      justify-content: center;
-      align-items: center;
-      text-align: center;
-      padding: 1rem;
-      box-sizing: border-box;
+    body {
+      margin: 0;
+      background: black;
     }
     iframe {
-      position: absolute;
-      top: 0; left: 0;
-      width: 100%; height: 100%;
+      width: 100vw;
+      height: 100vh;
       border: none;
       display: block;
     }
   </style>
-
-  <!-- Correcte CSP zonder inline scripts -->
-  <meta http-equiv="Content-Security-Policy"
-        content="default-src 'self'; script-src 'self' 'unsafe-inline'; style-src 'self' 'unsafe-inline'; connect-src *; img-src * data:; frame-ancestors 'none';" />
+  <script src="/js/hrn-notifications.min.js"></script>
 </head>
 <body>
-  <div id="wrapper">Loading...</div>
+  <iframe id="game" sandbox="allow-scripts allow-same-origin" src="https://hyperrushnet.github.io/action-games/bacon-may-die/"></iframe>
 
-  <script src="./loader.js">
+  <script>
+    const iframe = document.getElementById("game");
 
+    iframe.onload = () => {
+      try {
+        const win = iframe.contentWindow;
+
+        // 🔒 Blokkeer redirect via top.*
+        if (win && win.top !== window) {
+          Object.defineProperty(win, 'top', {
+            get() {
+              if (typeof hrn !== "undefined") {
+                hrn.notifications.show("Redirect blocked!", "info", "2500");
+              }
+              return new Proxy(window, {
+                get(target, prop) {
+                  if (typeof hrn !== "undefined") {
+                    hrn.notifications.show("Redirect blocked!", "info", "2500");
+                  }
+                  return typeof target[prop] === 'function' ? () => {} : null;
+                },
+                set() {
+                  if (typeof hrn !== "undefined") {
+                    hrn.notifications.show("Redirect blocked!", "info", "2500");
+                  }
+                  return true;
+                }
+              });
+            }
+          });
+        }
+
+        // 🎮 Injecteer FPS-meter
+        const doc = win.document;
+        const fpsBox = doc.createElement("div");
+        fpsBox.style.cssText = `
+          position:fixed;top:8px;left:8px;background:rgba(0,0,0,0.6);
+          color:#0f0;font:14px monospace;padding:4px 8px;z-index:9999;
+          pointer-events:none;user-select:none;border-radius:4px;
+        `;
+        fpsBox.textContent = "FPS: --";
+        doc.body.appendChild(fpsBox);
+
+        let lastTime = performance.now(), frames = 0;
+        function updateFPS() {
+          const now = performance.now();
+          frames++;
+          if (now - lastTime >= 1000) {
+            fpsBox.textContent = "FPS: " + frames;
+            frames = 0;
+            lastTime = now;
+          }
+          win.requestAnimationFrame(updateFPS);
+        }
+        win.requestAnimationFrame(updateFPS);
+      } catch (e) {
+        console.warn("FPS meter of redirect blocker mislukt:", e);
+      }
+    };
   </script>
 </body>
 </html>
