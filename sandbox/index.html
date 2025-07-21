@@ -1,0 +1,24 @@
+<!DOCTYPE html>
+<html>
+<head><title>Redirect blocker iframe</title></head>
+<body style="margin:0">
+<iframe id="gameFrame" src="./game.html" style="width:100vw; height:100vh;" sandbox="allow-scripts"></iframe>
+
+<script>
+  const iframe = document.getElementById('gameFrame');
+
+  // Prevent iframe navigations (sandbox zonder allow-top-navigation)
+  iframe.addEventListener('load', () => {
+    // iframe geladen, scripts binnenin kunnen niet top-level navigeren
+    // alleen detecteren als iframe zelf van URL verandert:
+    let lastSrc = iframe.src;
+    setInterval(() => {
+      if(iframe.src !== lastSrc) {
+        alert('Redirect blocked!');
+        iframe.src = lastSrc; // revert
+      }
+    }, 500);
+  });
+</script>
+</body>
+</html>
