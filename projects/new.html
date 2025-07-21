@@ -1,16 +1,27 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
   <meta charset="UTF-8">
-  <title>Veilige Game Embed</title>
+  <title>Veilige Game</title>
   <script src="/js/hrn-notifications.min.js"></script>
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
-      background: black;
+      overflow: hidden;
+      background-color: black;
     }
+
+    #game-container {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100vw;
+      height: 100vh;
+      z-index: 0;
+    }
+
     iframe {
       width: 100%;
       height: 100%;
@@ -23,19 +34,17 @@
   <div id="game-container"></div>
 
   <script>
-    // De URL van je spel
     const game = {
       link: "https://hyperrushnet.github.io/action-games/bacon-may-die/"
     };
 
-    // Creëer sandboxed iframe ZONDER redirect-permissies
     const iframe = document.createElement("iframe");
     iframe.src = game.link;
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin"); // geen top-navigation!
+    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
     iframe.setAttribute("allowfullscreen", "true");
     document.getElementById("game-container").appendChild(iframe);
 
-    // Blokkeer alle pogingen tot window.open
+    // Blokkeer window.open wereldwijd
     const originalOpen = window.open;
     window.open = function (url, target, features) {
       if (window.hrn?.notifications) {
@@ -44,7 +53,7 @@
       return null;
     };
 
-    // Blokkeer alle pogingen tot window.location-verandering in parent
+    // Blokkeer window.location (extern redirect)
     Object.defineProperty(window, 'location', {
       configurable: false,
       enumerable: true,
@@ -56,24 +65,22 @@
       }
     });
 
-    // Extra beveiliging: observer die navigatiepogingen binnen iframe detecteert
+    // Probeer ook binnen iframe redirect via open/location te blokkeren (alleen same-origin)
     iframe.addEventListener("load", () => {
       try {
-        const iframeWin = iframe.contentWindow;
-
-        // Override binnen iframe als same-origin
-        if (iframeWin && iframeWin !== window) {
-          iframeWin.open = function () {
+        const frameWin = iframe.contentWindow;
+        if (frameWin && frameWin !== window) {
+          frameWin.open = function () {
             if (window.hrn?.notifications) {
               hrn.notifications.show("Redirect blocked!", "info", "2500");
             }
             return null;
           };
 
-          Object.defineProperty(iframeWin, 'location', {
+          Object.defineProperty(frameWin, 'location', {
             configurable: false,
             enumerable: true,
-            get: () => iframeWin.location,
+            get: () => frameWin.location,
             set: () => {
               if (window.hrn?.notifications) {
                 hrn.notifications.show("Redirect blocked!", "info", "2500");
@@ -82,7 +89,7 @@
           });
         }
       } catch (e) {
-        // Cross-origin iframe: geen toegang, maar sandbox voorkomt redirect sowieso
+        // Cross-origin? Geen toegang, maar sandbox dekt het.
       }
     });
   </script>
