@@ -33,17 +33,16 @@
       display: block;
     }
   </style>
-  <!-- Strenge CSP: voorkomt navigatie buiten iframe -->
   <meta http-equiv="Content-Security-Policy"
     content="
       default-src 'self';
-      frame-ancestors 'none';
       script-src 'self';
       style-src 'self' 'unsafe-inline';
       img-src 'self' data:;
       connect-src 'self';
       form-action 'self';
       base-uri 'self';
+      frame-ancestors 'none';
     "
   />
 </head>
@@ -51,12 +50,6 @@
   <div id="wrapper">Loading...</div>
 
   <script>
-    if (!window.requestAnimationFrame) {
-      window.requestAnimationFrame = cb => setTimeout(cb, 16);
-    }
-    if (!window.performance) window.performance = {};
-    if (!performance.now) performance.now = () => Date.now();
-
     function getQueryParam(name) {
       const match = new RegExp('[?&]' + name + '=([^&]*)').exec(location.search);
       return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
@@ -87,7 +80,8 @@
 
           document.title = `${game.name} - HyperRush`;
 
-          if (typeof game.link !== 'string' || !game.link.startsWith('/') || game.link.includes('..')) {
+          // Betere validatie: alleen absolute root-URL's, geen "..", geen externe URL's
+          if (typeof game.link !== 'string' || !/^\/[a-zA-Z0-9\-_/]+$/.test(game.link)) {
             wrapper.innerHTML = '⚠️ Invalid game link.';
             document.title = 'Invalid game - HyperRush';
             return;
@@ -95,9 +89,8 @@
 
           const iframe = document.createElement('iframe');
 
-          // Strenge sandbox: geen allow-popups, geen allow-top-navigation
+          // Zeer strikte sandbox: alleen scripts en same-origin (maar geen top-navigatie of popups)
           iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-
           iframe.src = game.link;
           iframe.width = '100%';
           iframe.height = '100%';
@@ -107,15 +100,7 @@
           wrapper.innerHTML = '';
           wrapper.appendChild(iframe);
 
-          // Blokkeer navigatie in top venster via beforeunload
-          window.addEventListener('beforeunload', e => {
-            if (document.activeElement === iframe) {
-              e.preventDefault();
-              e.returnValue = '';
-            }
-          });
-
-          // Blokkeer window.open met target _top, _parent, _self
+          // Blokkeer window.open in de hoofd pagina voor top/self/parent targets
           const originalOpen = window.open;
           window.open = function(url, target, features) {
             if (['_top', '_parent', '_self'].includes(target)) {
@@ -124,6 +109,15 @@
             }
             return originalOpen.call(window, url, target, features);
           };
+
+          // Extra: luister naar postMessages van iframe om clicks/navigaties te blokkeren
+          window.addEventListener('message', e => {
+            if (e.source === iframe.contentWindow) {
+              if (e.data === 'navigateAttemptBlocked') {
+                console.warn('Navigatiepoging geblokkeerd vanuit iframe');
+              }
+            }
+          });
 
           // FPS meter injectie
           iframe.onload = () => {
