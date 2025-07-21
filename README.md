@@ -1,4 +1,4 @@
-# The HyperRush Network
+# The HyperRush Network 
 
 Play instantly. No hassle. Just games.
 
