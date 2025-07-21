@@ -1,25 +1,65 @@
-/* Reset & basis */
-*, *::before, *::after {
-  box-sizing: border-box;
-  margin: 0;
-  padding: 0;
-  border: 0;
-  font: inherit;
+/* ===== Klassieke stevige CSS reset + HTML5 fixes ===== */
+html, body, div, span, applet, object, iframe,
+h1, h2, h3, h4, h5, h6, p, blockquote, pre,
+a, abbr, acronym, address, big, cite, code,
+del, dfn, em, img, ins, kbd, q, s, samp,
+small, strike, strong, sub, sup, tt, var,
+b, u, i, center,
+dl, dt, dd, ol, ul, li,
+fieldset, form, label, legend,
+table, caption, tbody, tfoot, thead, tr, th, td,
+article, aside, canvas, details, embed,
+figure, figcaption, footer, header, hgroup,
+menu, nav, output, ruby, section, summary,
+time, mark, audio, video {
+  margin: 0; padding: 0; border: 0;
+  font-size: 100%; font: inherit;
   vertical-align: baseline;
-  background: none;
+  background: transparent;
+  box-sizing: border-box;
 }
 
-html, body {
-  height: 100%;
+/* HTML5 display-role reset for older browsers */
+article, aside, details, figcaption, figure,
+footer, header, hgroup, menu, nav, section {
+  display: block;
+}
+
+body {
+  line-height: 1;
   font-family: Arial, sans-serif;
   background-color: #08021c;
   overflow-x: hidden;
+  height: 100%;
 }
 
-body.lock-scroll {
-  overflow: hidden;
+ol, ul {
+  list-style: none;
 }
 
+blockquote, q {
+  quotes: none;
+}
+
+blockquote::before, blockquote::after,
+q::before, q::after {
+  content: ''; content: none;
+}
+
+table {
+  border-collapse: collapse;
+  border-spacing: 0;
+}
+
+/* Variabelen */
+:root {
+  --sidebar-width: 240px;
+  --sidebar-width-desktop: 220px;
+  --gap: 10px;
+  --min-card-width: 160px;
+}
+
+/* App wrapper overlay */
 #appWrapper {
   position: relative;
 }
@@ -27,10 +67,8 @@ body.lock-scroll {
 #appWrapper::after {
   content: '';
   position: fixed;
-  left: 0;
-  top: 0;
-  width: 100vw;
-  height: 100vh;
+  left: 0; top: 0;
+  width: 100vw; height: 100vh;
   background: rgba(0, 0, 0, 0.6);
   backdrop-filter: blur(4px);
   -webkit-backdrop-filter: blur(4px);
@@ -51,18 +89,10 @@ body.lock-scroll {
   }
 }
 
-:root {
-  --sidebar-width: 240px;
-  --sidebar-width-desktop: 220px;
-  --gap: 10px;
-  --min-card-width: 160px;
-}
-
 /* Sidebar */
 #sidebar {
   position: fixed;
-  top: 0;
-  left: 0;
+  top: 0; left: 0;
   height: 100vh;
   width: var(--sidebar-width);
   background: #0c032b;
@@ -201,29 +231,27 @@ body.lock-scroll {
 /* Game kaarten container */
 #gameCardsContainer {
   display: grid;
-  row-gap: var(--gap);
-  column-gap: var(--gap);
+  grid-template-columns: repeat(auto-fit, minmax(var(--min-card-width), 1fr));
+  gap: var(--gap);
   justify-content: start;
   width: 100%;
   transition: all 0.3s ease;
-  grid-template-columns: repeat(auto-fit, minmax(var(--min-card-width), 1fr));
 }
 
 /* Individuele gamekaart */
 .game-card {
-  position: relative;
   background: white;
   border-radius: 0.5rem;
   box-shadow: 0 2px 4px rgba(0,0,0,0.05);
-  border: none;
-  user-select: none;
   overflow: hidden;
-  text-decoration: none;
-  transition: transform 0.3s ease, width 0.3s ease;
-  color: inherit;
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  text-decoration: none;
+  color: inherit;
+  user-select: none;
+  border: none;
+  transition: transform 0.3s ease;
 }
 
 .game-card:hover {
@@ -245,9 +273,7 @@ body.lock-scroll {
 /* Fade effect onderin gamekaart */
 .game-fade {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   height: 50%;
   background: linear-gradient(to top, rgba(0, 0, 0, 0.65), transparent);
   pointer-events: none;
@@ -259,9 +285,7 @@ body.lock-scroll {
 /* Titel onderin gamekaart */
 .game-title-overlay {
   position: absolute;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  bottom: 0; left: 0; right: 0;
   padding: 6px 8px;
   font-size: 1rem;
   text-align: center;
