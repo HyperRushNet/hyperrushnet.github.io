@@ -1,49 +1,56 @@
+
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-  <title>Game Loader</title>
+  <title>Loading Game...</title>
   <style>
     html, body { margin: 0; height: 100%; overflow: hidden; }
-    iframe { border: 0; width: 100%; height: 100%; }
+    iframe { width: 100%; height: 100%; border: none; }
   </style>
 </head>
 <body>
 <script>
-  const gameNr = new URLSearchParams(location.search).get("nr");
-  const blocker = `/*! RedirectBlocker v1.0 | MIT License */(()=>{const a=b=>alert("🔒 Redirect geblokkeerd: "+b),c=window.open;window.open=function(b,d,...e){return d&&(d.includes("_top")||d.includes("_parent"))?(a("window.open → "+d),null):c.apply(this,[b,d,...e])},location.assign=function(b){a("location.assign")},location.replace=function(b){a("location.replace")};const d=(b,c)=>{try{const d=Object.getOwnPropertyDescriptor(b,"location");(!d||d.configurable)&&Object.defineProperty(b,"location",{configurable:!0,enumerable:!0,get:()=>window.location,set:d=>{a(c+".location = "+d)}})}catch(e){}};d(window,"window"),d(top,"top"),d(parent,"parent"),document.addEventListener("click",b=>{let c=b.target;for(;c&&c!==document;){if("A"===c.tagName&&c.href){a("<a href>"),b.preventDefault();break}c=c.parentNode}},!0)})();`;
+(async () => {
+  const params = new URLSearchParams(location.search);
+  const nr = parseInt(params.get("nr"));
+  if (!nr) return document.body.innerText = "❌ Geen geldig ?nr= meegegeven.";
 
-  if (!gameNr) {
-    document.body.innerHTML = "<h1 style='color:white;background:black;text-align:center;padding:2em'>Geen ?nr= opgegeven</h1>";
-    throw new Error("Geen nummer");
+  let games = [];
+  try {
+    const res = await fetch("/json/games.json");
+    games = await res.json();
+  } catch (e) {
+    return document.body.innerText = "❌ Kan games.json niet laden.";
   }
 
-  fetch("/json/games.json").then(r => r.json()).then(games => {
-    const game = games.find(g => g.number == gameNr);
-    if (!game) {
-      document.body.innerHTML = "<h1 style='color:white;background:black;text-align:center;padding:2em'>Game niet gevonden</h1>";
-      return;
+  const game = games.find(g => g.number === nr);
+  if (!game) return document.body.innerText = "❌ Game niet gevonden.";
+
+  document.title = `${game.name} - HyperRush`;
+
+  const iframe = document.createElement("iframe");
+  iframe.src = game.link;
+  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  document.body.appendChild(iframe);
+
+  const blockerScript = `/*! RedirectBlocker v1.1 | MIT */(()=>{const a=b=>window.hrn?.notifications?.show("Redirect blocked!","info","3000"),c=window.open;window.open=function(b,d,...e){return d&&(d.includes("_top")||d.includes("_parent"))?(a("window.open → "+d),null):c.apply(this,[b,d,...e])},location.assign=function(b){a("location.assign")},location.replace=function(b){a("location.replace")};const d=(b,c)=>{try{const d=Object.getOwnPropertyDescriptor(b,"location");(!d||d.configurable)&&Object.defineProperty(b,"location",{configurable:!0,enumerable:!0,get:()=>window.location,set:d=>{a(c+".location = "+d)}})}catch(e){}};d(window,"window"),d(top,"top"),d(parent,"parent"),document.addEventListener("click",b=>{let c=b.target;for(;c&&c!==document;){if("A"===c.tagName&&c.href){a("<a href>"),b.preventDefault();break}c=c.parentNode}},!0)})();`;
+
+  iframe.onload = () => {
+    try {
+      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      const notifyScript = doc.createElement("script");
+      notifyScript.src = "/js/hrn-notifications.min.js";
+      notifyScript.onload = () => {
+        const blocker = doc.createElement("script");
+        blocker.textContent = blockerScript;
+        doc.head.appendChild(blocker);
+      };
+      doc.head.appendChild(notifyScript);
+    } catch (e) {
+      console.warn("Injectie mislukt:", e);
     }
-
-    const iframe = document.createElement("iframe");
-    iframe.id = "gameframe";
-    iframe.src = game.link;
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
-    document.body.appendChild(iframe);
-
-    iframe.addEventListener("load", () => {
-      try {
-        const doc = iframe.contentDocument || iframe.contentWindow.document;
-        const script = doc.createElement("script");
-        script.textContent = blocker;
-        doc.head.appendChild(script);
-      } catch (e) {
-        console.warn("Injectie mislukt:", e);
-      }
-    });
-  }).catch(e => {
-    document.body.innerHTML = "<h1 style='color:white;background:black;text-align:center;padding:2em'>Fout bij laden JSON</h1>";
-    console.error(e);
-  });
+  };
+})();
 </script>
 </body>
 </html>
