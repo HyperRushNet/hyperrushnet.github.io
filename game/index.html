@@ -4,7 +4,6 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Loading Game..</title>
-  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   <style>
     html, body {
       margin: 0;
@@ -29,6 +28,7 @@
     }
   </style>
   <script src="/js/faviconchanger.js" async></script>
+  <script src="/js/hrn-notifications.min.js" async></script>
 </head>
 <body>
 
@@ -63,13 +63,25 @@
 
     document.title = `${game.name} - The HyperRush Network`;
 
-    // blokkeer iframe escape
-    const linkHost = new URL(game.link, location.origin).host;
-    if (linkHost !== location.host) {
-      console.warn('Externe game gelinkt. Kan worden geblokkeerd door sandbox.');
-    }
+    // Externe redirects kunnen niet werken → sandbox blokkeert
+    const url = new URL(game.link, location.origin);
+    const isExternal = url.host !== location.host;
 
     iframe.src = game.link;
+
+    // Detecteer redirect poging
+    setTimeout(() => {
+      try {
+        const frameLoc = iframe.contentWindow.location.href;
+        if (isExternal && frameLoc !== url.href) {
+          hrn?.notifications?.show?.("Redirect blocked!", "info", "2500");
+        }
+      } catch (err) {
+        // Cross-origin → redirect geblokkeerd
+        hrn?.notifications?.show?.("Redirect blocked!", "info", "2500");
+      }
+    }, 1500);
+    
   } catch (e) {
     console.error(e);
     iframe.remove();
