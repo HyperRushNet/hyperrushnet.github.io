@@ -1,4 +1,6 @@
-# The HyperRush Network v2.1
+# The HyperRush Network v2.
+![Screenshot van de game](https://placehold.co/600x400?text=Game+Screenshot)
+
 
 Play instantly. No hassle. Just games.
 
