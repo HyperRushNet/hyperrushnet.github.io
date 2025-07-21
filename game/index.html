@@ -54,7 +54,7 @@
       performance.now = function() { return Date.now(); };
     }
 
-    // Helper: Query param
+    // Query param helper
     function getQueryParam(name) {
       var match = RegExp('[?&]' + name + '=([^&]*)').exec(location.search);
       return match ? decodeURIComponent(match[1].replace(/\+/g, ' ')) : null;
@@ -78,34 +78,43 @@
             return res.json();
           })
           .then(games => {
-            // Find game by number
             var game = games.find(g => g.number === nr);
             if (!game) {
               wrapper.innerHTML = '⚠️ No game found with number ' + nr + '.';
               document.title = 'Game not found - HyperRush';
               return;
             }
-            // Set title
             document.title = game.name + ' - HyperRush';
 
-            // Sanity check link (must start with / and no ..)
+            // Validate link
             if (typeof game.link !== 'string' || !game.link.startsWith('/') || game.link.includes('..')) {
               wrapper.innerHTML = '⚠️ Invalid game link.';
               document.title = 'Invalid game - HyperRush';
               return;
             }
 
-            // Create iframe and add
             var iframe = document.createElement('iframe');
             iframe.src = game.link;
             iframe.width = "100%";
             iframe.height = "100%";
             iframe.setAttribute("allowfullscreen", "true");
             iframe.setAttribute("loading", "eager");
+            // Sandbox with allow-scripts and allow-same-origin but disallow top-navigation
+            iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+
             wrapper.innerHTML = '';
             wrapper.appendChild(iframe);
 
-            // Inject FPS meter into iframe
+            // Prevent iframe from redirecting parent (top) window
+            window.addEventListener('message', e => {
+              // Optional: You can check e.origin if needed
+              if (e.data === 'redirectParent') {
+                // Ignore or prevent
+                console.warn('Blocked attempt to redirect parent from iframe.');
+              }
+            });
+
+            // Inject FPS meter
             iframe.onload = function() {
               try {
                 var doc = iframe.contentDocument || iframe.contentWindow.document;
@@ -121,7 +130,6 @@
                 doc.body.appendChild(fpsBox);
 
                 var lastTime = performance.now(), frames = 0;
-
                 function updateFPS() {
                   var now = performance.now();
                   frames++;
@@ -144,6 +152,16 @@
           });
       }
     }
+
+    // Extra: Prevent iframe attempts to navigate top-level window (fallback)
+    var _open = window.open;
+    window.open = function(url, target, features) {
+      if (target === '_top' || target === '_parent' || target === '_self') {
+        console.warn('Blocked window.open targeting top/parent/self to prevent redirects.');
+        return null;
+      }
+      return _open.call(window, url, target, features);
+    };
   </script>
 </body>
 </html>
