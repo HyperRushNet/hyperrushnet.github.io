@@ -1,73 +1,80 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <title>Veilige Game Embed</title>
-  <style>
-    html, body {
-      margin: 0;
-      height: 100%;
-      overflow: hidden;
-      background: black;
-    }
-
-    #game-container {
-      position: fixed;
-      top: 0;
-      left: 0;
-      width: 100vw;
-      height: 100vh;
-      z-index: 0;
-    }
-
-    iframe {
-      width: 100%;
-      height: 100%;
-      border: none;
-      display: block;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Iframe met redirect blokker</title>
+<style>
+  html, body {
+    margin:0; padding:0; height:100%; overflow:hidden;
+  }
+  iframe {
+    position:fixed; top:0; left:0; width:100vw; height:100vh; border:none;
+  }
+</style>
 </head>
 <body>
-  <div id="game-container"></div>
 
-  <script>
-    const iframe = document.createElement("iframe");
-    iframe.src = "https://hyperrushnet.github.io/action-games/bacon-may-die/";
-    iframe.setAttribute("sandbox", "allow-scripts allow-same-origin"); // top-navigation geblokkeerd
-    iframe.setAttribute("allowfullscreen", "true");
+<iframe id="gameFrame" src="https://hyperrushnet.github.io/action-games/bacon-may-die/"></iframe>
 
-    document.getElementById("game-container").appendChild(iframe);
+<script>
+  const iframe = document.getElementById('gameFrame');
+  const iframeWindow = iframe.contentWindow;
 
-    // Detecteer redirectpogingen via window blur (soms veroorzaakt door poging tot top redirect)
-    let lastFocus = Date.now();
-    window.onblur = () => {
-      setTimeout(() => {
-        if (document.activeElement === document.body && Date.now() - lastFocus < 1000) {
-          alert("Redirect blocked!");
-        }
-      }, 200);
-    };
+  // Zet sandbox aan als je wilt, of laat weg als je volledige controle wilt
+  // iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin'); // optioneel
 
-    // Detecteer DOM-wijzigingen aan iframe (sommige engines proberen iframe te vervangen bij redirect)
-    const observer = new MutationObserver((mutations) => {
-      for (const m of mutations) {
-        for (const n of m.removedNodes) {
-          if (n === iframe) {
-            alert("Redirect attempt blocked!");
-          }
-        }
-      }
+  // Override navigatie functies in iframe om redirects te blokkeren
+  function preventRedirect(win) {
+    // Overschrijven van top navigatie
+    Object.defineProperty(win, 'top', {
+      get() { return win; } // voorkomen dat iframe naar parent gaat
     });
 
-    observer.observe(document.getElementById("game-container"), { childList: true });
+    // Overschrijven van location assign, replace, href set
+    const blockMsg = "Redirect blocked!";
+    ['assign','replace'].forEach(fn => {
+      const original = win.location[fn];
+      win.location[fn] = function(url) {
+        alert(blockMsg);
+        console.log(blockMsg, url);
+      };
+    });
 
-    // Prevent window.open global
-    const originalOpen = window.open;
-    window.open = function () {
-      alert("Redirect blocked!");
+    // Proxies om href set te onderscheppen
+    Object.defineProperty(win.location, 'href', {
+      set(url) {
+        alert(blockMsg);
+        console.log(blockMsg, url);
+      },
+      get() {
+        return win.location.toString();
+      },
+      configurable: true
+    });
+
+    // Overschrijven van window.open
+    win.open = function() {
+      alert(blockMsg);
+      console.log(blockMsg, arguments);
       return null;
     };
-  </script>
+
+    // Overschrijven van navigation via form submit (als mogelijk)
+    // Kan complex zijn, dus niet standaard hier
+
+  }
+
+  // Wacht tot iframe geladen is en pas preventRedirect toe
+  iframe.addEventListener('load', () => {
+    try {
+      preventRedirect(iframe.contentWindow);
+    } catch(e) {
+      console.warn('Kan iframe window niet aanpassen:', e);
+    }
+  });
+
+</script>
+
 </body>
 </html>
