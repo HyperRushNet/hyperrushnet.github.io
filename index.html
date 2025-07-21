@@ -1,30 +1,55 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
+  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate" />
+  <meta http-equiv="Pragma" content="no-cache" />
+  <meta http-equiv="Expires" content="0" />
 
-  <title>The HyperRush Network</title>
-  <link rel="stylesheet" href="/css/light.css" />
+  <title>The HyperRush Network | Free Online Games</title>
+  <meta name="description" content="The HyperRush Network offers a wide collection of free online games. Play instantly and safely without registration." />
+  <meta name="keywords" content="online games, free games, HyperRush Network, browser games, arcade, multiplayer" />
+  <meta name="author" content="The HyperRush Network" />
+  <meta name="robots" content="index, follow" />
+  <link rel="canonical" href="https://hyperrushnet.github.io/" />
+
+  <link rel="icon" href="/favicon.ico" />
+  <link rel="apple-touch-icon" sizes="180x180" href="/apple-touch-icon.png" />
+
   <link rel="stylesheet" href="/css/reset.css" />
+  <link rel="stylesheet" href="/css/light.css" />
+
   <script src="/js/faviconchanger.js" defer></script>
   <script src="/js/main.js" defer></script>
+
+  <script type="application/ld+json">
+  {
+    "@context": "https://schema.org",
+    "@type": "Organization",
+    "name": "The HyperRush Network",
+    "url": "https://hyperrushnet.github.io/",
+    "contactPoint": {
+      "@type": "ContactPoint",
+      "email": "hyperrushnetwork@gmail.com",
+      "contactType": "Customer Service",
+      "availableLanguage": ["English"]
+    }
+  }
+  </script>
 </head>
 <body>
   <div id="appWrapper">
-    <button id="menuToggle" aria-label="Open menu">
+    <button id="menuToggle" aria-label="Open menu" aria-expanded="false" aria-controls="sidebar">
       <svg viewBox="0 0 24 24" width="28" height="28" fill="none" aria-hidden="true" focusable="false">
         <path d="M4 6h16M4 12h16M4 18h16" stroke="white" stroke-width="2" stroke-linecap="round"/>
       </svg>
     </button>
 
-    <div id="sidebar" aria-label="Sidebar">
+    <aside id="sidebar" aria-label="Sidebar" role="complementary" hidden>
       <div id="searchWrapper">
-        <input id="searchInput" type="text" placeholder="Zoek spel..." aria-label="Zoek spel" />
-        <button id="searchBtn" aria-label="Zoek">
+        <input id="searchInput" type="search" placeholder="Search games..." aria-label="Search games" autocomplete="off" />
+        <button id="searchBtn" aria-label="Search">
           <svg viewBox="0 0 24 24" aria-hidden="true" focusable="false">
             <path d="M15.5 14h-.79l-.28-.27A6.471 6.471 0 0016 9.5
               6.5 6.5 0 109.5 16a6.471 6.471 0 004.23-1.57l.27.28v.79
@@ -32,8 +57,8 @@
           </svg>
         </button>
       </div>
-      <nav id="categoryList" aria-label="Categorieën"></nav>
-    </div>
+      <nav id="categoryList" aria-label="Categories"></nav>
+    </aside>
 
     <main id="content" role="main">
       <div id="gameCardsContainer" aria-live="polite"></div>
