@@ -1,114 +1,48 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
-  <meta charset="utf-8">
-  <meta http-equiv="X-UA-Compatible" content="IE=edge">
-  <title>HyperRushNet Game Loader</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta charset="utf-8" />
+  <title>Loading... - HyperRush</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+
+  <!-- STIJL -->
   <style>
     html, body {
-      margin: 0;
-      padding: 0;
+      margin: 0; padding: 0;
       background: #000;
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       overflow: hidden;
+      color: white;
+      font-family: sans-serif;
     }
-
     #wrapper {
       position: absolute;
-      top: 0; left: 0; right: 0; bottom: 0;
-      width: 100%;
-      height: 100%;
+      inset: 0;
       background: #000;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      text-align: center;
+      padding: 1rem;
+      box-sizing: border-box;
     }
-
     iframe {
       position: absolute;
       top: 0; left: 0;
-      width: 100%;
-      height: 100%;
+      width: 100%; height: 100%;
       border: none;
       display: block;
     }
   </style>
+
+  <!-- CSP die extern script toestaat -->
+  <meta http-equiv="Content-Security-Policy"
+        content="default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; connect-src *; img-src * data:; frame-ancestors 'none';" />
 </head>
 <body>
-  <div id="wrapper"></div>
+  <div id="wrapper">Loading...</div>
 
-  <script>
-    // Basis polyfills
-    if (!window.requestAnimationFrame) {
-      window.requestAnimationFrame = function(cb) {
-        return setTimeout(cb, 16);
-      };
-    }
-    if (!window.performance) window.performance = {};
-    if (!performance.now) {
-      performance.now = function() {
-        return Date.now();
-      };
-    }
-
-    // Query helper
-    function getQueryParam(name) {
-      var match = RegExp('[?&]' + name + '=([^&]*)').exec(location.search);
-      return match && decodeURIComponent(match[1].replace(/\+/g, ' '));
-    }
-
-    var game = getQueryParam("game");
-    var wrapper = document.getElementById("wrapper");
-
-    if (!game) {
-      wrapper.innerHTML = (
-        '<div style="color:white;font-family:sans-serif;text-align:center;padding:2rem">' +
-        '⚠️ Geen game opgegeven.<br><br>' +
-        'Gebruik bijv.: <code>?game=polytrack</code>' +
-        '</div>'
-      );
-    } else {
-      var iframe = document.createElement("iframe");
-      iframe.src = "/" + game;
-      iframe.width = "100%";
-      iframe.height = "100%";
-      iframe.setAttribute("allowfullscreen", "true");
-      iframe.setAttribute("loading", "eager");
-      // iframe.setAttribute("sandbox", "allow-scripts allow-same-origin"); // voeg dit toe als nodig
-      wrapper.appendChild(iframe);
-
-      // ✅ FPS-meter injecteren? Voeg dit toe:
-      iframe.onload = function() {
-        try {
-          var doc = iframe.contentDocument || iframe.contentWindow.document;
-          var win = iframe.contentWindow;
-
-          var fpsBox = doc.createElement('div');
-          fpsBox.style.cssText = `
-            position:fixed;top:8px;left:8px;background:rgba(0,0,0,0.6);
-            color:#0f0;font:14px monospace;padding:4px 8px;z-index:9999;
-            pointer-events:none;user-select:none;border-radius:4px;
-          `;
-          fpsBox.textContent = 'FPS: --';
-          doc.body.appendChild(fpsBox);
-
-          var lastTime = performance.now(), frames = 0;
-
-          function updateFPS() {
-            var now = performance.now();
-            frames++;
-            if (now - lastTime >= 1000) {
-              fpsBox.textContent = 'FPS: ' + frames;
-              frames = 0;
-              lastTime = now;
-            }
-            win.requestAnimationFrame(updateFPS);
-          }
-          win.requestAnimationFrame(updateFPS);
-        } catch (e) {
-          console.warn("FPS-meter kon niet worden geïnjecteerd:", e);
-        }
-      };
-    }
-  </script>
+  <!-- Extern script, zie hieronder -->
+  <script src="./loader.js"></script>
 </body>
 </html>
