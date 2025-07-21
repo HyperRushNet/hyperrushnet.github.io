@@ -3,77 +3,105 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Iframe met redirect blokker</title>
+<title>Iframe redirect blokker</title>
 <style>
   html, body {
-    margin:0; padding:0; height:100%; overflow:hidden;
+    margin: 0; padding: 0; height: 100%; overflow: hidden;
+    background: #111;
   }
   iframe {
-    position:fixed; top:0; left:0; width:100vw; height:100vh; border:none;
+    position: fixed;
+    top: 0; left: 0;
+    width: 100vw; height: 100vh;
+    border: none;
   }
 </style>
 </head>
 <body>
 
-<iframe id="gameFrame" src="https://hyperrushnet.github.io/action-games/bacon-may-die/"></iframe>
+<iframe id="gameFrame" sandbox="allow-scripts allow-same-origin" src="https://hyperrushnet.github.io/action-games/bacon-may-die/"></iframe>
 
 <script>
   const iframe = document.getElementById('gameFrame');
-  const iframeWindow = iframe.contentWindow;
 
-  // Zet sandbox aan als je wilt, of laat weg als je volledige controle wilt
-  // iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin'); // optioneel
-
-  // Override navigatie functies in iframe om redirects te blokkeren
-  function preventRedirect(win) {
-    // Overschrijven van top navigatie
-    Object.defineProperty(win, 'top', {
-      get() { return win; } // voorkomen dat iframe naar parent gaat
-    });
-
-    // Overschrijven van location assign, replace, href set
-    const blockMsg = "Redirect blocked!";
-    ['assign','replace'].forEach(fn => {
-      const original = win.location[fn];
-      win.location[fn] = function(url) {
-        alert(blockMsg);
-        console.log(blockMsg, url);
-      };
-    });
-
-    // Proxies om href set te onderscheppen
-    Object.defineProperty(win.location, 'href', {
-      set(url) {
-        alert(blockMsg);
-        console.log(blockMsg, url);
-      },
-      get() {
-        return win.location.toString();
-      },
-      configurable: true
-    });
-
-    // Overschrijven van window.open
-    win.open = function() {
-      alert(blockMsg);
-      console.log(blockMsg, arguments);
-      return null;
-    };
-
-    // Overschrijven van navigation via form submit (als mogelijk)
-    // Kan complex zijn, dus niet standaard hier
-
-  }
-
-  // Wacht tot iframe geladen is en pas preventRedirect toe
-  iframe.addEventListener('load', () => {
-    try {
-      preventRedirect(iframe.contentWindow);
-    } catch(e) {
-      console.warn('Kan iframe window niet aanpassen:', e);
+  // 1. Sandbox voorkomt top-navigation, maar controleer zelf ook eventjes
+  window.addEventListener('message', e => {
+    // Check alleen berichten van onze iframe
+    if (e.source === iframe.contentWindow) {
+      if (e.data === 'redirect_attempt') {
+        alert('Redirect binnen iframe geblokkeerd!');
+        // Hier evt reset iframe of andere actie
+      }
     }
   });
 
+  // 2. In iframe injecteren we code via script tag (alleen als zelfde domein)
+  iframe.addEventListener('load', () => {
+    try {
+      const iw = iframe.contentWindow;
+      const idoc = iframe.contentDocument || iw.document;
+
+      // Controleer of we kunnen injecteren
+      if (!iw || !idoc) return;
+
+      // Injecteer script in iframe die redirect/loc changes detecteert
+      const script = idoc.createElement('script');
+      script.textContent = `
+        (function(){
+          const originalAssign = window.location.assign;
+          const originalReplace = window.location.replace;
+
+          function notifyRedirect() {
+            window.parent.postMessage('redirect_attempt', '*');
+            alert('Redirect geblokkeerd door parent!');
+          }
+
+          window.location.assign = function(url) {
+            notifyRedirect();
+            // blokkeren dus niet uitvoeren originalAssign
+          };
+
+          window.location.replace = function(url) {
+            notifyRedirect();
+          };
+
+          Object.defineProperty(window.location, 'href', {
+            set: function(url) {
+              notifyRedirect();
+            },
+            get: function() {
+              return window.location.toString();
+            }
+          });
+
+          // Ook history.pushState en replaceState onderscheppen (navigaties zonder reload)
+          const originalPushState = history.pushState;
+          history.pushState = function(state, title, url) {
+            notifyRedirect();
+          };
+          const originalReplaceState = history.replaceState;
+          history.replaceState = function(state, title, url) {
+            notifyRedirect();
+          };
+
+          // Blokkeer beforeunload en unload
+          window.addEventListener('beforeunload', function(e){
+            notifyRedirect();
+            e.preventDefault();
+            return false;
+          });
+
+          window.addEventListener('unload', function(e){
+            notifyRedirect();
+          });
+        })();
+      `;
+      idoc.head.appendChild(script);
+
+    } catch (err) {
+      console.warn('Kan iframe niet injecteren:', err);
+    }
+  });
 </script>
 
 </body>
