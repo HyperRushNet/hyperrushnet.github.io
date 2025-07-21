@@ -1,5 +1,5 @@
 ### MIT License
-&copy; 2024/2025 HyperRushNet
+&copy; 2024/2025 HyperRushNet 
 
 Permission is hereby granted, free of charge, to any person obtaining a copy  
 of this software and associated documentation files (the "Software"), to deal  
