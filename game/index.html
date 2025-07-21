@@ -4,19 +4,21 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Loading Game..</title>
+  <link rel="icon" href="/favicon.ico" type="image/x-icon" />
   <style>
     html, body {
       margin: 0;
       padding: 0;
       height: 100%;
       background: #000;
+      overflow: hidden;
     }
     iframe {
       width: 100%;
       height: 100%;
       border: none;
-      display: block;
       background: #111;
+      display: block;
     }
     #error {
       color: white;
@@ -26,49 +28,55 @@
       font-size: 1.5em;
     }
   </style>
-
+  <script src="/js/faviconchanger.js" async></script>
 </head>
-  <script src="/js/faviconchanger.js"></script>
 <body>
 
-<iframe id="gameFrame" loading="lazy"></iframe>
+<iframe id="gameFrame" loading="lazy" sandbox="allow-scripts allow-same-origin allow-pointer-lock allow-popups" referrerpolicy="no-referrer"></iframe>
 <div id="error" style="display: none;"></div>
 
 <script>
-  (async () => {
-    const params = new URLSearchParams(location.search);
-    const nr = params.get('nr');
-    const errorBox = document.getElementById('error');
-    const iframe = document.getElementById('gameFrame');
+(async () => {
+  const params = new URLSearchParams(location.search);
+  const nr = params.get('nr');
+  const errorBox = document.getElementById('error');
+  const iframe = document.getElementById('gameFrame');
 
-    if (!nr || isNaN(nr)) {
+  if (!nr || isNaN(nr)) {
+    iframe.remove();
+    errorBox.style.display = 'block';
+    errorBox.textContent = 'Geen geldig game-nummer opgegeven.';
+    return;
+  }
+
+  try {
+    const res = await fetch('/json/games.json', { cache: "no-store" });
+    const games = await res.json();
+    const game = games.find(g => String(g.number) === nr);
+
+    if (!game) {
       iframe.remove();
       errorBox.style.display = 'block';
-      errorBox.textContent = 'Geen geldig game-nummer opgegeven.';
+      errorBox.textContent = 'Game niet gevonden.';
       return;
     }
 
-    try {
-      const res = await fetch('/json/games.json');
-      const games = await res.json();
-      const game = games.find(g => String(g.number) === nr);
+    document.title = `${game.name} - The HyperRush Network`;
 
-      if (!game) {
-        iframe.remove();
-        errorBox.style.display = 'block';
-        errorBox.textContent = 'Game niet gevonden.';
-        return;
-      }
-
-      document.title = `${game.name} - The HyperRush Network`;
-      iframe.src = game.link;
-    } catch (e) {
-      console.error(e);
-      iframe.remove();
-      errorBox.style.display = 'block';
-      errorBox.textContent = 'Fout bij het laden van de game.';
+    // blokkeer iframe escape
+    const linkHost = new URL(game.link, location.origin).host;
+    if (linkHost !== location.host) {
+      console.warn('Externe game gelinkt. Kan worden geblokkeerd door sandbox.');
     }
-  })();
+
+    iframe.src = game.link;
+  } catch (e) {
+    console.error(e);
+    iframe.remove();
+    errorBox.style.display = 'block';
+    errorBox.textContent = 'Fout bij het laden van de game.';
+  }
+})();
 </script>
 
 </body>
