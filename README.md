@@ -1,5 +1,5 @@
 # The HyperRush Network v2.
-![Screenshot van de game](https://placehold.co/600x400?text=Game+Screenshot)
+![Screenshot van de game](https://hyperrushnet.github.io/icons/dark.png)
 
 
 Play instantly. No hassle. Just games.
