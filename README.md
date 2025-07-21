@@ -5,7 +5,7 @@ Play instantly. No hassle. Just games.
 ## What to expect
 - Varied selection: from action to puzzles.
 - Instant play: no downloads, no sign-up.
-- Regular updates: new games and features.
+- Regular updates: new games and features. 
 
 ## Get started
 Visit The HyperRush Network, pick a game, and start playing.
