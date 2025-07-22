@@ -1,0 +1,62 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Game Filter</title>
+  <style>
+    body { font-family: sans-serif; background: #111; color: #fff; margin: 0; padding: 1rem; }
+    .game { background: #222; padding: 1rem; margin: 1rem 0; border-radius: 8px; display: flex; gap: 1rem; align-items: center; }
+    .game img { width: 100px; border-radius: 4px; }
+    .game a { color: #0ff; text-decoration: none; font-size: 1.2rem; }
+    .device-info { color: #ccc; font-size: 0.9rem; }
+  </style>
+</head>
+<body>
+  <h1>Games die werken op jouw apparaat</h1>
+  <div id="games"></div>
+
+  <script>
+    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+    const isDesktop = window.innerWidth > 768 && !isTouchDevice;
+
+    fetch("https://hyperrushnet.github.io/json/games.json")
+      .then(res => res.json())
+      .then(games => {
+        const filtered = games.filter(game => {
+          if (!game.touchscreen) return true; // fallback als veld ontbreekt
+          const { required, worksOnTouchscreenPC } = game.touchscreen;
+
+          if (isTouchDevice) return true;
+          if (isDesktop && !isTouchDevice && !required) return true;
+          if (isDesktop && isTouchDevice && worksOnTouchscreenPC) return true;
+
+          return false;
+        });
+
+        const container = document.getElementById('games');
+        if (filtered.length === 0) {
+          container.innerHTML = "<p>Geen geschikte games gevonden voor dit apparaat.</p>";
+          return;
+        }
+
+        filtered.forEach(game => {
+          const div = document.createElement("div");
+          div.className = "game";
+          div.innerHTML = `
+            <img src="${game.img}" alt="${game.name}">
+            <div>
+              <a href="${game.link}">${game.name}</a>
+              <div class="device-info">Categorie: ${game.category}</div>
+            </div>
+          `;
+          container.appendChild(div);
+        });
+      })
+      .catch(err => {
+        document.getElementById('games').innerHTML = "<p>Fout bij laden van games.</p>";
+        console.error(err);
+      });
+  </script>
+</body>
+</html>
