@@ -251,18 +251,6 @@
          "pc-touch",
          "pc-no-touch"
       ]
-   },
-   {
-      "number":22,
-      "name":"Burrito Bison Revenge",
-      "category":"Casual",
-      "img":"/images/burrito-bison-revenge.avif",
-      "link":"/action-games/burrito-bison-revenge",
-      "platforms":[
-         "pc-touch",
-         "pc-no-touch",
-         "tablet",
-         "phone"
-      ]
    }
+
 ]
