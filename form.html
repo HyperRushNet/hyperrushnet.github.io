@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HRN Storage Form met Tailwind</title>
+<script src="https://cdn.tailwindcss.com"></script>
+<style>
+  body {
+    background: url('https://i.redd.it/vsprmxbhzaj81.png') no-repeat center center fixed;
+    background-size: cover;
+  }
+</style>
+</head>
+<body class="min-h-screen flex items-start justify-center p-6 bg-gray-50 bg-opacity-90">
+  <form class="bg-white bg-opacity-95 max-w-md w-full p-8 rounded-lg shadow-lg flex flex-col gap-6" onsubmit="return false;">
+    <h2 class="text-2xl font-semibold text-center text-gray-800">HRN Storage Form</h2>
+
+    <div class="flex flex-col gap-1">
+      <label for="key" class="font-medium text-gray-700">Sleutel (key) kiezen</label>
+      <input id="key" type="text" placeholder="Vul hier je sleutel in" autocomplete="off" required
+        class="rounded-md border border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none px-5 py-3 text-gray-900 text-lg font-normal" />
+    </div>
+
+    <div class="flex flex-col gap-1">
+      <label for="val" class="font-medium text-gray-700">Tekst invoer</label>
+      <textarea id="val" placeholder="Typ hier je tekst..." required
+        class="rounded-md border border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none px-5 py-3 text-gray-900 text-lg font-normal resize-y min-h-[120px]"></textarea>
+    </div>
+
+    <button id="saveBtn" type="button" class="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg px-6 py-3 transition">
+      Opslaan
+    </button>
+    <button id="loadBtn" type="button" class="rounded-full border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold text-lg px-6 py-3 transition">
+      Laden
+    </button>
+    <button id="removeBtn" type="button" class="rounded-full border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold text-lg px-6 py-3 transition">
+      Verwijderen
+    </button>
+    <button id="clearBtn" type="button" class="rounded-full border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold text-lg px-6 py-3 transition">
+      Alles wissen
+    </button>
+
+    <pre id="out" class="bg-gray-100 rounded-xl p-4 max-h-40 overflow-auto text-gray-900 font-mono whitespace-pre-wrap"></pre>
+  </form>
+
+<script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
+<script>
+  window.hrn = {
+    storage: {
+      p: 'hrn-',
+      btoa_utf8: s => btoa(unescape(encodeURIComponent(s))),
+      atob_utf8: s => decodeURIComponent(escape(atob(s))),
+      add(k, v) {
+        if (!k) return;
+        try {
+          localStorage.setItem(this.p + k, LZString.compressToUTF16(this.btoa_utf8(v)));
+        } catch {
+          alert('Opslaan mislukt');
+        }
+      },
+      get(k) {
+        if (!k) return null;
+        const c = localStorage.getItem(this.p + k);
+        if (!c) return null;
+        try {
+          return this.atob_utf8(LZString.decompressFromUTF16(c));
+        } catch {
+          return null;
+        }
+      },
+      remove(k) {
+        if (!k) return;
+        localStorage.removeItem(this.p + k);
+      },
+      clear() {
+        Object.keys(localStorage).forEach(k => k.startsWith(this.p) && localStorage.removeItem(k));
+      },
+      getall() {
+        const out = {};
+        Object.keys(localStorage).forEach(k => {
+          if (k.startsWith(this.p)) {
+            try {
+              out[k.slice(this.p.length)] = this.atob_utf8(LZString.decompressFromUTF16(localStorage.getItem(k)));
+            } catch {
+              out[k.slice(this.p.length)] = null;
+            }
+          }
+        });
+        return out;
+      }
+    }
+  };
+
+  const keyInput = document.getElementById('key');
+  const valInput = document.getElementById('val');
+  const out = document.getElementById('out');
+  const saveBtn = document.getElementById('saveBtn');
+  const loadBtn = document.getElementById('loadBtn');
+  const removeBtn = document.getElementById('removeBtn');
+  const clearBtn = document.getElementById('clearBtn');
+
+  saveBtn.onclick = () => {
+    const key = keyInput.value.trim();
+    const val = valInput.value;
+    if (!key) {
+      out.textContent = 'Vul een sleutel (key) in!';
+      return;
+    }
+    hrn.storage.add(key, val);
+    out.textContent = `Opgeslagen onder sleutel: ${key}`;
+  };
+
+  loadBtn.onclick = () => {
+    const key = keyInput.value.trim();
+    if (!key) {
+      out.textContent = 'Vul een sleutel (key) in!';
+      return;
+    }
+    const val = hrn.storage.get(key);
+    out.textContent = val === null ? 'Niet gevonden' : val;
+  };
+
+  removeBtn.onclick = () => {
+    const key = keyInput.value.trim();
+    if (!key) {
+      out.textContent = 'Vul een sleutel (key) in!';
+      return;
+    }
+    hrn.storage.remove(key);
+    out.textContent = `Sleutel "${key}" verwijderd`;
+  };
+
+  clearBtn.onclick = () => {
+    hrn.storage.clear();
+    out.textContent = 'Alle HRN keys gewist';
+  };
+</script>
+</body>
+</html>
