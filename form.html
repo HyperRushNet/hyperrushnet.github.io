@@ -1,140 +1,142 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>HRN Storage Form met Tailwind</title>
-<script src="https://cdn.tailwindcss.com"></script>
-<style>
-  body {
-    background: url('https://i.redd.it/vsprmxbhzaj81.png') no-repeat center center fixed;
-    background-size: cover;
-  }
-</style>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Minimal Form</title>
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+body {
+  font-family: 'Inter', sans-serif;
+  background-image: url('https://cdn.pixabay.com/photo/2017/04/05/04/44/background-2203989_1280.jpg');
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  background-attachment: fixed;
+}
+
+    .formbold-main-wrapper {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 60px 20px;
+      min-height: 100vh;
+    }
+    .formbold-form-wrapper {
+      background: white;
+      padding: 50px;
+      max-width: 700px;
+      width: 100%;
+      box-shadow: 0 0 12px rgba(0,0,0,0.06);
+    }
+    .formbold-form-label {
+      color: #07074d;
+      font-size: 16px;
+      font-weight: 500;
+      margin-bottom: 8px;
+      display: block;
+    }
+    .formbold-form-input,
+    .formbold-form-select {
+      width: 100%;
+      padding: 16px 22px;
+      border: 1px solid #dde3ec;
+      border-radius: 0;
+      background: #fff;
+      font-size: 16px;
+      color: #07074d;
+      outline: none;
+    }
+    .formbold-form-input:focus,
+    .formbold-form-select:focus {
+      border-color: #6a64f1;
+      box-shadow: 0 3px 8px rgba(0,0,0,0.05);
+    }
+    .formbold-input-group {
+      margin-bottom: 24px;
+    }
+    .formbold-btn {
+      width: 100%;
+      padding: 18px;
+      background-color: #6a64f1;
+      color: #fff;
+      border: none;
+      border-radius: 50px;
+      font-size: 18px;
+      font-weight: 600;
+      cursor: pointer;
+      margin-top: 10px;
+    }
+    .formbold-btn:hover {
+      background-color: #5853d7;
+    }
+  </style>
 </head>
-<body class="min-h-screen flex items-start justify-center p-6 bg-gray-50 bg-opacity-90">
-  <form class="bg-white bg-opacity-95 max-w-md w-full p-8 rounded-lg shadow-lg flex flex-col gap-6" onsubmit="return false;">
-    <h2 class="text-2xl font-semibold text-center text-gray-800">HRN Storage Form</h2>
+<body>
+  <div class="formbold-main-wrapper">
+    <div class="formbold-form-wrapper">
+      <form id="deviceForm">
+        <div class="formbold-input-group">
+          <label for="name" class="formbold-form-label">Naam</label>
+          <input type="text" id="name" name="name" class="formbold-form-input" required>
+        </div>
 
-    <div class="flex flex-col gap-1">
-      <label for="key" class="font-medium text-gray-700">Sleutel (key) kiezen</label>
-      <input id="key" type="text" placeholder="Vul hier je sleutel in" autocomplete="off" required
-        class="rounded-md border border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none px-5 py-3 text-gray-900 text-lg font-normal" />
+        <div class="formbold-input-group">
+          <label for="device" class="formbold-form-label">Device type</label>
+          <select id="device" name="device" class="formbold-form-select" required>
+            <option value="">Kies een type</option>
+            <option value="Phone">Phone</option>
+            <option value="Tablet">Tablet</option>
+            <option value="Laptop">Laptop</option>
+            <option value="Desktop">Desktop</option>
+            <option value="Other">Other</option>
+          </select>
+        </div>
+
+        <div class="formbold-input-group">
+          <label for="theme" class="formbold-form-label">Thema</label>
+          <input type="text" id="theme" name="theme" placeholder="Thema naam" class="formbold-form-input" required>
+        </div>
+
+        <input type="hidden" id="key" name="key">
+
+        <button type="submit" class="formbold-btn">Opslaan</button>
+      </form>
     </div>
+  </div>
 
-    <div class="flex flex-col gap-1">
-      <label for="val" class="font-medium text-gray-700">Tekst invoer</label>
-      <textarea id="val" placeholder="Typ hier je tekst..." required
-        class="rounded-md border border-gray-300 focus:border-blue-600 focus:ring-2 focus:ring-blue-400 focus:outline-none px-5 py-3 text-gray-900 text-lg font-normal resize-y min-h-[120px]"></textarea>
-    </div>
-
-    <button id="saveBtn" type="button" class="rounded-full bg-blue-600 hover:bg-blue-700 text-white font-semibold text-lg px-6 py-3 transition">
-      Opslaan
-    </button>
-    <button id="loadBtn" type="button" class="rounded-full border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold text-lg px-6 py-3 transition">
-      Laden
-    </button>
-    <button id="removeBtn" type="button" class="rounded-full border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold text-lg px-6 py-3 transition">
-      Verwijderen
-    </button>
-    <button id="clearBtn" type="button" class="rounded-full border border-gray-300 hover:border-gray-400 text-gray-700 font-semibold text-lg px-6 py-3 transition">
-      Alles wissen
-    </button>
-
-    <pre id="out" class="bg-gray-100 rounded-xl p-4 max-h-40 overflow-auto text-gray-900 font-mono whitespace-pre-wrap"></pre>
-  </form>
-
-<script src="https://cdn.jsdelivr.net/npm/lz-string@1.4.4/libs/lz-string.min.js"></script>
-<script>
-  window.hrn = {
-    storage: {
-      p: 'hrn-',
-      btoa_utf8: s => btoa(unescape(encodeURIComponent(s))),
-      atob_utf8: s => decodeURIComponent(escape(atob(s))),
-      add(k, v) {
-        if (!k) return;
-        try {
-          localStorage.setItem(this.p + k, LZString.compressToUTF16(this.btoa_utf8(v)));
-        } catch {
-          alert('Opslaan mislukt');
-        }
-      },
-      get(k) {
-        if (!k) return null;
-        const c = localStorage.getItem(this.p + k);
-        if (!c) return null;
-        try {
-          return this.atob_utf8(LZString.decompressFromUTF16(c));
-        } catch {
-          return null;
-        }
-      },
-      remove(k) {
-        if (!k) return;
-        localStorage.removeItem(this.p + k);
-      },
-      clear() {
-        Object.keys(localStorage).forEach(k => k.startsWith(this.p) && localStorage.removeItem(k));
-      },
-      getall() {
-        const out = {};
-        Object.keys(localStorage).forEach(k => {
-          if (k.startsWith(this.p)) {
-            try {
-              out[k.slice(this.p.length)] = this.atob_utf8(LZString.decompressFromUTF16(localStorage.getItem(k)));
-            } catch {
-              out[k.slice(this.p.length)] = null;
-            }
-          }
-        });
-        return out;
+  <script>
+    // Genereer random key
+    function generateKey() {
+      const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
+      let key = '';
+      for (let i = 0; i < 12; i++) {
+        key += chars.charAt(Math.floor(Math.random() * chars.length));
       }
+      return key;
     }
-  };
 
-  const keyInput = document.getElementById('key');
-  const valInput = document.getElementById('val');
-  const out = document.getElementById('out');
-  const saveBtn = document.getElementById('saveBtn');
-  const loadBtn = document.getElementById('loadBtn');
-  const removeBtn = document.getElementById('removeBtn');
-  const clearBtn = document.getElementById('clearBtn');
+    // Key automatisch invullen
+    document.getElementById('key').value = generateKey();
 
-  saveBtn.onclick = () => {
-    const key = keyInput.value.trim();
-    const val = valInput.value;
-    if (!key) {
-      out.textContent = 'Vul een sleutel (key) in!';
-      return;
-    }
-    hrn.storage.add(key, val);
-    out.textContent = `Opgeslagen onder sleutel: ${key}`;
-  };
-
-  loadBtn.onclick = () => {
-    const key = keyInput.value.trim();
-    if (!key) {
-      out.textContent = 'Vul een sleutel (key) in!';
-      return;
-    }
-    const val = hrn.storage.get(key);
-    out.textContent = val === null ? 'Niet gevonden' : val;
-  };
-
-  removeBtn.onclick = () => {
-    const key = keyInput.value.trim();
-    if (!key) {
-      out.textContent = 'Vul een sleutel (key) in!';
-      return;
-    }
-    hrn.storage.remove(key);
-    out.textContent = `Sleutel "${key}" verwijderd`;
-  };
-
-  clearBtn.onclick = () => {
-    hrn.storage.clear();
-    out.textContent = 'Alle HRN keys gewist';
-  };
-</script>
+    // Submit-handler
+    document.getElementById('deviceForm').addEventListener('submit', function (e) {
+      e.preventDefault();
+      const data = {
+        name: this.name.value,
+        device: this.device.value,
+        theme: this.theme.value,
+        key: this.key.value
+      };
+      console.log('Verzonden:', data);
+      alert('Informatie opgeslagen!');
+      // Hier kan fetch() komen naar backend
+    });
+  </script>
 </body>
 </html>
