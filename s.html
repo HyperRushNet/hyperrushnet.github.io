@@ -6,57 +6,104 @@
   <title>Game Filter</title>
   <style>
     body { font-family: sans-serif; background: #111; color: #fff; margin: 0; padding: 1rem; }
+    h1 { margin-bottom: 0.5rem; }
     .game { background: #222; padding: 1rem; margin: 1rem 0; border-radius: 8px; display: flex; gap: 1rem; align-items: center; }
     .game img { width: 100px; border-radius: 4px; }
     .game a { color: #0ff; text-decoration: none; font-size: 1.2rem; }
-    .device-info { color: #ccc; font-size: 0.9rem; }
+    .device-info { color: #ccc; font-size: 0.9rem; margin-top: 0.2rem; }
+    #device-select { margin-bottom: 1rem; background: #333; color: #fff; padding: 0.5rem; border: none; border-radius: 5px; }
   </style>
 </head>
 <body>
-  <h1>Games die werken op jouw apparaat</h1>
+  <h1>Games voor jouw apparaat</h1>
+  <div class="device-info">
+    Gedetecteerd apparaat: <span id="deviceLabel">...</span><br>
+    <label>Apparaat wijzigen:
+      <select id="device-select">
+        <option value="auto">🔍 Automatisch detecteren</option>
+        <option value="desktop">💻 PC zonder touchscreen</option>
+        <option value="desktop-touch">🖥️ PC met touchscreen</option>
+        <option value="mobile">📱 Mobiel of tablet</option>
+      </select>
+    </label>
+  </div>
   <div id="games"></div>
 
   <script>
-    const isTouchDevice = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
-    const isDesktop = window.innerWidth > 768 && !isTouchDevice;
+    const $ = (q) => document.querySelector(q);
+
+    function detectDevice() {
+      const touch = 'ontouchstart' in window || navigator.maxTouchPoints > 0;
+      const width = window.innerWidth;
+
+      if (touch && width < 768) return "mobile";
+      if (touch && width >= 768) return "desktop-touch";
+      return "desktop";
+    }
+
+    function getDeviceLabel(type) {
+      switch(type) {
+        case "desktop": return "💻 PC zonder touchscreen";
+        case "desktop-touch": return "🖥️ PC met touchscreen";
+        case "mobile": return "📱 Mobiel of tablet";
+        default: return "🔍 Automatisch detecteren";
+      }
+    }
+
+    function filterGames(games, mode) {
+      const device = mode === "auto" ? detectDevice() : mode;
+      $("#deviceLabel").textContent = getDeviceLabel(device);
+
+      return games.filter(game => {
+        const ts = game.touchscreen || {};
+        const { required = false, worksOnTouchscreenPC = false } = ts;
+
+        if (device === "mobile") return true;
+        if (device === "desktop") return !required;
+        if (device === "desktop-touch") return !required || worksOnTouchscreenPC;
+        return true;
+      });
+    }
+
+    function renderGames(games) {
+      const container = $("#games");
+      container.innerHTML = "";
+
+      if (games.length === 0) {
+        container.innerHTML = "<p>Geen geschikte games gevonden.</p>";
+        return;
+      }
+
+      for (const game of games) {
+        const div = document.createElement("div");
+        div.className = "game";
+        div.innerHTML = `
+          <img src="${game.img}" alt="${game.name}">
+          <div>
+            <a href="${game.link}">${game.name}</a>
+            <div class="device-info">Categorie: ${game.category}</div>
+          </div>
+        `;
+        container.appendChild(div);
+      }
+    }
+
+    let allGames = [];
 
     fetch("https://hyperrushnet.github.io/json/games.json")
       .then(res => res.json())
       .then(games => {
-        const filtered = games.filter(game => {
-          if (!game.touchscreen) return true; // fallback als veld ontbreekt
-          const { required, worksOnTouchscreenPC } = game.touchscreen;
-
-          if (isTouchDevice) return true;
-          if (isDesktop && !isTouchDevice && !required) return true;
-          if (isDesktop && isTouchDevice && worksOnTouchscreenPC) return true;
-
-          return false;
-        });
-
-        const container = document.getElementById('games');
-        if (filtered.length === 0) {
-          container.innerHTML = "<p>Geen geschikte games gevonden voor dit apparaat.</p>";
-          return;
-        }
-
-        filtered.forEach(game => {
-          const div = document.createElement("div");
-          div.className = "game";
-          div.innerHTML = `
-            <img src="${game.img}" alt="${game.name}">
-            <div>
-              <a href="${game.link}">${game.name}</a>
-              <div class="device-info">Categorie: ${game.category}</div>
-            </div>
-          `;
-          container.appendChild(div);
-        });
-      })
-      .catch(err => {
-        document.getElementById('games').innerHTML = "<p>Fout bij laden van games.</p>";
-        console.error(err);
+        allGames = games;
+        const mode = $("#device-select").value;
+        const filtered = filterGames(allGames, mode);
+        renderGames(filtered);
       });
+
+    $("#device-select").addEventListener("change", () => {
+      const mode = $("#device-select").value;
+      const filtered = filterGames(allGames, mode);
+      renderGames(filtered);
+    });
   </script>
 </body>
 </html>
