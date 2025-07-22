@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
-  <title>Minimal Form</title>
+  <title>Registratie Formulier</title>
   <style>
     @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600&display=swap');
     * {
@@ -11,29 +11,41 @@
       padding: 0;
       box-sizing: border-box;
     }
-body {
-  font-family: 'Inter', sans-serif;
-  background-image: url('https://cdn.pixabay.com/photo/2017/04/05/04/44/background-2203989_1280.jpg');
-  background-size: cover;
-  background-position: center;
-  background-repeat: no-repeat;
-  background-attachment: fixed;
-}
+    body {
+      font-family: 'Inter', sans-serif;
+      background-image: url('https://t3.ftcdn.net/jpg/01/83/50/32/360_F_183503230_heDoLySnwt4W968RVTJOf7LFHbkZdCHA.jpg');
+      background-size: cover;
+      background-position: center;
+      background-repeat: no-repeat;
+      background-attachment: fixed;
+    }
 
     .formbold-main-wrapper {
       display: flex;
+      flex-direction: column;
       align-items: center;
-      justify-content: center;
-      padding: 60px 20px;
+      justify-content: flex-start;
+      padding: 40px 20px;
       min-height: 100vh;
     }
+
     .formbold-form-wrapper {
-      background: white;
-      padding: 50px;
+      background: rgba(255,255,255,0.7);
+      padding: 40px 30px;
       max-width: 700px;
       width: 100%;
-      box-shadow: 0 0 12px rgba(0,0,0,0.06);
+      border-radius: 12px;
+      box-shadow: 0 0 12px rgba(0,0,0,0.08);
     }
+
+    .formbold-title-inside {
+      font-size: 28px;
+      font-weight: 600;
+      color: #07074d;
+      text-align: center;
+      margin-bottom: 30px;
+    }
+
     .formbold-form-label {
       color: #07074d;
       font-size: 16px;
@@ -41,55 +53,91 @@ body {
       margin-bottom: 8px;
       display: block;
     }
+
     .formbold-form-input,
     .formbold-form-select {
       width: 100%;
       padding: 16px 22px;
       border: 1px solid #dde3ec;
-      border-radius: 0;
-      background: #fff;
+      border-radius: 8px;
+      background: rgba(255,255,255,0.1);
       font-size: 16px;
       color: #07074d;
       outline: none;
+      appearance: none;
+      -webkit-appearance: none;
+      -moz-appearance: none;
+      background-image: url("data:image/svg+xml;utf8,<svg fill='gray' height='16' viewBox='0 0 24 24' width='16' xmlns='http://www.w3.org/2000/svg'><path d='M7 10l5 5 5-5z'/></svg>");
+      background-repeat: no-repeat;
+      background-position: right 15px center;
+      background-size: 16px;
     }
+
+    select:invalid {
+      color: #999;
+    }
+
     .formbold-form-input:focus,
     .formbold-form-select:focus {
       border-color: #6a64f1;
       box-shadow: 0 3px 8px rgba(0,0,0,0.05);
     }
+
     .formbold-input-group {
       margin-bottom: 24px;
     }
+
     .formbold-btn {
       width: 100%;
       padding: 18px;
-      background-color: #6a64f1;
-      color: #fff;
+      background-color: rgba(106, 100, 241, 0.7);
+      color: white;
       border: none;
       border-radius: 50px;
       font-size: 18px;
       font-weight: 600;
       cursor: pointer;
       margin-top: 10px;
+      transition: background 0.2s ease-in-out;
     }
+
     .formbold-btn:hover {
       background-color: #5853d7;
+    }
+
+    .formbold-feedback {
+      margin-top: 16px;
+      color: green;
+      font-weight: 500;
+      text-align: center;
+      display: none;
+    }
+
+    @media (max-width: 480px) {
+      .formbold-form-wrapper {
+        padding: 30px 20px;
+      }
+
+      .formbold-title-inside {
+        font-size: 22px;
+      }
     }
   </style>
 </head>
 <body>
   <div class="formbold-main-wrapper">
     <div class="formbold-form-wrapper">
+      <div class="formbold-title-inside">Apparaat Registratie</div>
       <form id="deviceForm">
         <div class="formbold-input-group">
           <label for="name" class="formbold-form-label">Naam</label>
-          <input type="text" id="name" name="name" class="formbold-form-input" required>
+          <input type="text" id="name" name="name" class="formbold-form-input" placeholder="Jouw naam" autocomplete="name" required>
         </div>
 
         <div class="formbold-input-group">
           <label for="device" class="formbold-form-label">Device type</label>
           <select id="device" name="device" class="formbold-form-select" required>
-            <option value="">Kies een type</option>
+            <option value="" disabled selected>Kies een type</option>
             <option value="Phone">Phone</option>
             <option value="Tablet">Tablet</option>
             <option value="Laptop">Laptop</option>
@@ -100,18 +148,17 @@ body {
 
         <div class="formbold-input-group">
           <label for="theme" class="formbold-form-label">Thema</label>
-          <input type="text" id="theme" name="theme" placeholder="Thema naam" class="formbold-form-input" required>
+          <input type="text" id="theme" name="theme" class="formbold-form-input" placeholder="Thema naam" autocomplete="off" required>
         </div>
 
         <input type="hidden" id="key" name="key">
-
         <button type="submit" class="formbold-btn">Opslaan</button>
+        <div id="feedback" class="formbold-feedback">✔ Informatie opgeslagen!</div>
       </form>
     </div>
   </div>
 
   <script>
-    // Genereer random key
     function generateKey() {
       const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
       let key = '';
@@ -121,10 +168,8 @@ body {
       return key;
     }
 
-    // Key automatisch invullen
     document.getElementById('key').value = generateKey();
 
-    // Submit-handler
     document.getElementById('deviceForm').addEventListener('submit', function (e) {
       e.preventDefault();
       const data = {
@@ -134,8 +179,11 @@ body {
         key: this.key.value
       };
       console.log('Verzonden:', data);
-      alert('Informatie opgeslagen!');
-      // Hier kan fetch() komen naar backend
+      const feedback = document.getElementById('feedback');
+      feedback.style.display = 'block';
+      setTimeout(() => {
+        feedback.style.display = 'none';
+      }, 3000);
     });
   </script>
 </body>
