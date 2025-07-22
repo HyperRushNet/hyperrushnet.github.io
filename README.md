@@ -18,10 +18,7 @@ Visit The HyperRush Network, pick a game, and start playing.
 - Want to contribute? Fork the project and submit a pull request.
 
 ## Technologies used
-HTML5, CSS, JavaScript.
-
-## Contact
-Email: hyperrushnetwork@gmail.com
+HTML5, CSS3, JavaScript.
 
 ---
 
