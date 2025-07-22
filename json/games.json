@@ -6,9 +6,8 @@
       "img":"/images/10-minutes-till-dawn.avif",
       "link":"/action-games/10-minutes-till-dawn/",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -18,9 +17,8 @@
       "img":"/images/1v1-lol.avif",
       "link":"/action-games/1v1-lol/",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -30,9 +28,8 @@
       "img":"/images/offline-paradise.avif",
       "link":"/action-games/OfflineParadise/",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -43,6 +40,7 @@
       "link":"/action-games/adam-eve-2",
       "platforms":[
          "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -55,6 +53,7 @@
       "link":"/action-games/adam-eve",
       "platforms":[
          "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -66,9 +65,8 @@
       "img":"/images/a-dark-room.avif",
       "link":"/action-games/adarkroom",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -78,9 +76,8 @@
       "img":"/images/alien-hominid.avif",
       "link":"/action-games/alienhominid",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -90,7 +87,8 @@
       "img":"/images/angry-sharks.avif",
       "link":"/action-games/angry-sharks",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -102,7 +100,8 @@
       "img":"/images/apple-shooter.avif",
       "link":"/action-games/apple-shooter",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -114,7 +113,8 @@
       "img":"/images/arcane-archer.avif",
       "link":"/action-games/arcane-archer",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -126,9 +126,8 @@
       "img":"/images/avalanche.avif",
       "link":"/action-games/avalanche",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -138,7 +137,8 @@
       "img":"/images/awesome-tanks-2.avif",
       "link":"/action-games/awesome-tanks-2",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -150,7 +150,8 @@
       "img":"/images/the-backrooms-2d.avif",
       "link":"/action-games/backrooms-2d",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -162,9 +163,8 @@
       "img":"/images/the-backrooms.avif",
       "link":"/action-games/backrooms",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -174,9 +174,8 @@
       "img":"/images/bacon-may-die.avif",
       "link":"/action-games/bacon-may-die",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -186,7 +185,8 @@
       "img":"/images/the-black-knight.avif",
       "link":"/action-games/blackknight",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -198,7 +198,8 @@
       "img":"/images/blumgi-slime.avif",
       "link":"/action-games/blumgi-slime",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -210,9 +211,8 @@
       "img":"/images/bob-the-robber-4.avif",
       "link":"/action-games/bob-the-robber-4",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -222,7 +222,8 @@
       "img":"/images/bomb-it-7.avif",
       "link":"/action-games/bomb-it-7",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -234,7 +235,8 @@
       "img":"/images/boxel-rebound.avif",
       "link":"/action-games/boxel-rebound",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
@@ -246,9 +248,8 @@
       "img":"/images/bullet-force.avif",
       "link":"/action-games/bullet-force",
       "platforms":[
-         "pc",
-         "tablet",
-         "phone"
+         "pc-touch",
+         "pc-no-touch"
       ]
    },
    {
@@ -258,7 +259,8 @@
       "img":"/images/burrito-bison-revenge.avif",
       "link":"/action-games/burrito-bison-revenge",
       "platforms":[
-         "pc",
+         "pc-touch",
+         "pc-no-touch",
          "tablet",
          "phone"
       ]
