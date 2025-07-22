@@ -22,3 +22,21 @@ HTML5, CSS, JavaScript.
 
 ## Contact
 Email: hyperrushnetwork@gmail.com
+
+---
+
+## LICENSE
+
+© 2024–2025 HyperRushNet (https://hyperrushnet.github.io)  
+Contact: hyperrushnetwork@gmail.com
+
+All rights reserved.
+
+This project is not open source and is not licensed for public, private, or commercial use.
+
+You may **NOT**:
+- Copy, modify, or distribute any part of this repository  
+- Use the code or assets in any form  
+- Host, mirror, or republish any content  
+
+Unauthorized use is strictly prohibited and may lead to legal action.
