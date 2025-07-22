@@ -3,81 +3,61 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Game Filter op Apparaat :)</title>
+<title>Games filteren op device</title>
 <style>
-  body{font-family:sans-serif; margin:20px; background:#f0f0f0;}
-  #device-select{font-size:16px; padding:5px; margin-bottom:20px;}
-  .game-list{display:flex; flex-wrap:wrap; gap:15px;}
-  .game-card{background:#fff; border-radius:8px; box-shadow:0 2px 6px rgba(0,0,0,0.15); width:180px; padding:10px; text-align:center;}
-  .game-card img{width:100%; border-radius:5px;}
-  .game-name{font-weight:700; margin:10px 0 5px;}
-  .game-category{color:#555; font-size:0.9em;}
+  body { font-family: Arial, sans-serif; padding: 20px; }
+  select { font-size: 1rem; padding: 5px; margin-bottom: 20px; }
+  .game { margin-bottom: 15px; }
+  .game img { max-width: 150px; display: block; margin-bottom: 5px; }
 </style>
 </head>
 <body>
-
-<label for="device-select">Filter op apparaat:</label>
-<select id="device-select"></select>
-
-<div id="device-info" style="margin:10px 0 20px; font-weight:bold;"></div>
-
-<div class="game-list" id="game-list"></div>
-
+<h1>Games filteren op device</h1>
+<select id="deviceSelect">
+  <option value="pc-no-touch">pc-no-touch</option>
+  <option value="pc-touch" selected>pc-touch</option>
+  <option value="phone">phone</option>
+  <option value="tablet">tablet</option>
+</select>
+<div id="games">Laden...</div>
 <script>
-(async () => {
-  const url = 'https://hyperrushnet.github.io/json/games.json';
-  const res = await fetch(url);
-  const games = await res.json();
+let allGames = [];
 
-  // Detect apparaat + touchscreen
-  function getDevice() {
-    const ua = navigator.userAgent.toLowerCase();
-    const isTouch = ('maxTouchPoints' in navigator && navigator.maxTouchPoints > 0) || 'ontouchstart' in window;
-    if (/mobile|iphone|android|blackberry|iemobile|opera mini/.test(ua)) return 'phone';
-    if (/ipad|tablet/.test(ua)) return 'tablet';
-    // desktop: onderscheid pc met of zonder touchscreen
-    return isTouch ? 'pc-touch' : 'pc';
+function filterGames(device) {
+  const filtered = allGames.filter(g =>
+    Array.isArray(g.device) ? g.device.includes(device) : g.device === device
+  );
+  const container = document.getElementById("games");
+  container.innerHTML = "";
+  if (filtered.length === 0) {
+    container.textContent = "Geen games gevonden voor " + device + ".";
+    return;
   }
-  const device = getDevice();
+  filtered.forEach(game => {
+    const div = document.createElement("div");
+    div.className = "game";
+    div.innerHTML = `
+      <img src="${game.img}" alt="${game.name}" />
+      <strong>${game.name}</strong><br />
+      <a href="${game.link}">Speel</a>
+    `;
+    container.appendChild(div);
+  });
+}
 
-  // Vul dropdown met opties (pc, pc-touch, tablet, phone)
-  const devices = ['pc','pc-touch','tablet','phone'];
-  const select = document.getElementById('device-select');
-  devices.forEach(d => {
-    const opt = document.createElement('option');
-    opt.value = d;
-    opt.textContent = d.replace('-', ' ').toUpperCase();
-    select.appendChild(opt);
+fetch("https://hyperrushnet.github.io/json/games.json")
+  .then(r => r.json())
+  .then(data => {
+    allGames = data;
+    filterGames(document.getElementById("deviceSelect").value);
+  })
+  .catch(() => {
+    document.getElementById("games").textContent = "Fout bij laden games.";
   });
 
-  select.value = device;
-  document.getElementById('device-info').textContent = `Gedetecteerd apparaat: ${device.replace('-', ' ').toUpperCase()}`;
-
-  function renderGames(filter) {
-    const container = document.getElementById('game-list');
-    container.innerHTML = '';
-    const filtered = games.filter(g => g.platforms.includes(filter));
-    if(filtered.length === 0) {
-      container.textContent = 'Geen games gevonden voor dit apparaat.';
-      return;
-    }
-    filtered.forEach(g => {
-      const div = document.createElement('div');
-      div.className = 'game-card';
-      div.innerHTML = `<a href="${g.link}"><img src="${g.img}" alt="${g.name}"><div class="game-name">${g.name}</div><div class="game-category">${g.category}</div></a>`;
-      container.appendChild(div);
-    });
-  }
-
-  renderGames(device);
-
-  select.addEventListener('change', e => {
-    const val = e.target.value;
-    document.getElementById('device-info').textContent = `Geselecteerd apparaat: ${val.replace('-', ' ').toUpperCase()}`;
-    renderGames(val);
-  });
-})();
+document.getElementById("deviceSelect").addEventListener("change", e => {
+  filterGames(e.target.value);
+});
 </script>
-
 </body>
 </html>
