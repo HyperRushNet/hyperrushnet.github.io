@@ -1,4 +1,4 @@
-![HyperRush Logo](https://hyperrushnet.github.io/assets/logo.png)
+![HyperRush Logo](https://hyperrushnet.github.io/assets/images/logo.png)
 
 ---
 
