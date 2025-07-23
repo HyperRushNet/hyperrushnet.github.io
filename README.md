@@ -2,7 +2,7 @@
 
 ---
 
-Play instantly. No hassle. Just games.
+Play instantly. No hassle. Just games. 
 
 ## What to expect
 - Varied selection: from action to puzzles.
