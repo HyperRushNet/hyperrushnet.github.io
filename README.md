@@ -1,5 +1,4 @@
-# The HyperRush Network v2.1
-![Screenshot van de game](https://raw.githubusercontent.com/HyperRushNet/images/refs/heads/main/banner-large.jpg)
+![HyperRush Logo](https://hyperrushnet.github.io/assets/logo.png)
 
 ---
 
