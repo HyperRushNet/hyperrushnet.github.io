@@ -164,7 +164,7 @@ searchInput.addEventListener("keypress", e => {
   if (e.key === "Enter") filterAndRender();
 });
 
-fetch("/json/games.json")
+fetch("/assets/json/games.json")
   .then(res => res.json())
   .then(data => {
     allGames = data;
