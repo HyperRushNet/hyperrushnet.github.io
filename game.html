@@ -40,7 +40,7 @@
     try {
       const doc = iframe.contentDocument || iframe.contentWindow.document;
       const notifyScript = doc.createElement("script");
-      notifyScript.src = "/js/hrn-notifications.min.js";
+      notifyScript.src = "/assets/js/hrn-notifications.min.js";
       notifyScript.onload = () => {
         const blocker = doc.createElement("script");
         blocker.textContent = blockerScript;
