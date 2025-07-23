@@ -1,404 +1,64 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Welcome to HyperRush!</title>
-<style>
-* {
-  box-sizing: border-box;
-  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-}
-html, body {
-  margin: 0;
-  height: 100%;
-  background: #000;
-  overflow: hidden;
-}
-body {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  position: relative;
-}
-#particles-js {
-  position: fixed;
-  width: 100%;
-  height: 100%;
-  top: 0;
-  left: 0;
-  z-index: 1;
-}
-form {
-  background: rgba(30, 30, 30, 0.1);
-  backdrop-filter: blur(10px);
-  padding: 32px 36px;
-  border-radius: 14px;
-  width: 380px;
-  max-width: 100%;
-  box-shadow: 0 0 30px rgba(0,0,0,0.5);
-  color: white;
-  position: relative;
-  z-index: 10;
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  transition: opacity 0.4s ease, transform 0.4s ease;
-}
-form.closing {
-  opacity: 0;
-  transform: scale(0.95);
-}
-.form-header {
-  display: flex;
-  flex-direction: column;
-  align-items: center;
-  margin-bottom: 25px;
-  margin-top: 0;
-}
-.form-logo {
-  width: 100%;
-  height: auto;
-  margin-bottom: 12px;
-}
-.form-title {
-  color: white;
-  font-size: 2em;
-  text-align: center;
-  text-shadow: 0 0 10px rgba(0, 255, 224, 0.7);
-  letter-spacing: 1px;
-  margin: 0;
-}
-.field {
-  position: relative;
-  margin-bottom: 26px;
-  width: 100%;
-}
-input {
-  width: 100%;
-  padding: 12px 0 8px;
-  font-size: 16px;
-  color: white;
-  background: transparent;
-  border: none;
-  border-bottom: 2px solid #444;
-  transition: border-color 0.3s;
-}
-input:focus {
-  outline: none;
-  border-color: #00ffe0;
-}
-label {
-  position: absolute;
-  top: 12px;
-  left: 0;
-  color: #888;
-  font-size: 14px;
-  pointer-events: none;
-  transition: 0.3s ease;
-}
-input:focus + label,
-input:not(:placeholder-shown) + label {
-  top: -10px;
-  font-size: 12px;
-  color: #00ffe0;
-}
-button {
-  width: 100%;
-  padding: 12px;
-  background: #009fbf;
-  border: none;
-  border-radius: 8px;
-  font-size: 16px;
-  font-weight: 700;
-  color: #000;
-  cursor: pointer;
-  transition: background 0.3s cubic-bezier(0.645, 0.045, 0.355, 1);
-  margin-top: 8px;
-  box-shadow: 0 4px 15px rgba(0, 255, 224, 0.4);
-}
-button:hover {
-  background: #00d6c0;
-  box-shadow: 0 6px 20px rgba(0, 255, 224, 0.6);
-}
-.custom-select-wrapper {
-  position: relative; /* positionering voor dropdown */
-  width: 100%;
-  margin-bottom: 26px;
-}
-.custom-select {
-  position: relative;
-  font-size: 16px;
-  color: white;
-  width: 100%;
-  cursor: pointer;
-  padding: 12px 0 8px;
-  border-bottom: 2px solid #444;
-  transition: border-color 0.3s;
-}
-.custom-select-wrapper.active .select-selected {
-  border-color: #00ffe0;
-}
-.select-selected {
-  padding-right: 30px;
-  position: relative;
-  color: #888;
-  user-select: none;
-}
-.custom-select-wrapper.active .select-selected {
-  color: #00ffe0;
-}
-.select-selected::after {
-  position: absolute;
-  content: "";
-  top: 14px;
-  right: 10px;
-  width: 0;
-  height: 0;
-  border: 6px solid transparent;
-  border-color: #888 transparent transparent transparent;
-  pointer-events: none;
-}
-.custom-select-wrapper.active .select-selected::after {
-  border-color: transparent transparent #00ffe0 transparent;
-  top: 7px;
-}
-
-.select-items {
-  position: absolute;
-  top: 100%;
-  left: 0;
-  right: 0;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.3s ease, opacity 0.3s ease, transform 0.3s ease;
-  opacity: 0;
-  transform: translateY(-10px);
-  z-index: 9999; /* staat boven alles */
-  background: #1e1e1e;
-  border: 1px solid rgba(0,255,224,0.2);
-  border-radius: 6px;
-  box-shadow: 0 4px 12px rgba(0,255,224,0.25);
-}
-
-.custom-select-wrapper.active .select-items {
-  max-height: 300px;
-  opacity: 1;
-  transform: translateY(0);
-}
-
-.select-items div {
-  color: white;
-  padding: 10px 15px;
-  cursor: pointer;
-  transition: background-color 0.2s ease;
-  user-select: none;
-}
-.select-items div:hover {
-  background-color: rgba(0, 255, 224, 0.2);
-}
-.same-as-selected {
-  background-color: rgba(0, 255, 224, 0.3);
-  color: #00ffe0;
-}
-.custom-select-wrapper label {
-  display: none;
-}
-.custom-select-wrapper select {
-  display: none;
-}
-.hidden {
-  display: none !important;
-}
-rtant;
-  }
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Welcome! - HyperRush</title>
+  <link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet">
+  <style>*{box-sizing:border-box;font-family:'Segoe UI',Arial,sans-serif}body{margin:0;padding:20px;background:#000;color:#fff;display:flex;justify-content:center;align-items:center;min-height:100vh;overflow-x:hidden}#particles-js{position:fixed;top:0;left:0;width:100%;height:100%;z-index:0}.container{max-width:400px;width:100%;padding:30px;background:rgba(30,30,30,.2);border-radius:12px;box-shadow:0 0 25px rgba(0,0,0,.5);border:1px solid rgba(255,255,255,.15);position:relative;z-index:1;transition:transform .3s ease}.blur-overlay{position:absolute;top:0;left:0;width:100%;height:100%;background:inherit;backdrop-filter:blur(12px) brightness(.7);z-index:-1;border-radius:12px;overflow:hidden}.logo{width:100%;max-width:400px;margin-bottom:20px;filter:drop-shadow(0 0 8px rgba(0,255,224,.4)) contrast(1.1)}form{display:flex;flex-direction:column;gap:20px;width:100%}.field{position:relative;width:100%}.field input{width:100%;padding:12px 0 8px;font-size:16px;color:#fff;background:0 0;border:none;border-bottom:2px solid #444;transition:border-color .3s}.field input:focus{outline:0;border-color:#00ffe0}.field label{position:absolute;top:12px;left:0;color:#888;font-size:16px;pointer-events:none;transition:all .3s ease}.field input:focus+label,.field input:not(:placeholder-shown)+label{top:-10px;font-size:12px;color:#00ffe0}.dropdown{position:relative;width:100%}.dropdown-button{background:rgba(255,255,255,.1);color:#fff;padding:12px 16px;border:2px solid #444;border-radius:6px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;width:100%;font-size:16px;transition:border-color .3s,background .3s}.dropdown-button:hover{border-color:#00ffe0;background:rgba(255,255,255,.15)}.dropdown-menu{position:absolute;top:100%;left:0;right:0;background:rgba(30,30,30,.9);border:1px solid rgba(0,255,224,.2);border-radius:6px;box-shadow:0 4px 10px rgba(0,255,224,.2);display:none;z-index:10;margin-top:4px;max-height:200px;overflow-y:auto}.dropdown-menu.show{display:block}.dropdown-item{padding:10px 16px;cursor:pointer;color:#fff;text-align:left;transition:background .2s}.dropdown-item:hover{background:rgba(0,255,224,.2)}.dropdown-item.selected{background:rgba(0,255,224,.3);color:#00ffe0}.send-button{width:100%;padding:12px;background:#009fbf;border:none;border-radius:8px;font-size:16px;font-weight:700;color:#000;cursor:pointer;transition:background .3s,box-shadow .3s;box-shadow:0 4px 15px rgba(0,255,224,.4)}.send-button:hover{background:#00d6c0;box-shadow:0 6px 20px rgba(0,255,224,.6)}@media (max-width:600px){.container{padding:20px}.field input,.dropdown-button,.send-button{font-size:14px;padding:10px 14px}.field label{font-size:14px}.field input:focus+label,.field input:not(:placeholder-shown)+label{font-size:10px}.dropdown-item{font-size:14px;padding:8px 14px}}</style>
 </head>
 <body>
-<div id="particles-js"></div>
-<form autocomplete="off" novalidate id="main-form">
-  <div class="form-header">
-    <img src="https://hyperrushnet.github.io/assets/logo.png" alt="HyperRush Logo" class="form-logo" />
+  <div id="particles-js"></div>
+  <div class="container">
+    <div class="blur-overlay"></div>
+    <img src="https://hyperrushnet.github.io/assets/logo.png" alt="Logo" class="logo">
+    <form id="selection-form" autocomplete="off">
+      <div class="field">
+        <input type="text" id="name" placeholder=" " autocomplete="off">
+        <label for="name">Name</label>
+      </div>
+      <div class="field">
+        <input type="text" id="message" placeholder=" " autocomplete="off">
+        <label for="message">Message</label>
+      </div>
+      <div class="dropdown" id="device-dropdown">
+        <button type="button" class="dropdown-button" onclick="toggleDropdown('device-dropdown')">
+          <span>Select Device</span>
+          <span class="material-icons">arrow_drop_down</span>
+        </button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item" onclick="selectItem('device-dropdown', 'Computer')">Computer</div>
+          <div class="dropdown-item" onclick="selectItem('device-dropdown', 'Phone')">Phone</div>
+          <div class="dropdown-item" onclick="selectItem('device-dropdown', 'Tablet')">Tablet</div>
+        </div>
+      </div>
+      <div class="dropdown" id="color-dropdown">
+        <button type="button" class="dropdown-button" onclick="toggleDropdown('color-dropdown')">
+          <span>Select Color</span>
+          <span class="material-icons">arrow_drop_down</span>
+        </button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item" onclick="selectItem('color-dropdown', 'Red')">Red</div>
+          <div class="dropdown-item" onclick="selectItem('color-dropdown', 'Blue')">Blue</div>
+          <div class="dropdown-item" onclick="selectItem('color-dropdown', 'Green')">Green</div>
+        </div>
+      </div>
+      <div class="dropdown" id="country-dropdown">
+        <button type="button" class="dropdown-button" onclick="toggleDropdown('country-dropdown')">
+          <span>Select Country</span>
+          <span class="material-icons">arrow_drop_down</span>
+        </button>
+        <div class="dropdown-menu">
+          <div class="dropdown-item" onclick="selectItem('country-dropdown', 'USA')">USA</div>
+          <div class="dropdown-item" onclick="selectItem('country-dropdown', 'Germany')">Germany</div>
+          <div class="dropdown-item" onclick="selectItem('country-dropdown', 'India')">India</div>
+        </div>
+      </div>
+      <button type="submit" class="send-button">Send</button>
+    </form>
   </div>
-  <div class="field">
-    <input type="text" id="name" placeholder=" " autocomplete="off" required />
-    <label for="name">Name</label>
-  </div>
-  <div class="field">
-    <input type="email" id="email" placeholder=" " autocomplete="off" required />
-    <label for="email">Email</label>
-  </div>
-  <div class="field">
-    <input type="text" id="subject" placeholder=" " autocomplete="off" required />
-    <label for="subject">Subject</label>
-  </div>
-  <div class="field">
-    <input type="text" id="code" placeholder=" " autocomplete="off" required />
-    <label for="code">Reference Code</label>
-  </div>
 
-  <div class="custom-select-wrapper" id="device-type-wrapper">
-    <select id="device-type-select" name="device-type" required>
-      <option value="">Selecteer...</option>
-      <option value="computer">Computer</option>
-      <option value="phone">Phone</option>
-      <option value="tablet">Tablet</option>
-    </select>
-    <div class="custom-select select-selected"></div>
-  </div>
-
-  <div class="custom-select-wrapper hidden" id="touchscreen-wrapper">
-    <select id="touchscreen-select" name="touchscreen" required>
-      <option value="">Selecteer...</option>
-      <option value="yes">Yes</option>
-      <option value="no">No</option>
-    </select>
-    <div class="custom-select select-selected"></div>
-  </div>
-
-  <button type="submit">Submit</button>
-</form>
-
-<script src="https://cdn.jsdelivr.net/npm/particles.js@2.0.0/particles.min.js"></script>
-<script>
-  window.onload = function() {
-    particlesJS('particles-js', {
-      "particles": {
-        "number": {
-          "value": 120,
-          "density": {"enable": true, "value_area": 800}
-        },
-        "color": {"value": "#00ffe0"},
-        "shape": {
-          "type": "circle"
-        },
-        "opacity": {
-          "value": 0.7,
-          "random": true
-        },
-        "size": {
-          "value": 2,
-          "random": true
-        },
-        "line_linked": {
-          "enable": true,
-          "distance": 150,
-          "color": "#00ffe0",
-          "opacity": 0.4,
-          "width": 1
-        },
-        "move": {
-          "enable": true,
-          "speed": 2,
-          "direction": "none",
-          "random": true,
-          "straight": false,
-          "out_mode": "out"
-        }
-      },
-      "interactivity": {
-        "detect_on": "canvas",
-        "events": {
-          "onhover": { "enable": true, "mode": "grab" },
-          "onclick": { "enable": true, "mode": "push" }
-        },
-        "modes": {
-          "grab": { "distance": 140, "line_linked": {"opacity": 1} },
-          "push": { "particles_nb": 4 }
-        }
-      },
-      "retina_detect": true
-    });
-  };
-</script>
-<script>
-  // Custom select dropdown logic with sliding animation
-  (function(){
-    function createCustomSelect(wrapper) {
-      var selectElem = wrapper.querySelector('select');
-      var selected = wrapper.querySelector('.select-selected');
-      var itemsContainer = document.createElement('div');
-      itemsContainer.classList.add('select-items');
-      wrapper.appendChild(itemsContainer);
-
-      // Fill options
-      for (var i=0; i<selectElem.options.length; i++) {
-        var option = selectElem.options[i];
-        var itemDiv = document.createElement('div');
-        itemDiv.textContent = option.textContent;
-        itemDiv.dataset.value = option.value;
-        if(option.selected){
-          selected.textContent = option.textContent;
-          itemDiv.classList.add('same-as-selected');
-        }
-        itemsContainer.appendChild(itemDiv);
-      }
-
-      function closeAllSelects(except) {
-        var allWrappers = document.querySelectorAll('.custom-select-wrapper');
-        allWrappers.forEach(function(w){
-          if(w !== except) {
-            w.classList.remove('active');
-          }
-        });
-      }
-
-      selected.addEventListener('click', function(e){
-        e.stopPropagation();
-        if(wrapper.classList.contains('active')){
-          wrapper.classList.remove('active');
-        } else {
-          closeAllSelects(wrapper);
-          wrapper.classList.add('active');
-        }
-      });
-
-      itemsContainer.addEventListener('click', function(e){
-        if(e.target && e.target.nodeName === 'DIV'){
-          selected.textContent = e.target.textContent;
-          selectElem.value = e.target.dataset.value;
-          // Mark selection
-          var allItems = itemsContainer.querySelectorAll('div');
-          allItems.forEach(function(div){
-            div.classList.remove('same-as-selected');
-          });
-          e.target.classList.add('same-as-selected');
-          wrapper.classList.remove('active');
-          selectElem.dispatchEvent(new Event('change'));
-        }
-      });
-
-      // Close dropdown if clicking outside
-      document.addEventListener('click', function(){
-        wrapper.classList.remove('active');
-      });
-    }
-
-    var deviceWrapper = document.getElementById('device-type-wrapper');
-    var touchscreenWrapper = document.getElementById('touchscreen-wrapper');
-    createCustomSelect(deviceWrapper);
-    createCustomSelect(touchscreenWrapper);
-
-    // Show/hide touchscreen dropdown based on device-type
-    var deviceSelect = document.getElementById('device-type-select');
-    var touchscreenSelect = document.getElementById('touchscreen-select');
-
-    deviceSelect.addEventListener('change', function(){
-      if(deviceSelect.value === 'phone' || deviceSelect.value === 'tablet'){
-        touchscreenWrapper.classList.remove('hidden');
-        touchscreenSelect.required = true;
-      } else {
-        touchscreenWrapper.classList.add('hidden');
-        touchscreenSelect.value = "";
-        touchscreenSelect.required = false;
-        // Reset touchscreen custom select text
-        touchscreenWrapper.querySelector('.select-selected').textContent = "";
-        var items = touchscreenWrapper.querySelectorAll('.select-items div');
-        items.forEach(i => i.classList.remove('same-as-selected'));
-      }
-    });
-  })();
-</script>
+  <script src="https://cdn.jsdelivr.net/particles.js/2.0.0/particles.min.js"></script>
+  <script>particlesJS("particles-js",{particles:{number:{value:120,density:{enable:!0,value_area:800}},color:{value:"#00ffe0"},shape:{type:"circle"},opacity:{value:.7,random:!0},size:{value:2,random:!0},line_linked:{enable:!0,distance:150,color:"#00ffe0",opacity:.4,width:1},move:{enable:!0,speed:2,direction:"none",random:!0,straight:!1,out_mode:"out"}},interactivity:{detect_on:"canvas",events:{onhover:{enable:!0,mode:"grab"},onclick:{enable:!0,mode:"push"},resize:!0},modes:{grab:{distance:150,line_linked:{opacity:.8}},push:{particles_nb:4}}},retina_detect:!0});function toggleDropdown(a){const b=document.getElementById(a),c=b.querySelector(".dropdown-menu"),d=c.classList.contains("show");document.querySelectorAll(".dropdown-menu").forEach(a=>a.classList.remove("show"));d||c.classList.add("show")}function selectItem(a,b){const c=document.getElementById(a),d=c.querySelector(".dropdown-button span:first-child"),e=c.querySelectorAll(".dropdown-item");d.textContent=b,e.forEach(a=>a.classList.toggle("selected",a.textContent===b)),c.querySelector(".dropdown-menu").classList.remove("show")}document.addEventListener("click",a=>{a.target.closest(".dropdown")||document.querySelectorAll(".dropdown-menu").forEach(a=>a.classList.remove("show"))});</script>
 </body>
 </html>
