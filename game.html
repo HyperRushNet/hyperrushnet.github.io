@@ -18,7 +18,7 @@
 
   let games = [];
   try {
-    const res = await fetch("/json/games.json");
+    const res = await fetch("/assets/json/games.json");
     games = await res.json();
   } catch (e) {
     return document.body.innerText = "❌ Kan games.json niet laden.";
