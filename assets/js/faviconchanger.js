@@ -55,4 +55,4 @@
         window.addEventListener('load', initFavicon);
     }
 })();
-   
+  
