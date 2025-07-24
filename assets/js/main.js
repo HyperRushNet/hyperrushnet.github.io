@@ -190,4 +190,4 @@ document.addEventListener("DOMContentLoaded", () => {
   adjustGridColumns();
   updateOverlaySize();
 });
-  
+ 
