@@ -1,0 +1,1466 @@
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>MyStudyLife - Mobile UI</title>
+<link href="https://fonts.googleapis.com/icon?family=Material+Icons" rel="stylesheet" />
+<style>
+  /* Algemene body en container styles */
+  body { margin: 0; font-family: 'Inter', sans-serif; display: flex; flex-direction: column; justify-content: flex-start; align-items: center; min-height: 100vh; background-color: #f0f2f5; overflow-x: hidden; position: relative; }
+  .ui-container { width: 100%; max-width: 375px; background: #fff; box-shadow: 0 0 15px rgba(0,0,0,.1); display: flex; flex-direction: column; min-height: 100vh; position: relative; }
+
+  /* Header */
+  .header { display: flex; justify-content: space-between; align-items: center; padding: 15px 20px; background: #fff; border-bottom: 1px solid #eee; position: relative; width: 100%; box-sizing: border-box; }
+  .header .greeting { font-size: 16px; color: #888; }
+  .header .user-info h2 { margin: 0; font-size: 24px; color: #333; font-weight: 700; }
+  .header .user-info p { margin: 0; font-size: 14px; color: #666; }
+  .header .search-icon { font-size: 28px; color: #333; cursor: pointer; }
+  .profile-pic { width: 50px; height: 50px; border-radius: 50%; object-fit: cover; border: 2px solid #007bff; margin-left: 15px; cursor: pointer; }
+
+  /* Info boxes */
+  .info-boxes { display: flex; justify-content: space-around; padding: 15px 20px; gap: 10px; background: #fff; width: 100%; box-sizing: border-box; }
+  .info-box { flex: 1; background: #e0f7fa; border-radius: 15px; padding: 15px; text-align: center; font-weight: bold; color: #007bb5; font-size: 16px; display: flex; flex-direction: column; justify-content: center; align-items: center; box-shadow: 0 2px 5px rgba(0,0,0,.05); cursor: pointer; transition: transform .2s, background-color .3s, color .3s; }
+  .info-box:hover { transform: translateY(-2px); }
+  .info-box.active { background-color: #007bff; color: #fff; box-shadow: 0 4px 8px rgba(0,123,255,.2); }
+
+  /* Main content sections */
+  .main-content { flex-grow: 1; overflow-y: auto; padding: 0 20px 90px; background: #f9f9f9; width: 100%; box-sizing: border-box; }
+  .content-section-tab { display: none; padding-top: 20px; }
+  .content-section-tab.active { display: block; }
+
+  /* Section headers */
+  .section-header { display: flex; justify-content: space-between; align-items: center; margin: 25px 0 15px; }
+  .section-header h3 { margin: 0; font-size: 20px; font-weight: 600; color: #333; }
+
+  /* Cards for tests, exams, tasks */
+  .card { background: #fff; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,.05); display: flex; align-items: flex-start; cursor: pointer; transition: transform .2s, box-shadow .2s; position: relative; }
+  .card:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,.1); }
+  .icon-placeholder { width: 40px; height: 40px; border-radius: 10px; flex-shrink: 0; display: flex; justify-content: center; align-items: center; overflow: hidden; margin-right: 15px; }
+  .icon-placeholder img { width: 100%; height: 100%; object-fit: cover; border-radius: 10px; }
+  .content { flex: 1; }
+  .content h4 { margin: 0 0 5px; font-size: 18px; font-weight: 600; color: #333; }
+  .time-range { font-size: 14px; color: #888; margin-top: 5px; }
+  .delete-btn { position: absolute; top: 10px; right: 10px; background: none; border: none; cursor: pointer; font-size: 20px; opacity: 0.7; transition: opacity 0.2s, transform 0.2s; }
+  .delete-btn:hover { opacity: 1; transform: scale(1.1); }
+
+  /* Up Next cards */
+  .up-next-card { background: #e8f5e9; border-radius: 15px; padding: 15px; margin-bottom: 15px; box-shadow: 0 2px 5px rgba(0,0,0,.05); display: flex; flex-direction: column; cursor: pointer; transition: transform .2s, box-shadow .2s; }
+  .up-next-card:hover { transform: translateY(-3px); box-shadow: 0 5px 10px rgba(0,0,0,.1); }
+  .title { font-size: 16px; font-weight: bold; color: #333; margin-bottom: 10px; }
+  .up-next-item { display: flex; align-items: center; width: 100%; margin-bottom: 10px; }
+  .up-next-item:last-child { margin-bottom: 0; }
+  .color-block { width: 10px; height: 40px; border-radius: 5px; margin-right: 10px; }
+  .text-content { flex-grow: 1; }
+  .task-name { font-weight: bold; font-size: 15px; color: #333; }
+  .time-info { font-size: 13px; color: #666; }
+  .tag { background-color: #dcedc8; color: #5cb85c; padding: 5px 10px; border-radius: 10px; font-size: 12px; font-weight: bold; margin-left: auto; flex-shrink: 0; }
+  .tag.orange { background-color: #ffecb3; color: #ff9800; }
+
+  /* Bottom navigation bar */
+  .bottom-nav { display: flex; justify-content: space-around; align-items: center; background: #fff; padding: 10px 0; border-top: 1px solid #eee; position: fixed; bottom: 0; width: 100%; max-width: 375px; box-sizing: border-box; z-index: 90; }
+  .nav-item { display: flex; flex-direction: column; align-items: center; color: #888; font-size: 12px; text-decoration: none; cursor: pointer; padding: 5px; transition: color .2s; }
+  .nav-item i { font-size: 24px; margin: 0; padding: 0; height: 32px; display: flex; justify-content: center; align-items: center; line-height: 1; }
+  .nav-item span { margin: 0; padding: 0; line-height: 1; }
+  .nav-item.add-button i { font-size: 32px; background-color: transparent; transform: none; }
+  .nav-item.add-button:hover i { background-color: transparent; transform: none; }
+  .nav-item.active { color: #007bff; font-weight: bold; }
+  .nav-item:hover { color: #0056b3; }
+
+  /* Modal overlay styles */
+  .message-box-overlay,
+  .add-item-modal-overlay,
+  .search-modal-overlay,
+  .delete-bottom-sheet-overlay { position: fixed; bottom: 0; left: 0; width: 100%; height: 100%; background-color: rgba(0,0,0,.4); display: flex; justify-content: center; align-items: center; z-index: 200; visibility: hidden; opacity: 0; transition: visibility 0s, opacity .3s; box-sizing: border-box; }
+  .message-box-overlay.visible,
+  .add-item-modal-overlay.visible,
+  .search-modal-overlay.visible,
+  .delete-bottom-sheet-overlay.visible { visibility: visible; opacity: 1; }
+
+  /* Message box styling */
+  .message-box { background: #fff; padding: 30px; border-radius: 20px; box-shadow: 0 10px 20px rgba(0,0,0,.2); text-align: center; max-width: 100% ; transform: scale(.9); transition: transform .3s; }
+  .message-box-overlay.visible .message-box { transform: scale(1); }
+  .message-box h4 { margin: 0 0 15px; font-size: 22px; color: #333; }
+  .message-box p { font-size: 16px; color: #666; margin-bottom: 25px; }
+  .message-box button { background: #007bff; color: #fff; border: none; padding: 12px 25px; border-radius: 10px; font-size: 16px; cursor: pointer; transition: background .2s, transform .1s; }
+  .message-box button:hover { background: #0056b3; transform: translateY(-1px); }
+
+  /* Add item modal bottom sheet styles */
+  .add-item-modal-overlay { align-items: flex-end; }
+  .add-item-modal { background: #fff; width偶: 1px solid #ddd; width: 100%; max-width: 375px; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 25px; box-shadow: 0 -5px 15px rgba(0,0,0,.2); transform: translateY(100%); transition: transform .3s ease-out; display: flex; flex-direction: column; gap: 15px; }
+  .add-item-modal-overlay.visible .add-item-modal { transform: translateY(0); }
+  .add-item-modal h3 { margin: 0 0 15px; font-size: 24px; text-align: center; color: #333; }
+  .add-item-modal label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
+  .add-item-modal input[type="text"],
+  .add-item-modal input[type="date"],
+  .add-item-modal input[type="time"] { width: calc(100% - 20px); padding: 10px; margin-bottom: 15px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+  .form-buttons { display: flex; justify-content: flex-end; gap: 10px; margin-top: 10px; }
+  .add-item-modal button { padding: 10px 20px; border-radius: 8px; border: none; cursor: pointer; font-size: 16px; transition: background .2s; }
+  .cancel { background-color: #e0e0e0; color: #333; }
+  .cancel:hover { background-color: #ccc; }
+  .add { background-color: #007bff; color: #fff; }
+  .add:hover { background-color: #0056b3; }
+
+  /* Music player styles */
+  .music-player { display: flex; flex-direction: column; align-items: center; gap: 20px; padding: 20px; background: #fff; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,.05); margin-bottom: 15px; text-align: center; }
+  .music-player h4 { margin: 0; color: #333; font-size: 18px; }
+  .progress-container { width: 100%; margin-top: 15px; text-align: center; }
+  #progressBar { width: 100%; height: 8px; border-radius: 5px; background: #ddd; outline: none; -webkit-appearance: none; appearance: none; cursor: pointer; margin-bottom: 10px; }
+  #progressBar::-webkit-slider-thumb { -webkit-appearance: none; appearance: none; width: 16px; height: 16px; border-radius: 50%; background: #007bff; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+  #progressBar::-moz-range-thumb { width: 16px; height: 16px; border-radius: 50%; background: #007bff; cursor: pointer; box-shadow: 0 2px 5px rgba(0,0,0,0.2); }
+  .time-display { font-size: 14px; color: #666; }
+  .track-selection { display: flex; flex-direction: column; gap: 10px; width: 100%; }
+  .track-selection button { background: #f0f0f0; color: #333; border: 1px solid #ddd; padding: 10px 15px; border-radius: 10px; font-size: 16px; cursor: pointer; transition: background .2s, border-color .2s; width: 100%; box-sizing: border-box; }
+  .track-selection button.active { background: #007bff; color: #fff; border-color: #007bff; }
+  .track-selection button:hover { background: #e0e0e0; border-color: #c0c0c0; }
+  .track-selection button.active:hover { background: #0056b3; border-color: #0056b3; }
+
+  /* Search modal top bar style (now embedded in overlay) */
+  .search-modalmaakt { background: #fff; border-radius: 0 0 15px 15px; box-shadow: 0 5px 15px rgba(0,0,0,.2); max-width: 375px; width: 100%; padding: 15px 20px; display: flex; flex-direction: column; gap: 15px; transform: translateY(-100%); transition: transform .3s ease-out; }
+  .search-modal-overlay.visible .search-modal { transform: translateY(0); }
+  .search-modal input[type="text"] { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; }
+  .search-results { max-height: 300px; overflow-y: auto; border-top: 1px solid #eee; padding-top: 10px; margin-top: 10px; }
+  .search-results .card { margin-bottom: 10px; }
+
+  /* Profile section styles */
+  .profile-content-inner { display: flex; flex-direction: column; gap: 20px; padding: 20px; background: #fff; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,.05); margin-bottom: 15px; }
+  .profile-section label { display: block; margin-bottom: 5px; font-weight: bold; color: #555; font-size: 14px; }
+  .profile-section input[type="text"],
+  .profile-section input[type="url"],
+  .profile-section input[type="file"] { width: calc(100% - 20px); padding: 10px; border: 1px solid #ddd; border-radius: 8px; font-size: 16px; box-sizing: border-box; margin-bottom: 10px; }
+  button { background-color: #007bff; color: #fff; border: none; padding: 10px 20px; border-radius: 8px; font-size: 16px; cursor: pointer; transition: background .2s; }
+  button:hover { background-color: #0056b3; }
+
+  /* Pomodoro timer styles */
+  .pomodoro-timer { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 20px; padding: 20px; background: #fff; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,.05); margin-bottom: 15px; }
+  .timer-display { font-size: 60px; font-weight: bold; color: #333; margin-bottom: 10px; }
+  .timer-status { font-size: 20px; color: #666; margin-bottom: 20px; }
+  .timer-controls { display: flex; gap: 15px; }
+  .timer-controls button { background-color: #007bff; color: #fff; border: none; padding: 12px 25px; border-radius: 10px; font-size: 16px; cursor: pointer; transition: background .2s, transform .1s; }
+  .timer-controls button:hover { background-color: #0056b3; transform: translateY(-1px); }
+  .reset { background-color: #f44336; }
+  .reset:hover { background-color: #d32f2f; }
+  .timer-settings { display: flex; flex-direction: column; gap: 10px; width: 100%; max-width: 250px; margin-top: 20px; }
+  .timer-settings label { font-size: 14px; color: #555; display: flex; justify-content: space-between; align-items: center; }
+  .timer-settings input[type="number"] { width: 70px; padding: 8px; border: 1px solid #ddd; border-radius: 5px; text-align: center; font-size: 16px; }
+
+  /* Delete bottom sheet styles */
+  .delete-bottom-sheet { background: #fff; width: 100%; max-width: 375px; border-top-left-radius: 20px; border-top-right-radius: 20px; padding: 20px; box-shadow: 0 -5px 15px rgba(0,0,0,.2); transform: translateY(100%); transition: transform .3s ease-out; }
+  .delete-bottom-sheet-overlay.visible .delete-bottom-sheet { transform: translateY(0); }
+  .delete-bottom-sheet h4 { margin-top: 0; font-size: 20px; text-align: center; margin-bottom: 15px; color: #333; }
+  .delete-bottom-sheet p { font-size: 15px; color: #666; margin-bottom: 25px; text-align: center; }
+  .button-group { display: flex; justify-content: space-around; gap: 10px; }
+  .cancel-delete { background-color: #e0e0e0; color: #333; }
+  .cancel-delete:hover { background-color: #ccc; }
+  .confirm-delete { background-color: #dc3545; color: #fff; }
+  .confirm-delete:hover { background-color: #c82333; }
+
+  /* Custom dropdown styles */
+  .custom-dropdown { position: relative; width: calc(100% - 20px); margin-bottom: 15px; }
+  .dropdown-header { display: flex; justify-content: space-between; align-items: center; padding: 10px; border: 1px solid #ddd; border-radius: 8px; background-color: #fff; cursor: pointer; font-size: 16px; color: #333; }
+  .dropdown-header.active { border-color: #007bff; }
+  .dropdown-header i { font-size: 20px; transition: transform .3s; }
+  .dropdown-header.active i { transform: rotate(180deg); }
+  .dropdown-list { position: absolute; top: 100%; left: 0; width: 100%; background-color: #fff; border: 1px solid #ddd; border-radius: 8px; box-shadow: 0 4px 8px rgba(0,0,0,.1); list-style: none; padding: 0; margin-top: 5px; max-height: 200px; overflow-y: auto; visibility: hidden; opacity: 0; transform: translateY(-10px); transition: visibility 0s, opacity .3s, transform .3s; z-index: 100; }
+  .dropdown-list.visible { visibility: visible; opacity: 1; transform: translateY(0); }
+  .dropdown-list li { padding: 10px; cursor: pointer; font-size: 16px; color: #333; }
+  .dropdown-list li:hover { background-color: #f0f0f0; }
+  .dropdown-list li.selected { background-color: #e0f7fa; color: #007bff; font-weight: bold; }
+
+  /* Study Tips Section */
+  .study-tips { padding: 20px; background: #fff; border-radius: 15px; box-shadow: 0 2px 5px rgba(0,0,0,.05); margin-bottom: 15px; }
+  .study-tips h4 { margin: 0 0 15px; font-size: 18px; font-weight: 600; color: #333; }
+  .study-tips p { font-size: 16px; color: #666; margin-bottom: 15px; line-height: 1.5; }
+  .study-tips ul { margin: 0; padding-left: 20px; }
+  .study-tips li { font-size: 16px; color: #333; margin-bottom: 10px; }
+
+  /* Dark Theme Styles */
+  :root {
+    --dark-bg-primary: #121212;
+    --dark-bg-secondary: #1e1e1e;
+    --dark-bg-tertiary: #2a2a2a;
+    --dark-text-primary: #e0e0e0;
+    --dark-text-secondary: #b0b0b0;
+    --dark-border-color: #333;
+    --dark-accent-color: #007bff; /* Existing blue, check contrast */
+    --dark-accent-text-color: #ffffff;
+    --dark-hover-bg-color: #383838;
+    --dark-active-info-box-bg: #0056b3; /* Darker blue for active */
+    --dark-box-shadow: 0 2px 5px rgba(0,0,0,.3); /* Softer shadow for dark mode */
+    --dark-hover-box-shadow: 0 4px 8px rgba(0,0,0,.4); /* Softer hover shadow */
+    --dark-input-bg: #2a2a2a;
+    --dark-input-border: #444;
+    --dark-disabled-bg: #424242;
+  }
+
+  .dark-theme {
+    background-color: var(--dark-bg-primary) !important;
+    color: var(--dark-text-primary);
+  }
+
+  .dark-theme .ui-container {
+    background: var(--dark-bg-secondary);
+    box-shadow: 0 0 15px rgba(0,0,0,.5);
+    color: var(--dark-text-primary);
+  }
+
+  .dark-theme .header {
+    /* background: var(--dark-bg-secondary); */ /* Original: lighter than main content */
+    background: var(--dark-bg-primary); /* Match main content bg for seamless look */
+    /* border-bottom: 1px solid var(--dark-border-color); */ /* Original border */
+    border-bottom: none; /* Remove border to blend further */
+    /* padding-bottom: 16px; */ /* Keep padding or adjust if needed */
+  }
+  .dark-theme .header .greeting { color: var(--dark-text-secondary); }
+  .dark-theme .header .user-info h2 { color: var(--dark-text-primary); }
+  .dark-theme .header .user-info p { color: var(--dark-text-secondary); }
+  .dark-theme .header .search-icon { color: var(--dark-text-primary); }
+  .dark-theme .profile-pic { border-color: var(--dark-accent-color); }
+
+  .dark-theme .info-boxes { background: var(--dark-bg-secondary); }
+  .dark-theme .info-box {
+    background: var(--dark-bg-tertiary);
+    color: var(--dark-accent-color); /* Light blue text on dark bg */
+    box-shadow: var(--dark-box-shadow);
+  }
+  .dark-theme .info-box.active {
+    background-color: var(--dark-active-info-box-bg);
+    color: var(--dark-accent-text-color);
+  }
+
+  .dark-theme .main-content { background: var(--dark-bg-primary); }
+  .dark-theme .section-header h3 { color: var(--dark-text-primary); }
+
+  .dark-theme .card {
+    background: var(--dark-bg-tertiary);
+    box-shadow: var(--dark-box-shadow);
+    color: var(--dark-text-primary);
+  }
+  .dark-theme .card:hover { box-shadow: var(--dark-hover-box-shadow); }
+  .dark-theme .content h4 { color: var(--dark-text-primary); }
+  .dark-theme .content p { color: var(--dark-text-secondary); }
+  .dark-theme .time-range { color: var(--dark-text-secondary); }
+  .dark-theme .delete-btn { color: var(--dark-text-secondary); }
+  .dark-theme .delete-btn:hover { color: var(--dark-text-primary); }
+
+  .dark-theme .icon-placeholder img { /* Assuming placeholder images might need filter for dark mode */
+    /* filter: brightness(0.8) contrast(1.2); */ /* Example: adjust if needed */
+  }
+
+
+  .dark-theme .up-next-card {
+    background: var(--dark-bg-tertiary); /* A slightly different dark shade */
+    box-shadow: var(--dark-box-shadow);
+  }
+  .dark-theme .up-next-card .title { color: var(--dark-text-primary); }
+  .dark-theme .up-next-card .task-name { color: var(--dark-text-primary); }
+  .dark-theme .up-next-card .time-info { color: var(--dark-text-secondary); }
+  .dark-theme .up-next-card .tag {
+    background-color: var(--dark-hover-bg-color); /* Darker tag bg */
+    color: #a5d6a7; /* Lighter green text */
+  }
+  .dark-theme .up-next-card .tag.orange {
+    background-color: var(--dark-hover-bg-color);
+    color: #ffcc80; /* Lighter orange text */
+  }
+
+  .dark-theme .bottom-nav {
+    background: var(--dark-bg-secondary);
+    border-top: 1px solid var(--dark-border-color);
+  }
+  .dark-theme .nav-item { color: var(--dark-text-secondary); }
+  .dark-theme .nav-item.active { color: var(--dark-accent-color); }
+  .dark-theme .nav-item:hover { color: var(--dark-accent-color); } /* Keep accent for hover */
+
+  .dark-theme .message-box-overlay,
+  .dark-theme .add-item-modal-overlay,
+  .dark-theme .search-modal-overlay,
+  .dark-theme .delete-bottom-sheet-overlay {
+    background-color: rgba(0,0,0,.7); /* Darker overlay */
+  }
+
+  .dark-theme .message-box,
+  .dark-theme .add-item-modal,
+  .dark-theme .search-modal,
+  .dark-theme .delete-bottom-sheet,
+  .dark-theme .profile-content-inner,
+  .dark-theme .pomodoro-timer,
+  .dark-theme .music-player,
+  .dark-theme .study-tips {
+    background: var(--dark-bg-tertiary);
+    box-shadow: var(--dark-box-shadow);
+    color: var(--dark-text-primary);
+  }
+
+  .dark-theme .message-box h4, .dark-theme .add-item-modal h3, .dark-theme .search-modal h3, .dark-theme .delete-bottom-sheet h4,
+  .dark-theme .profile-content-inner h3, .dark-theme .pomodoro-timer h3, .dark-theme .music-player h3, .dark-theme .study-tips h3,
+  .dark-theme .music-player h4, .dark-theme .study-tips h4 {
+    color: var(--dark-text-primary);
+  }
+  .dark-theme .message-box p, .dark-theme .delete-bottom-sheet p, .dark-theme .study-tips p, .dark-theme .study-tips li {
+    color: var(--dark-text-secondary);
+  }
+
+  .dark-theme button, .dark-theme .add-item-modal button.add, .dark-theme .timer-controls button {
+    background-color: var(--dark-accent-color);
+    color: var(--dark-accent-text-color);
+    border: 1px solid var(--dark-accent-color);
+  }
+  .dark-theme button:hover, .dark-theme .add-item-modal button.add:hover, .dark-theme .timer-controls button:hover {
+    background-color: var(--dark-active-info-box-bg); /* Using darker blue for hover */
+    border-color: var(--dark-active-info-box-bg);
+  }
+  .dark-theme .add-item-modal button.cancel, .dark-theme .cancel-delete {
+    background-color: var(--dark-hover-bg-color);
+    color: var(--dark-text-primary);
+    border: 1px solid var(--dark-border-color);
+  }
+  .dark-theme .add-item-modal button.cancel:hover, .dark-theme .cancel-delete:hover {
+    background-color: var(--dark-border-color);
+  }
+   .dark-theme .confirm-delete, .dark-theme .reset { /* Specific buttons like delete/reset */
+    background-color: #c62828; /* Darker red */
+    color: var(--dark-accent-text-color);
+    border-color: #c62828;
+  }
+  .dark-theme .confirm-delete:hover, .dark-theme .reset:hover {
+    background-color: #b71c1c; /* Even darker red */
+    border-color: #b71c1c;
+  }
+
+
+  .dark-theme input[type="text"],
+  .dark-theme input[type="date"],
+  .dark-theme input[type="time"],
+  .dark-theme input[type="url"],
+  .dark-theme input[type="number"],
+  .dark-theme .custom-dropdown .dropdown-header {
+    background-color: var(--dark-input-bg);
+    color: var(--dark-text-primary);
+    border: 1px solid var(--dark-input-border);
+  }
+  .dark-theme input[type="text"]::placeholder,
+  .dark-theme input[type="date"]::placeholder,
+  .dark-theme input[type="time"]::placeholder,
+  .dark-theme input[type="url"]::placeholder,
+  .dark-theme input[type="number"]::placeholder {
+    color: var(--dark-text-secondary);
+  }
+  .dark-theme .profile-section label, .dark-theme .add-item-modal label, .dark-theme .timer-settings label {
+    color: var(--dark-text-secondary);
+  }
+  .dark-theme .custom-dropdown .dropdown-header.active {
+    border-color: var(--dark-accent-color);
+  }
+  .dark-theme .custom-dropdown .dropdown-list {
+    background-color: var(--dark-input-bg);
+    border: 1px solid var(--dark-input-border);
+    box-shadow: 0 4px 8px rgba(0,0,0,.3);
+  }
+  .dark-theme .custom-dropdown .dropdown-list li {
+    color: var(--dark-text-primary);
+  }
+  .dark-theme .custom-dropdown .dropdown-list li:hover {
+    background-color: var(--dark-hover-bg-color);
+  }
+  .dark-theme .custom-dropdown .dropdown-list li.selected {
+    background-color: var(--dark-active-info-box-bg); /* Using darker blue */
+    color: var(--dark-accent-text-color);
+  }
+
+  .dark-theme #progressBar { background: var(--dark-input-border); }
+  .dark-theme #progressBar::-webkit-slider-thumb { background: var(--dark-accent-color); }
+  .dark-theme #progressBar::-moz-range-thumb { background: var(--dark-accent-color); }
+  .dark-theme .time-display { color: var(--dark-text-secondary); }
+  .dark-theme .track-selection button {
+    background: var(--dark-bg-tertiary);
+    color: var(--dark-text-primary);
+    border: 1px solid var(--dark-input-border);
+  }
+  .dark-theme .track-selection button.active {
+    background: var(--dark-accent-color);
+    color: var(--dark-accent-text-color);
+    border-color: var(--dark-accent-color);
+  }
+  .dark-theme .track-selection button:hover {
+    background: var(--dark-hover-bg-color);
+    border-color: var(--dark-border-color);
+  }
+  .dark-theme .track-selection button.active:hover {
+    background: var(--dark-active-info-box-bg);
+    border-color: var(--dark-active-info-box-bg);
+  }
+
+  .dark-theme .timer-display { color: var(--dark-text-primary); }
+  .dark-theme .timer-status { color: var(--dark-text-secondary); }
+
+  .dark-theme .no-items-message { color: var(--dark-text-secondary); }
+  .dark-theme ::-webkit-calendar-picker-indicator {
+    filter: invert(1); /* Basic invert for date/time pickers, might need refinement */
+  }
+  .dark-theme .search-results p { color: var(--dark-text-secondary); }
+
+  /* Toggle Switch CSS */
+  .profile-section .switch { position: relative; display: inline-block; width: 50px; height: 24px; margin-left: 10px; vertical-align: middle;}
+  .profile-section .switch input { opacity: 0; width: 0; height: 0; }
+  .profile-section .slider { position: absolute; cursor: pointer; top: 0; left: 0; right: 0; bottom: 0; background-color: #ccc; transition: .4s; }
+  .profile-section .slider:before { position: absolute; content: ""; height: 18px; width: 18px; left: 3px; bottom: 3px; background-color: white; transition: .4s; }
+  .profile-section input:checked + .slider { background-color: #007bff; }
+  .profile-section input:focus + .slider { box-shadow: 0 0 1px #007bff; }
+  .profile-section input:checked + .slider:before { transform: translateX(26px); }
+  .profile-section .slider.round { border-radius: 24px; }
+  .profile-section .slider.round:before { border-radius: 50%; }
+  .profile-section label[for="themeToggle"] { vertical-align: middle; }
+
+  .dark-theme .profile-section .slider { background-color: var(--dark-input-border); }
+  .dark-theme .profile-section input:checked + .slider { background-color: var(--dark-accent-color); }
+  .dark-theme .profile-section .slider:before { background-color: var(--dark-text-secondary); } /* Thumb color in dark */
+  .dark-theme .profile-section input:checked + .slider:before { background-color: white; }
+
+  /* Decorative Gradient Ball for Dark Mode */
+  .dark-theme .ui-container::after {
+    content: '';
+    position: fixed; /* Fixed to viewport */
+    right: -80px;  /* Partially off-screen */
+    bottom: -80px; /* Partially off-screen */
+    width: 200px;
+    height: 200px;
+    background: radial-gradient(circle, rgba(0, 123, 255, 0.15) 0%, rgba(0, 123, 255, 0.0) 70%);
+    border-radius: 50%;
+    z-index: 0; /* Below most content, but above body background */
+    pointer-events: none; /* Non-interactive */
+    display: block; /* Ensure it's displayed */
+  }
+  /* Ensure it's not on light theme */
+  .ui-container::after {
+    display: none;
+  }
+
+
+</style>
+</head>
+<body>
+<div class="ui-container">
+  <div class="main-content">
+    <!-- Home sectie -->
+    <div id="homeContent" class="content-section-tab active">
+      <div class="header">
+        <div class="user-info">
+          <span class="greeting" id="timeGreeting">Good morning!</span>
+          <h2 id="userNameDisplay">Your Name</h2>
+          <p id="currentDateDisplay">Mon, Sept 10</p>
+        </div>
+        <div style="display: flex; align-items: center;">
+          <i class="material-icons search-icon" id="searchIcon">search</i>
+          <img src="https://placehold.co/50x50/A3E4D7/000000?text=YN" alt="Profile Picture" class="profile-pic" id="profilePicture" />
+        </div>
+      </div>
+      
+      <!-- Info boxes -->
+      <div class="info-boxes" id="infoBoxes">
+        <div class="info-box active" data-content-id="tests">
+          <span id="testsCount">0</span> <span id="testsLabel">Tests</span>
+        </div>
+        <div class="info-box" data-content-id="exams">
+          <span id="examsCount">0</span> <span id="examsLabel">Exams</span>
+        </div>
+        <div class="info-box" data-content-id="tasks">
+          <span id="tasksCount">0</span> <span id="tasksLabel">Tasks</span>
+        </div>
+      </div>
+      
+      <!-- Up Next -->
+      <div id="upNextSection" style="display:none;">
+        <div class="section-header">
+          <h3>Up Next</h3>
+        </div>
+        <div class="up-next-card" id="upNextCard" data-card-type="up-next">
+          <div class="up-next-item">
+            <div class="color-block" style="background-color:#4CAF50"></div>
+            <div class="text-content">
+              <div class="task-name"></div>
+              <div class="time-info"></div>
+            </div>
+            <span class="tag orange">Up Next</span>
+          </div>
+        </div>
+      </div>
+      
+      <!-- Content Tests -->
+      <div id="testsContent" class="content-section" style="display:block;">
+        <div class="section-header">
+          <h3>Tests</h3>
+        </div>
+      </div>
+      
+      <!-- Content Exams -->
+      <div id="examsContent" class="content-section" style="display:none;">
+        <div class="section-header">
+          <h3>Exams</h3>
+        </div>
+      </div>
+      
+      <!-- Content Tasks -->
+      <div id="tasksContent" class="content-section" style="display:none;">
+        <div class="section-header">
+          <h3>Tasks</h3>
+        </div>
+      </div>
+    </div>
+
+    <!-- Pomodoro -->
+    <div id="pomodoroContent" class="content-section-tab">
+      <div class="section-header">
+        <h3>Pomodoro Timer</h3>
+      </div>
+      <div class="pomodoro-timer">
+        <div class="timer-display" id="timerDisplay">25:00</div>
+        <div class="timer-status" id="timerStatus">Klaar om te starten</div>
+        <div class="timer-controls">
+          <button id="startPauseBtn">Start</button>
+          <button id="resetBtn" class="reset">Reset</button>
+        </div>
+        <div class="timer-settings">
+          <label>
+            Werkduur (min): <input type="number" id="workDuration" value="25" min="1" />
+          </label>
+          <label>
+            Korte Pauze (min): <input type="number" id="shortBreakDuration" value="5" min="1" />
+          </label>
+          <label>
+            Lange Pauze (min): <input type="number" id="longBreakDuration" value="15" min="1" />
+          </label>
+          <label>
+            Pomodoro's voor Lange Pauze: <input type="number" id="pomodorosUntilLongBreak" value="4" min="1" />
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Music -->
+    <div id="musicContent" class="content-section-tab">
+      <div class="section-header">
+        <h3>Music for Study</h3>
+      </div>
+      <div class="music-player">
+        <audio id="audioPlayer" loop></audio>
+        <h4 id="currentSongTitle">Select a song</h4>
+        <div class="progress-container">
+          <input type="range" id="progressBar" value="0" min="0" step="0.01" />
+          <div class="time-display">
+            <span id="currentTimeDisplay">0:00</span> / <span id="durationDisplay">0:00</span>
+          </div>
+        </div>
+        <div class="track-selection">
+          <button data-src="https://hyperrushnet.github.io/study/calmpiano.mp3" data-title="Calm Piano">Calm Piano</button>
+          <button data-src="https://hyperrushnet.github.io/study/diadelicia.mp3" data-title="Dia Delicia">Dia Delicia</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Profile -->
+    <div id="profileContent" class="content-section-tab">
+      <div class="section-header">
+        <h3>My Profile</h3>
+      </div>
+      <div class="profile-content-inner">
+        <div class="profile-section">
+          <label for="editUserName">Name:</label>
+          <input type="text" id="editUserName" placeholder="Your Name" />
+          <button id="saveUserName">Save Name</button>
+        </div>
+        <div class="profile-section">
+          <label for="editProfilePicIdentifier">Profile Picture Initials:</label>
+          <input type="text" id="editProfilePicIdentifier" maxlength="2" placeholder="e.g., YN" />
+          <p style="font-size: 12px; color:#888; margin-top:5px;">(Max 2 karakters voor placeholder afbeelding)</p>
+          <label for="profilePictureUpload" style="margin-top:15px;">Upload Profielfoto:</label>
+          <input type="file" id="profilePictureUpload" accept="image/*" />
+          <p style="font-size: 12px; color:#888; margin-top:5px;">(Upload een afbeeldingsbestand zoals .png, .jpg, .jpeg. Overschrijft link.)</p>
+          <button id="saveProfilePic">Update Afbeelding</button>
+        </div>
+        <div class="profile-section">
+          <label for="themeToggle">Dark Mode:</label>
+          <label class="switch">
+            <input type="checkbox" id="themeToggle">
+            <span class="slider round"></span>
+          </label>
+        </div>
+      </div>
+    </div>
+
+    <!-- Study Tips -->
+    <div id="studyTipsContent" class="content-section-tab">
+      <div class="section-header">
+        <h3>Study Tips</h3>
+      </div>
+      <div class="study-tips">
+        <h4>Effective Study Strategies</h4>
+        <p>Boost your productivity and retention with these proven study techniques:</p>
+        <ul>
+          <li><strong>Active Recall:</strong> Test yourself on the material without looking at your notes to strengthen memory.</li>
+          <li><strong>Spaced Repetition:</strong> Review material at increasing intervals to improve long-term retention.</li>
+          <li><strong>Pomodoro Technique:</strong> Work in focused 25-minute sessions with short breaks to maintain concentration.</li>
+          <li><strong>Create a Study Schedule:</strong> Plan your study sessions in advance to stay organized and consistent.</li>
+          <li><strong>Minimize Distractions:</strong> Study in a quiet environment and silence your phone to stay focused.</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- Bottom nav -->
+  <div class="bottom-nav" id="bottomNav">
+    <a href="#" class="nav-item active" data-nav-id="home">
+      <i class="material-icons">home</i>
+      <span>Home</span>
+    </a>
+    <a href="#" class="nav-item" data-nav-id="pomodoro">
+      <i class="material-icons">timer</i>
+      <span>Pomodoro</span>
+    </a>
+    <a href="#" class="nav-item add-button" data-nav-id="add-item" id="addItemNavButton">
+      <i class="material-icons">add</i>
+      <span>Add</span>
+    </a>
+    <a href="#" class="nav-item" data-nav-id="music">
+      <i class="material-icons">music_note</i>
+      <span>Music</span>
+    </a>
+    <a href="#" class="nav-item" data-nav-id="studyTips">
+      <i class="material-icons">school</i>
+      <span>Study Tips</span>
+    </a>
+  </div>
+</div>
+
+<!-- Message Box -->
+<div class="message-box-overlay" id="messageBoxOverlay">
+  <div class="message-box">
+    <h4 id="messageBoxTitle"></h4>
+    <p id="messageBoxContent"></p>
+    <button id="messageBoxClose">Sluiten</button>
+  </div>
+</div>
+
+<!-- Add Item Bottom Sheet -->
+<div class="add-item-modal-overlay" id="addItemModalOverlay">
+  <div class="add-item-modal" id="addItemModal">
+    <h3>Nieuw item toevoegen</h3>
+    <!-- Item Type Dropdown -->
+    <label for="itemType">Type:</label>
+    <div class="custom-dropdown" id="itemTypeDropdown">
+      <div class="dropdown-header">
+        <span class="selected-value" data-value="test">Test</span>
+        <i class="material-icons">arrow_drop_down</i>
+      </div>
+      <ul class="dropdown-list">
+        <li data-value="test">Test</li>
+        <li data-value="exam">Examen</li>
+        <li data-value="task">Taak</li>
+      </ul>
+    </div>
+    <input type="hidden" id="itemType" value="test" />
+
+    <!-- Titel -->
+    <label for="itemTitle">Titel:</label>
+    <input type="text" id="itemTitle" placeholder="Titel van item" required />
+
+    <!-- Test fields -->
+    <div id="testFields" class="input-group">
+      <label for="testSubject">Onderwerp:</label>
+      <input type="text" id="testSubject" placeholder="bijv. Algebra" />
+      <label for="testTime">Tijd:</label>
+      <input type="time" id="testTime" />
+    </div>
+
+    <!-- Exam fields -->
+    <div id="examFields" class="input-group" style="display: none;">
+      <label for="examSubject">Onderwerp:</label>
+      <input type="text" id="examSubject" placeholder="bijv. Natuurkunde" />
+      <label for="examDate">Datum:</label>
+      <input type="date" id="examDate" />
+    </div>
+
+    <!-- Task fields -->
+    <div id="taskFields" class="input-group" style="display: none;">
+      <label for="taskDescription">Beschrijving:</label>
+      <input type="text" id="taskDescription" placeholder="bijv. Hoofdstuk 5 lezen" />
+      <label for="taskDueDate">Vervaldatum:</label>
+      <input type="date" id="taskDueDate" />
+    </div>
+
+    <!-- Buttons -->
+    <div class="form-buttons" style="margin-top:15px;">
+      <button class="cancel" id="cancelAddItem">Annuleren</button>
+      <button class="add" id="confirmAddItem">Toevoegen</button>
+    </div>
+  </div>
+</div>
+
+<!-- Search modal top -->
+<div class="search-modal-overlay" id="searchModalOverlay">
+  <div class="search-modal" id="searchModal">
+    <button class="close-btn" id="closeSearchModal"><i class="material-icons">close</i></button>
+    <h3>Items zoeken</h3>
+    <input type="text" id="searchInput" placeholder="Zoeken op titel, onderwerp of beschrijving" />
+    <div class="search-results" id="searchResults">
+      <p style="text-align:center; color:#888;">Begin met typen om te zoeken...</p>
+    </div>
+  </div>
+</div>
+
+<!-- Delete Bottom Sheet -->
+<div class="delete-bottom-sheet-overlay" id="deleteBottomSheetOverlay">
+  <div class="delete-bottom-sheet" id="deleteBottomSheet">
+    <h4 id="deleteBottomSheetTitle">Bevestig Verwijdering</h4>
+    <p id="deleteBottomSheetMessage">Weet u zeker dat u dit item wilt verwijderen?</p>
+    <div class="button-group">
+      <button class="cancel-delete" id="cancelDeleteBottomSheet">Annuleren</button>
+      <button class="confirm-delete" id="confirmDeleteBottomSheet">Verwijderen</button>
+    </div>
+  </div>
+</div>
+
+<script>
+  // =================== JS ===================
+
+  // Globale datastructuren
+  let allItems = { tests: [], exams: [], tasks: [] };
+  let userProfile = { name: "Jouw Naam", profilePicIdentifier: "JN", profilePicUrl: "" };
+  
+  // Utility functies
+  function generateUUID() {
+    return 'xxxxxxxx-xxxx-4xxx-yxxx-xxxxxxxxxxxx'.replace(/[xy]/g, c => {
+      let r = Math.random() * 16 | 0,
+          v = c === 'x' ? r : (r & 0x3 | 0x8);
+      return v.toString(16);
+    });
+  }
+
+  function showMessageBox(title, message) {
+    document.getElementById('messageBoxTitle').textContent = title;
+    document.getElementById('messageBoxContent').textContent = message;
+    document.getElementById('messageBoxOverlay').classList.add('visible');
+  }
+  function hideMessageBox() {
+    document.getElementById('messageBoxOverlay').classList.remove('visible');
+  }
+
+  // Local storage
+  function saveItemsToLocalStorage() {
+    localStorage.setItem('myStudyLifeItems', JSON.stringify(allItems));
+  }
+  function saveProfileToLocalStorage() {
+    localStorage.setItem('myStudyLifeProfile', JSON.stringify(userProfile));
+  }
+  function loadItemsFromLocalStorage() {
+    const itemsStr = localStorage.getItem('myStudyLifeItems');
+    if (itemsStr) {
+      try { allItems = JSON.parse(itemsStr); } catch(e){ allItems={tests:[],exams:[],tasks:[]}; }
+    }
+    const profileStr = localStorage.getItem('myStudyLifeProfile');
+    if (profileStr) {
+      try { userProfile = JSON.parse(profileStr); } catch(e){ userProfile={name:"Jouw Naam", profilePicIdentifier:"JN", profilePicUrl:""}; }
+      userProfile.profilePicIdentifier = userProfile.profilePicIdentifier || (userProfile.name ? userProfile.name.substring(0,2).toUpperCase() : "JN");
+    }
+  }
+
+  // UI update functies
+  function updateItemCountDisplay(type, count) {
+    let spanCount, spanLabel, labelText;
+    if (type === 'tests') {
+      spanCount = document.getElementById('testsCount');
+      spanLabel = document.getElementById('testsLabel');
+      labelText = count ===1 ? 'Test' : 'Tests';
+    } else if (type==='exams') {
+      spanCount = document.getElementById('examsCount');
+      spanLabel = document.getElementById('examsLabel');
+      labelText= count===1 ? 'Examen' : 'Examens';
+    } else if (type==='tasks') {
+      spanCount = document.getElementById('tasksCount');
+      spanLabel = document.getElementById('tasksLabel');
+      labelText= count===1 ? 'Taak' : 'Taken';
+    }
+    if (spanCount && spanLabel) {
+      spanCount.textContent = count;
+      spanLabel.textContent=labelText;
+    }
+  }
+
+  function renderItems(type) {
+    const container = document.getElementById(type + 'Content');
+    // Remove existing cards
+    container.innerHTML = '';
+
+    if (allItems[type].length ===0) {
+      const msg = document.createElement('p');
+      msg.className='no-items-message';
+      msg.style.textAlign='center';
+      msg.style.color='#888';
+      msg.style.padding='20px';
+      msg.textContent = `Nog geen ${type} toegevoegd.`;
+      container.appendChild(msg);
+    } else {
+      // Sorteren op datum
+      const sorted = [...allItems[type]].sort((a,b) => {
+        const dateA = a.date || a.dueDate || (a.time ? `2000-01-01T${a.time}` : '');
+        const dateB = b.date || b.dueDate || (b.time ? `2000-01-01T${b.time}` : '');
+        const da = dateA ? new Date(dateA).getTime() : 0;
+        const db = dateB ? new Date(dateB).getTime() : 0;
+        return da - db;
+      });
+      
+      sorted.forEach(item => {
+        let iconText = item.title.substring(0,3).toUpperCase();
+        let bgColor='#c0d9ef', textColor='#407BA7', details='', timeRange='';
+        if(type==='tests') {
+          bgColor='#c0d9ef'; textColor='#407BA7'; details= item.subject || 'Geen onderwerp'; timeRange= item.time || 'Geen tijd';
+        } else if (type==='exams') {
+          bgColor='#e8c8a1'; textColor='#9e622b'; details= item.subject || 'Geen onderwerp'; timeRange= item.date || 'Geen datum';
+        } else if (type==='tasks') {
+          bgColor='#d6eac2'; textColor='#629e2b'; details= item.description || 'Geen beschrijving'; timeRange= item.dueDate || 'Geen vervaldatum';
+        }
+        const html= `
+          <div class="card" data-item-id="${item.id}" data-item-type="${type}">
+            <div class="icon-placeholder">
+              <img src="https://placehold.co/40x40/${bgColor.substring(1)}/${textColor.substring(1)}?text=${iconText}" alt="${item.title}" />
+            </div>
+            <div class="content">
+              <h4>${item.title}</h4>
+              <p>${details}</p>
+              <div class="time-range">${timeRange}</div>
+            </div>
+            <button class="delete-btn" data-item-id="${item.id}" data-item-type="${type}"><i class="material-icons">delete</i></button>
+          </div>`;
+        const wrapper=document.createElement('div');
+        wrapper.innerHTML=html.trim();
+        container.appendChild(wrapper.firstChild);
+      });
+    }
+    updateItemCountDisplay(type, allItems[type].length);
+  }
+
+  function renderAllItems() {
+    renderItems('tests');
+    renderItems('exams');
+    renderItems('tasks');
+    updateUpNextCard();
+  }
+
+  function deleteItemConfirmed(id,type) {
+    allItems[type] = allItems[type].filter(i=>i.id!==id);
+    saveItemsToLocalStorage();
+    renderAllItems();
+    showMessageBox('Verwijderd', `De ${type.slice(0,-1)} is verwijderd.`);
+  }
+
+  // =================== Delete modal ===================
+  const deleteSheetOverlay=document.getElementById('deleteBottomSheetOverlay');
+  const confirmDeleteBtn=document.getElementById('confirmDeleteBottomSheet');
+  const cancelDeleteBtn=document.getElementById('cancelDeleteBottomSheet');
+  const deleteMsg=document.getElementById('deleteBottomSheetMessage');
+  let pendingDelete={id:null, type:null};
+
+  function showDeleteModal(id, type) {
+    pendingDelete={id, type};
+    deleteMsg.textContent=`Weet u zeker dat u deze ${type.slice(0,-1)} wilt verwijderen?`;
+    deleteSheetOverlay.classList.add('visible');
+  }
+  function hideDeleteModal() {
+    deleteSheetOverlay.classList.remove('visible');
+    pendingDelete={id:null, type:null};
+  }
+
+  confirmDeleteBtn.onclick=()=>{
+    if(pendingDelete.id) {
+      deleteItemConfirmed(pendingDelete.id,pendingDelete.type);
+      hideDeleteModal();
+    }
+  }
+  cancelDeleteBtn.onclick=hideDeleteModal;
+
+  // =================== Dynamic Greeting ===================
+  function updateGreeting() {
+    const hour=new Date().getHours();
+    const greeting=document.getElementById('timeGreeting');
+    if (hour>=5 && hour<12) greeting.textContent='Goedemorgen!';
+    else if (hour>=12 && hour<18) greeting.textContent='Goedemiddag!';
+    else greeting.textContent='Goedenavond!';
+    const date=new Date();
+    document.getElementById('currentDateDisplay').textContent= date.toLocaleDateString('nl-NL',{weekday:'short',month:'short',day:'numeric'});
+  }
+
+  // =================== Profile ===================
+  function updateProfileDisplay() {
+    document.getElementById('editUserName').value=userProfile.name;
+    document.getElementById('userNameDisplay').textContent=userProfile.name;
+    document.getElementById('editProfilePicIdentifier').value= userProfile.profilePicIdentifier;
+    // document.getElementById('editProfilePicUrl').value= userProfile.profilePicUrl; // Verwijderd element
+    const profPic=document.getElementById('profilePicture');
+    if (userProfile.profilePicUrl) {
+      profPic.src=userProfile.profilePicUrl;
+      profPic.onerror= ()=>{ 
+        console.error('Kon profielfoto niet laden vanaf URL, terug naar placeholder.');
+        profPic.src= `https://placehold.co/50x50/A3E4D7/000000?text=${userProfile.profilePicIdentifier||'YN'}`;
+      };
+    } else {
+      profPic.src= `https://placehold.co/50x50/A3E4D7/000000?text=${userProfile.profilePicIdentifier||'YN'}`;
+    }
+  }
+
+  document.getElementById('saveUserName').onclick=()=> {
+    const newName=document.getElementById('editUserName').value.trim();
+    if(newName) {
+      userProfile.name=newName;
+      saveProfileToLocalStorage();
+      updateProfileDisplay();
+      showMessageBox('Succes','Uw naam is bijgewerkt!');
+    } else {
+      showMessageBox('Fout','Naam mag niet leeg zijn.');
+    }
+  }
+
+  // Upload profielfoto via file
+  document.getElementById('profilePictureUpload').onchange= (e) => {
+    const file=e.target.files[0];
+    if(file) {
+      const reader=new FileReader();
+      reader.onloadend=()=>{
+        userProfile.profilePicUrl=reader.result; 
+        userProfile.profilePicIdentifier=''; 
+         // document.getElementById('editProfilePicUrl').value=''; // Verwijderd element
+        saveProfileToLocalStorage();
+        updateProfileDisplay();
+        showMessageBox('Succes','Profielfoto geüpload!');
+      };
+      reader.onerror=()=>{ showMessageBox('Fout', 'Kon de afbeelding niet lezen.');}
+      reader.readAsDataURL(file);
+    } else {
+      showMessageBox('Fout', 'Geen bestand geselecteerd.');
+    }
+  }
+
+  document.getElementById('saveProfilePic').onclick=()=>{
+    // const newUrl= document.getElementById('editProfilePicUrl').value.trim(); // Verwijderd element
+    const newInit= document.getElementById('editProfilePicIdentifier').value.trim().toUpperCase();
+    // if(newUrl && !newUrl.match(/^(https?:\/\/[^\s$.?#].[^\s]*)$/i)) { // Verwijderd element
+    //   showMessageBox('Fout','Voer een geldige URL in.');
+    //   return;
+    // }
+    // Als er een bestand is geüpload, wordt profilePicUrl al ingesteld in de 'onchange' handler.
+    // We hoeven hier alleen de initialen bij te werken als er geen URL is (wat betekent dat er geen bestand is geüpload).
+    if (!userProfile.profilePicUrl) { // Geen bestand geüpload en geen URL meer mogelijk
+        userProfile.profilePicIdentifier = newInit || (userProfile.name ? userProfile.name.substring(0, 2).toUpperCase() : 'YN');
+    }
+    // Als er wel een bestand is geüpload, wordt profilePicUrl al gezet, en initialen worden gewist.
+    // Als er geen bestand is geüpload, dan worden alleen de initialen gebruikt.
+    // De URL optie is weg.
+
+    // De logica hieronder is vereenvoudigd omdat de URL-optie weg is.
+    // We slaan altijd op, want ofwel de initialen zijn veranderd, ofwel een foto is geupload (wat de URL en initialen al aanpast).
+    saveProfileToLocalStorage();
+    updateProfileDisplay();
+    showMessageBox('Succes','Profielfoto-instellingen bijgewerkt!');
+    // De oude else-conditie is niet meer relevant omdat er geen URL-veld meer is.
+  };
+
+  // Profile picture click handler
+  document.getElementById('profilePicture').onclick=()=>{
+    document.querySelectorAll('#bottomNav .nav-item').forEach(n=>n.classList.remove('active'));
+    document.querySelectorAll('.content-section-tab').forEach(s=>s.classList.remove('active'));
+    document.getElementById('profileContent').classList.add('active');
+  };
+
+  // =================== Timer ===================
+  let countdown;
+  let timeLeft;
+  let isRunning=false;
+  let currentMode='work'; //'work', 'short-break', 'long-break'
+  let pomodoroCount=0;
+  const alarm=new Audio('https://www.soundjay.com/buttons/beep-07.mp3');
+
+  const timerDisplay=document.getElementById('timerDisplay');
+  const timerStatus=document.getElementById('timerStatus');
+  const startPauseBtn=document.getElementById('startPauseBtn');
+  const resetBtn=document.getElementById('resetBtn');
+  const workDurationInput=document.getElementById('workDuration');
+  const shortBreakInput=document.getElementById('shortBreakDuration');
+  const longBreakInput=document.getElementById('longBreakDuration');
+  const pomodoroInput=document.getElementById('pomodorosUntilLongBreak');
+
+  function updateTimer() {
+    const min = Math.floor(timeLeft/60);
+    const sec= timeLeft%60;
+    timerDisplay.textContent= `${min<10?'0':''}${min}:${sec<10?'0':''}${sec}`;
+  }
+
+  function getDuration(mode) {
+    switch(mode) {
+      case 'work':return parseInt(workDurationInput.value);
+      case 'short-break':return parseInt(shortBreakInput.value);
+      case 'long-break':return parseInt(longBreakInput.value);
+      default: return 25;
+    }
+  }
+
+  function getStatusText(mode,state) {
+    const modeText= { work:'Werken', 'short-break':'Korte pauze', 'long-break':'Lange pauze'}[mode];
+    const stateText= { running:'loopt', paused:'gepauzeerd', finished:'voorbij'}[state];
+    return `${modeText} ${stateText}.`;
+  }
+
+  function startTimer() {
+    if(timeLeft===undefined || timeLeft===null || timeLeft===0) {
+      timeLeft=getDuration(currentMode)*60;
+    }
+    updateTimer();
+    timerStatus.textContent=getStatusText(currentMode,'running');
+    startPauseBtn.textContent='Pauze';
+    isRunning=true;
+    countdown=setInterval(()=> {
+      timeLeft--;
+      if (timeLeft<0) timeLeft=0;
+      updateTimer();
+      if(timeLeft<=0) {
+        clearInterval(countdown);
+        alarm.play();
+        isRunning=false;
+        startPauseBtn.textContent='Start';
+        // Update pb, switch mode
+        if(currentMode==='work') {
+          pomodoroCount++;
+          if (pomodoroCount%parseInt(pomodoroInput.value)===0) {
+            currentMode='long-break';
+          } else {
+            currentMode='short-break';
+          }
+          showMessageBox('Pomodoro',`Werkperiode voorbij! Tijd voor ${currentMode==='long-break'?'een lange pauze':'een korte pauze'}`);
+        } else {
+          currentMode='work';
+          showMessageBox('Pomodoro','Pauze voorbij! Tijd om te werken.');
+        }
+        timeLeft=getDuration(currentMode)*60;
+        updateTimer();
+      }
+    },1000);
+  }
+  function pauseTimer() {
+    clearInterval(countdown);
+    isRunning=false;
+    startPauseBtn.textContent='Hervat';
+    timerStatus.textContent=getStatusText(currentMode,'paused');
+  }
+  function resetTimer() {
+    clearInterval(countdown);
+    isRunning=false;
+    startPauseBtn.textContent='Start';
+    currentMode='work';
+    pomodoroCount=0;
+    timeLeft=parseInt(workDurationInput.value)*60;
+    updateTimer();
+    timerStatus.textContent='Klaar om te starten';
+  }
+
+  startPauseBtn.onclick= ()=> {
+    if(isRunning) pauseTimer();
+    else startTimer();
+  }
+  document.getElementById('resetBtn').onclick= resetTimer;
+
+  // Instellingen wijzigen
+  [workDurationInput, shortBreakInput, longBreakInput, pomodoroInput].forEach(ip=> {
+    ip.onchange=()=> {
+      if(!isRunning) {
+        resetTimer();
+      }
+    };
+  });
+  // Eerst reset om op juiste startwaarde te staan
+  resetTimer();
+
+  // =================== Music ===================
+  const audio=document.getElementById('audioPlayer');
+  const progressBar=document.getElementById('progressBar');
+  const currentTimeDisplay=document.getElementById('currentTimeDisplay');
+  const durationDisplay=document.getElementById('durationDisplay');
+  const currentSongTitle=document.getElementById('currentSongTitle');
+  const trackButtons=document.querySelectorAll('.track-selection button');
+  let isPlaying=false;
+  let currentTrackBtn=null;
+
+  function formatTime(sec) {
+    let m=Math.floor(sec/60);
+    let s= Math.floor(sec%60);
+    return `${m}:${s<10?'0':''}${s}`;
+  }
+
+  audio.ontimeupdate= ()=> {
+    currentTimeDisplay.textContent=formatTime(audio.currentTime);
+    progressBar.value=audio.currentTime;
+  }
+  audio.onloadedmetadata= ()=> {
+    durationDisplay.textContent=formatTime(audio.duration);
+    progressBar.max=audio.duration;
+  }
+  progressBar.oninput= ()=> {
+    audio.currentTime=progressBar.value;
+  }
+
+  trackButtons.forEach(btn=> {
+    btn.onclick= ()=> {
+      const src= btn.dataset.src;
+      const title= btn.dataset.title;
+      if(currentTrackBtn===btn && isPlaying) {
+        audio.pause();
+        isPlaying=false;
+      } else {
+        if(audio.src) {
+          audio.pause();
+        }
+        audio.src=src;
+        currentSongTitle.textContent=title;
+        audio.load();
+        audio.play();
+        isPlaying=true;
+      }
+      trackButtons.forEach(b=>b.classList.remove('active'));
+      if(isPlaying) btn.classList.add('active');
+      else btn.classList.remove('active');
+      currentTrackBtn=btn;
+    }
+  });
+  audio.onended= ()=> {
+    isPlaying=false;
+    if(currentTrackBtn) currentTrackBtn.classList.remove('active');
+    currentSongTitle.textContent='Selecteer een nummer';
+    progressBar.value=0;
+    currentTimeDisplay.textContent='0:00';
+    durationDisplay.textContent='0:00';
+    currentTrackBtn=null;
+  }
+
+  // =================== Search ===================
+  const searchOverlay=document.getElementById('searchModalOverlay');
+  const searchInput=document.getElementById('searchInput');
+  const searchResults=document.getElementById('searchResults');
+  document.getElementById('searchIcon').onclick= ()=> {
+    searchOverlay.classList.add('visible');
+    searchInput.value='';
+    searchResults.innerHTML='<p style="text-align:center; color:#888;">Begin met typen om te zoeken...</p>';
+    searchInput.focus();
+  }
+  document.getElementById('closeSearchModal').onclick= ()=> {
+    searchOverlay.classList.remove('visible');
+  }
+  searchInput.oninput= ()=> {
+    const query= searchInput.value.toLowerCase().trim();
+    searchResults.innerHTML='';
+    if(query.length<2) {
+      searchResults.innerHTML='<p style="text-align:center; color:#888;">Begin met typen om te zoeken...</p>';
+      return;
+    }
+    const allsearch=[...allItems.tests.map(i=>({...i, type:'Test', searchFields:`${i.title} ${i.subject || ''}`.toLowerCase()})),
+                     ...allItems.exams.map(i=>({...i, type:'Examen', searchFields:`${i.title} ${i.subject || ''}`.toLowerCase()})),
+                     ...allItems.tasks.map(i=>({...i, type:'Taak', searchFields:`${i.title} ${i.description||''}`.toLowerCase() }))];
+    const res=allsearch.filter(i=>i.searchFields.includes(query));
+    if(res.length===0) {
+      searchResults.innerHTML='<p style="text-align:center; color:#888;">Geen overeenkomende items gevonden.</p>';
+    } else {
+      res.forEach(i=> {
+        let iconText= i.title.substring(0,3).toUpperCase();
+        let bg='#c0d9ef', col='#407BA7', details='', timeRange='';
+        if(i.type==='Test') {
+          bg='#c0d9ef'; col='#407BA7'; details= i.subject||'Geen onderwerp'; timeRange= i.time||'Geen tijd';
+        } else if(i.type==='Examen') {
+          bg='#e8c8a1'; col='#9e622b'; details= i.subject||'Geen onderwerp'; timeRange= i.date||'Geen datum';
+        } else if(i.type==='Taak') {
+          bg='#d6eac2'; col='#629e2b'; details= i.description||'Geen beschrijving'; timeRange= i.dueDate||'Geen vervaldatum';
+        }
+        const html= `
+          <div class="card" data-item-id="${i.id}" data-item-type="${i.type.toLowerCase()}">
+            <div class="icon-placeholder">
+              <img src="https://placehold.co/40x40/${bg.substring(1)}/${col.substring(1)}?text=${iconText}" alt="${i.title}">
+            </div>
+            <div class="content">
+              <h4>${i.title} (${i.type})</h4>
+              <p>${details}</p>
+              <div class="time-range">${timeRange}</div>
+            </div>
+            <button class="delete-btn" data-item-id="${i.id}" data-item-type="${i.type.toLowerCase()}"><i class="material-icons">delete</i></button>
+          </div>`;
+        searchResults.insertAdjacentHTML('beforeend', html);
+      });
+    }
+  }
+
+  // =================== Add item modal ===================
+  const addOverlay=document.getElementById('addItemModalOverlay');
+  const addModal=document.getElementById('addItemModal');
+  const itemTypeInput=document.getElementById('itemType');
+  const itemTitleInput=document.getElementById('itemTitle');
+  const testFields=document.getElementById('testFields');
+  const examFields=document.getElementById('examFields');
+  const taskFields=document.getElementById('taskFields');
+
+  const itemTypeDropdown=document.getElementById('itemTypeDropdown');
+  const dropdownHeader=document.querySelector('#itemTypeDropdown .dropdown-header');
+  const selectedSpan=document.querySelector('#itemTypeDropdown .selected-value');
+  const dropdownList=document.querySelector('#itemTypeDropdown .dropdown-list');
+  const dropdownItems=dropdownList.querySelectorAll('li');
+
+  // Dropdown toggling
+  dropdownHeader.onclick=()=> {
+    dropdownList.classList.toggle('visible');
+    dropdownHeader.classList.toggle('active');
+  };
+
+  dropdownItems.forEach(li=> {
+    li.onclick=()=> {
+      const v=li.dataset.value;
+      selectedSpan.textContent=li.textContent;
+      selectedSpan.dataset.value=v;
+      itemTypeInput.value=v;
+      dropdownList.classList.remove('visible');
+      dropdownHeader.classList.remove('active');
+
+      updateAddItemFields(v);
+      // Remove all selected class
+      dropdownItems.forEach(item=>item.classList.remove('selected'));
+      li.classList.add('selected');
+    };
+  });
+  document.addEventListener('click', (e)=> {
+    if(!document.querySelector('#itemTypeDropdown').contains(e.target)){
+      dropdownList.classList.remove('visible');
+      dropdownHeader.classList.remove('active');
+    }
+  });
+
+  function updateAddItemFields(selectedType) {
+    testFields.style.display='none';
+    examFields.style.display='none';
+    taskFields.style.display='none';
+    if(selectedType==='test') {
+      testFields.style.display='block';
+      itemTitleInput.placeholder='Titel van de test (bijv. Wiskunde Examen)';
+    } else if(selectedType==='exam') {
+      examFields.style.display='block';
+      itemTitleInput.placeholder='Titel van het examen (bijv. Geschiedenis Tentamen)';
+    } else if(selectedType==='task') {
+      taskFields.style.display='block';
+      itemTitleInput.placeholder='Titel van de taak (bijv. Essay schrijven)';
+    }
+  }
+
+  // Button handlers
+  document.getElementById('addItemNavButton').onclick=(e)=> {
+    e.preventDefault();
+    // Reset form
+    itemTypeInput.value='test';
+    selectedSpan.textContent='Test';
+    dropdownItems.forEach(li=> {
+      li.classList.remove('selected');
+      if(li.dataset.value==='test') li.classList.add('selected');
+    });
+    document.getElementById('itemTitle').value='';
+    document.getElementById('testSubject').value='';
+    document.getElementById('testTime').value='';
+    document.getElementById('examSubject').value='';
+    document.getElementById('examDate').value='';
+    document.getElementById('taskDescription').value='';
+    document.getElementById('taskDueDate').value='';
+    updateAddItemFields('test');
+
+    document.getElementById('addItemModalOverlay').classList.add('visible');
+  };
+  document.getElementById('cancelAddItem').onclick=()=> {
+    addOverlay.classList.remove('visible');
+  };
+  document.getElementById('confirmAddItem').onclick= ()=> {
+    const type=itemTypeInput.value;
+    const title=document.getElementById('itemTitle').value.trim();
+    if(!title){ showMessageBox('Fout','Titel mag niet leeg zijn.'); return; }
+    const newItem={ id:generateUUID(), title};
+    if(type==='test') {
+      newItem.subject=document.getElementById('testSubject').value.trim();
+      newItem.time=document.getElementById('testTime').value;
+      allItems.tests.push(newItem);
+    } else if (type==='exam') {
+      newItem.subject=document.getElementById('examSubject').value.trim();
+      newItem.date=document.getElementById('examDate').value;
+      allItems.exams.push(newItem);
+    } else if (type==='task') {
+      newItem.description=document.getElementById('taskDescription').value.trim();
+      newItem.dueDate=document.getElementById('taskDueDate').value;
+      allItems.tasks.push(newItem);
+    }
+    saveItemsToLocalStorage();
+    renderAllItems();
+    document.getElementById('addItemModalOverlay').classList.remove('visible');
+    showMessageBox('Succes',`Nieuw ${type} "${title}" toegevoegd.`);
+  };
+
+  // =================== Event listeners ===================
+  document.getElementById('messageBoxClose').onclick=hideMessageBox;
+
+  // Delete item from list
+  document.querySelector('.main-content').addEventListener('click', (e)=> {
+    const delBtn=e.target.closest('.delete-btn');
+    if(delBtn) {
+      const id=delBtn.dataset.itemId;
+      const type=delBtn.dataset.itemType;
+      showDeleteModal(id, type);
+    } else {
+      const card=e.target.closest('.card,.up-next-card');
+      if(card && card.dataset.cardType && card.dataset.cardType!=='up-next') {
+        const title= card.querySelector('h4')?.textContent||'Onbekend';
+        showMessageBox('Item Geselecteerd',`${title} is geselecteerd. Hier zou u meer details kunnen nemen.`);
+      }
+    }
+  });
+
+  // Bottom nav
+  document.querySelectorAll('#bottomNav .nav-item').forEach(n=> {
+    n.onclick=(e)=> {
+      e.preventDefault();
+      const navId=n.dataset.navId;
+      if(navId==='add-item') {
+        document.getElementById('addItemModalOverlay').classList.add('visible');
+        // Reset dropdown
+        itemTypeInput.value='test';
+        selectedSpan.textContent='Test';
+        dropdownItems.forEach(li=> {
+          li.classList.remove('selected');
+          if(li.dataset.value==='test') li.classList.add('selected');
+        });
+        // Reset fields
+        document.getElementById('itemTitle').value='';
+        document.getElementById('testSubject').value='';
+        document.getElementById('testTime').value='';
+        document.getElementById('examSubject').value='';
+        document.getElementById('examDate').value='';
+        document.getElementById('taskDescription').value='';
+        document.getElementById('taskDueDate').value='';
+        updateAddItemFields('test');
+        return;
+      }
+      // Else
+      document.querySelectorAll('#bottomNav .nav-item').forEach(b=>b.classList.remove('active'));
+      n.classList.add('active');
+
+      // Show proper section
+      document.querySelectorAll('.content-section-tab').forEach(s=>s.classList.remove('active'));
+      const sec=document.getElementById(navId+'Content');
+      if(sec) sec.classList.add('active');
+
+      // Extra code for home tab
+      if(navId==='home') {
+        const activeBox=document.querySelector('#infoBoxes .info-box.active');
+        if(activeBox) {
+          document.querySelectorAll('.content-section').forEach(s=>s.style.display='none');
+          const subId= activeBox.dataset.contentId+'Content';
+          const subSection=document.getElementById(subId);
+          if(subSection) subSection.style.display='block';
+        }
+      }
+    };
+  });
+
+  // =================== Up Next ===================
+  function updateUpNextCard() {
+    const tasks=allItems.tasks;
+    tasks.sort((a,b)=> {
+      const da=a.dueDate? new Date(a.dueDate).getTime():Infinity;
+      const db=b.dueDate? new Date(b.dueDate).getTime():Infinity;
+      return da-db;
+    });
+    const now=new Date();
+    const upcoming= tasks.filter(t=> t.dueDate && new Date(t.dueDate) >= now);
+    const upPrev=document.getElementById('upNextSection');
+    const upCard=document.getElementById('upNextCard');
+    if(upcoming.length>0 && upCard && upPrev) {
+      upPrev.style.display='block';
+      const task=upcoming[0];
+      upCard.querySelector('.task-name').textContent=task.title;
+      upCard.querySelector('.time-info').textContent=task.dueDate? `Vervaldatum: ${task.dueDate}`:'Geen vervaldatum';
+      
+      const bgColor='#d6eac2', textColor='#629e2b';
+      upCard.querySelector('.color-block').style.backgroundColor=bgColor;
+    } else if(upPrev) {
+      upPrev.style.display='none';
+    }
+  }
+
+  // =================== Initialiseren ===================
+  document.addEventListener('DOMContentLoaded', ()=> {
+    loadItemsFromLocalStorage(); // Loads items and profile (which could include theme)
+    updateGreeting();
+    updateProfileDisplay(); // Could update toggle if theme is part of profile
+    renderAllItems();
+    updateUpNextCard();
+
+    // Theme Toggle Logic
+    const themeToggle = document.getElementById('themeToggle');
+    const uiContainer = document.querySelector('.ui-container'); // Target .ui-container for main app theme
+
+    function applyTheme(theme) {
+      if (theme === 'dark') {
+        uiContainer.classList.add('dark-theme');
+        document.body.classList.add('dark-theme'); // Also apply to body for overall page background
+        if (themeToggle) themeToggle.checked = true;
+        localStorage.setItem('myStudyLifeTheme', 'dark');
+      } else {
+        uiContainer.classList.remove('dark-theme');
+        document.body.classList.remove('dark-theme');
+        if (themeToggle) themeToggle.checked = false;
+        localStorage.setItem('myStudyLifeTheme', 'light');
+      }
+    }
+
+    // Load saved theme
+    const savedTheme = localStorage.getItem('myStudyLifeTheme') || 'light'; // Default to light
+    applyTheme(savedTheme);
+
+    if (themeToggle) {
+      themeToggle.addEventListener('change', () => {
+        if (themeToggle.checked) {
+          applyTheme('dark');
+        } else {
+          applyTheme('light');
+        }
+      });
+    }
+
+    // Info box click handler
+    const infoBoxesContainer = document.getElementById('infoBoxes');
+    if (infoBoxesContainer) {
+      infoBoxesContainer.addEventListener('click', (e) => {
+        const targetInfoBox = e.target.closest('.info-box');
+        if (targetInfoBox && !targetInfoBox.classList.contains('active')) {
+          // Remove active from all info boxes
+          document.querySelectorAll('#infoBoxes .info-box').forEach(box => {
+            box.classList.remove('active');
+          });
+          // Add active to clicked box
+          targetInfoBox.classList.add('active');
+
+          // Hide all content sections
+          document.querySelectorAll('#homeContent .content-section').forEach(section => {
+            section.style.display = 'none';
+          });
+
+          // Show target content section
+          const contentId = targetInfoBox.dataset.contentId;
+          if (contentId) {
+            const targetSection = document.getElementById(contentId + 'Content');
+            if (targetSection) {
+              targetSection.style.display = 'block';
+            }
+          }
+        }
+      });
+    }
+
+    setInterval(updateGreeting,60*1000);
+  });
+</script>
+</body>
+</html>
