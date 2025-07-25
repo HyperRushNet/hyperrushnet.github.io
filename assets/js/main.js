@@ -183,7 +183,7 @@ window.addEventListener("resize", () => {
     adjustGridColumns();
     count++;
     if (count >= maxCount) clearInterval(interval);
-  }, 1000);
+  }, 200);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
