@@ -27,7 +27,7 @@ appWrapper.addEventListener("click", (e) => {
 });
 
 function updateOverlaySize() {
-  const overlay = appWrapper.querySelector("::after");
+  const overlay = appWrapper.querySelector("::after"); 
   if (overlay) {
     overlay.style.width = `${window.innerWidth}px`;
     overlay.style.height = `${window.innerHeight}px`;
