@@ -106,7 +106,7 @@ function renderGames(games) {
           delete img.dataset.retrying;
         };
         testImg.onerror = function () {
-          // blijf proberen
+          // Keep trying :)
         };
         testImg.src = originalSrc + "?t=" + Date.now();
       }, 5000);
@@ -178,12 +178,12 @@ fetch("/assets/json/games.json")
 window.addEventListener("resize", () => {
   clearTimeout(resizeTimeout);
   let count = 0;
-  const maxCount = 10;
+  const maxCount = 50;
   const interval = setInterval(() => {
     adjustGridColumns();
     count++;
     if (count >= maxCount) clearInterval(interval);
-  }, 200);
+  }, 100);
 });
 
 document.addEventListener("DOMContentLoaded", () => {
