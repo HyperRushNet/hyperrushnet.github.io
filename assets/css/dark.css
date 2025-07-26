@@ -1,12 +1,20 @@
 /* Reset */
 *, *::before, *::after {
-  box-sizing: border-box; 
+  box-sizing: border-box;
   margin: 0;
   padding: 0;
   border: 0;
   font: inherit;
   vertical-align: baseline;
   background: none;
+}
+
+/* Accessibility */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    transition: none !important;
+    animation: none !important;
+  }
 }
 
 html, body {
@@ -20,6 +28,14 @@ body.lock-scroll {
   overflow: hidden;
 }
 
+:root {
+  --sidebar-width: 240px;
+  --sidebar-width-desktop: 220px;
+  --gap: 10px;
+  --min-card-width: 160px;
+}
+
+/* App overlay */
 #appWrapper {
   position: relative;
 }
@@ -51,13 +67,6 @@ body.lock-scroll {
   }
 }
 
-:root {
-  --sidebar-width: 240px;
-  --sidebar-width-desktop: 220px;
-  --gap: 10px;
-  --min-card-width: 160px;
-}
-
 /* Sidebar */
 #sidebar {
   position: fixed;
@@ -83,11 +92,21 @@ body.lock-scroll {
     transform: translateX(0);
     width: var(--sidebar-width);
   }
+
+  #content {
+    margin-left: var(--sidebar-width);
+    max-width: calc(100% - var(--sidebar-width));
+  }
 }
 
 @media (min-width: 1025px) {
   #sidebar {
     width: var(--sidebar-width-desktop);
+  }
+
+  #content {
+    margin-left: var(--sidebar-width-desktop);
+    max-width: calc(100% - var(--sidebar-width-desktop));
   }
 }
 
@@ -110,6 +129,7 @@ body.lock-scroll {
   display: flex;
   align-items: center;
   justify-content: center;
+  aspect-ratio: 1/1;
 }
 
 @media (min-width: 768px) {
@@ -184,20 +204,6 @@ body.lock-scroll {
   transition: margin-left 0.3s ease;
 }
 
-@media (min-width: 768px) {
-  #content {
-    margin-left: var(--sidebar-width);
-    max-width: calc(100% - var(--sidebar-width));
-  }
-}
-
-@media (min-width: 1025px) {
-  #content {
-    margin-left: var(--sidebar-width-desktop);
-    max-width: calc(100% - var(--sidebar-width-desktop));
-  }
-}
-
 /* Game kaarten container */
 #gameCardsContainer {
   display: grid;
@@ -219,11 +225,13 @@ body.lock-scroll {
   user-select: none;
   overflow: hidden;
   text-decoration: none;
-  transition: transform 0.3s ease, width 0.3s ease;
   color: inherit;
   cursor: pointer;
   display: flex;
   flex-direction: column;
+  transition: transform 0.3s ease, width 0.3s ease;
+  will-change: transform;
+  contain: layout paint;
 }
 
 .game-card:hover {
@@ -240,6 +248,7 @@ body.lock-scroll {
   border-top-left-radius: 0.5rem;
   border-top-right-radius: 0.5rem;
   user-select: none;
+  pointer-events: none;
 }
 
 /* Fade effect onderin gamekaart */
