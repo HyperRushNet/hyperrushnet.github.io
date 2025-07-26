@@ -1,11 +1,8 @@
-<!DOCTYPE html> 
-<html lang="nl"> 
+<!DOCTYPE html>
+<html lang="nl">
 <head>
-  <meta charset="UTF-8" /> 
+  <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate"> 
-  <meta http-equiv="Pragma" content="no-cache">
-  <meta http-equiv="Expires" content="0">
   <title>The HyperRush Network | Free Online Games</title>
   <link rel="stylesheet" href="/assets/css/dark.css" />
   <script src="/assets/js/main.js" defer></script>
@@ -13,20 +10,23 @@
   <script src="/assets/js/hrn-notifications.min.js"></script>
   <script src="/assets/js/notranslate.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.26/bundled/lenis.min.js"></script>
-<script>
-  const lenis = new Lenis({
-    duration: 1.1,
-    easing: t * (2 - t), 
-    smoothWheel: true,
-    smoothTouch: true,
-  });
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      const lenis = new Lenis({
+        duration: 1.1,
+        easing: t => t * (2 - t),
+        smoothWheel: true,
+        smoothTouch: true,
+      });
 
-  function raf(time) {
-    lenis.raf(time);
-    requestAnimationFrame(raf);
-  }
-  requestAnimationFrame(raf);
-</script>
+      function raf(time) {
+        lenis.raf(time);
+        requestAnimationFrame(raf);
+      }
+      requestAnimationFrame(raf);
+    });
+  </script>
+</head>
 <body>
   <div id="appWrapper">
     <button id="menuToggle" aria-label="Open menu">
@@ -54,6 +54,4 @@
     </main>
   </div>
 </body>
-
 </html>
-  
