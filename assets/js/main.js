@@ -3,7 +3,7 @@
 
   let allGames = [];
   let activeCategory = null;
-  let resizeWatching = false;
+  let resizeScheduled = false;
 
   const sidebar = document.getElementById("sidebar");
   const menuToggle = document.getElementById("menuToggle");
@@ -13,6 +13,7 @@
   const searchBtn = document.getElementById("searchBtn");
   const appWrapper = document.getElementById("appWrapper");
   const body = document.body;
+  const overlay = document.querySelector(".overlay");
 
   menuToggle.addEventListener("click", () => {
     const isOpen = sidebar.classList.toggle("open");
@@ -32,32 +33,45 @@
     }
   });
 
-  // Oude resize handlers zoals jij ze wilde:
-
   function updateOverlaySize() {
-    const overlay = document.querySelector(".overlay");
     if (!overlay) return;
     overlay.style.width = window.innerWidth + "px";
     overlay.style.height = window.innerHeight + "px";
   }
 
-  window.addEventListener("resize", () => {
-    updateOverlaySize();
-    adjustGridColumns();
-  });
+  function adjustGridColumns() {
+    const containerWidth = gameCardsContainer.clientWidth;
+    const styles = getComputedStyle(document.documentElement);
+    const gap = parseInt(styles.getPropertyValue("--gap")) || 10;
+    const minCardWidth = parseInt(styles.getPropertyValue("--min-card-width")) || 160;
 
-  window.addEventListener("resize", () => {
-    if (!resizeWatching) {
-      resizeWatching = true;
-      requestAnimationFrame(() => {
-        adjustGridColumns();
-        resizeWatching = false;
-      });
-    }
-  });
+    let maxPerRow = Math.floor((containerWidth + gap) / (minCardWidth + gap));
+    maxPerRow = Math.max(1, maxPerRow);
+
+    const cardWidth = (containerWidth - (maxPerRow - 1) * gap) / maxPerRow;
+    gameCardsContainer.style.gridTemplateColumns = `repeat(${maxPerRow}, ${cardWidth}px)`;
+  }
+
+  function onResize() {
+    if (resizeScheduled) return;
+    resizeScheduled = true;
+    requestAnimationFrame(() => {
+      updateOverlaySize();
+      adjustGridColumns();
+      resizeScheduled = false;
+    });
+  }
+
+  window.addEventListener("resize", onResize);
+
+  function closeSidebar() {
+    sidebar.classList.remove("open");
+    appWrapper.classList.remove("active");
+    body.classList.remove("lock-scroll");
+  }
 
   function renderCategories() {
-    const categories = [...new Set(allGames.map((g) => g.category))];
+    const categories = [...new Set(allGames.map(g => g.category))];
     categoryList.innerHTML = "";
 
     const allBtn = document.createElement("button");
@@ -71,7 +85,7 @@
     if (!activeCategory) allBtn.classList.add("active");
     categoryList.appendChild(allBtn);
 
-    categories.forEach((cat) => {
+    categories.forEach(cat => {
       const btn = document.createElement("button");
       btn.textContent = cat;
       btn.onclick = () => {
@@ -85,17 +99,11 @@
     });
   }
 
-  function closeSidebar() {
-    sidebar.classList.remove("open");
-    appWrapper.classList.remove("active");
-    body.classList.remove("lock-scroll");
-  }
-
   function renderGames(games) {
     gameCardsContainer.innerHTML = "";
     const fragment = document.createDocumentFragment();
 
-    games.forEach((game) => {
+    games.forEach(game => {
       const card = document.createElement("div");
       card.className = "game-card";
       card.onclick = () => {
@@ -121,9 +129,6 @@
             img.src = originalSrc;
             delete img.dataset.retrying;
           };
-          testImg.onerror = function () {
-            // Blijf proberen
-          };
           testImg.src = originalSrc + "?t=" + Date.now();
         }, 5000);
       };
@@ -145,27 +150,14 @@
     adjustGridColumns();
   }
 
-  function adjustGridColumns() {
-    const containerWidth = gameCardsContainer.clientWidth;
-    const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue("--gap")) || 10;
-    const minCardWidth =
-      parseInt(getComputedStyle(document.documentElement).getPropertyValue("--min-card-width")) || 160;
-
-    let maxPerRow = Math.floor((containerWidth + gap) / (minCardWidth + gap));
-    maxPerRow = Math.max(1, maxPerRow);
-
-    const cardWidth = (containerWidth - (maxPerRow - 1) * gap) / maxPerRow;
-    gameCardsContainer.style.gridTemplateColumns = `repeat(${maxPerRow}, ${cardWidth}px)`;
-  }
-
   function filterAndRender() {
     const term = searchInput.value.toLowerCase().trim();
     let filtered;
 
     if (term) {
-      filtered = allGames.filter((g) => g.name.toLowerCase().includes(term));
+      filtered = allGames.filter(g => g.name.toLowerCase().includes(term));
     } else if (activeCategory) {
-      filtered = allGames.filter((g) => g.category === activeCategory);
+      filtered = allGames.filter(g => g.category === activeCategory);
     } else {
       filtered = allGames;
     }
@@ -177,23 +169,20 @@
   }
 
   searchBtn.addEventListener("click", filterAndRender);
-  searchInput.addEventListener("keypress", (e) => {
+  searchInput.addEventListener("keypress", e => {
     if (e.key === "Enter") filterAndRender();
   });
 
   fetch("/assets/json/games.json")
-    .then((res) => res.json())
-    .then((data) => {
+    .then(res => res.json())
+    .then(data => {
       allGames = data;
       renderCategories();
       renderGames(allGames);
+      updateOverlaySize();
+      adjustGridColumns();
     })
-    .catch((err) => {
+    .catch(err => {
       console.error("Fout bij laden van games.json:", err);
     });
-
-  document.addEventListener("DOMContentLoaded", () => {
-    updateOverlaySize();
-    adjustGridColumns();
-  });
 })();
