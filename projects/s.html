@@ -45,7 +45,7 @@ function filterGames(device) {
   });
 }
 
-fetch("https://hyperrushnet.github.io/json/games.json")
+fetch("https://hyperrushnet.github.io/assets/json/games.json")
   .then(r => r.json())
   .then(data => {
     allGames = data;
