@@ -1,8 +1,6 @@
 ![HyperRush Logo](https://hyperrushnet.github.io/assets/images/logo.png)
 
----
-
-Play instantly. No hassle. Just games. 
+--- 
 
 ## What to expect
 - Varied selection: from action to puzzles.
