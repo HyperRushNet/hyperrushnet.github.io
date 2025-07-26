@@ -12,8 +12,21 @@
   <script src="/assets/js/faviconchanger.min.js"></script>
   <script src="/assets/js/hrn-notifications.min.js"></script>
   <script src="/assets/js/notranslate.min.js"></script>
-  <script src="/assets/js/smoothscroll.min.js"></script>
-</head>
+  <script src="https://cdn.jsdelivr.net/npm/@studio-freight/lenis@1.0.26/bundled/lenis.min.js"></script>
+<script>
+  const lenis = new Lenis({
+    duration: 1.1,
+    easing: t * (2 - t), 
+    smoothWheel: true,
+    smoothTouch: true,
+  });
+
+  function raf(time) {
+    lenis.raf(time);
+    requestAnimationFrame(raf);
+  }
+  requestAnimationFrame(raf);
+</script>
 <body>
   <div id="appWrapper">
     <button id="menuToggle" aria-label="Open menu">
@@ -41,5 +54,6 @@
     </main>
   </div>
 </body>
+
 </html>
   
