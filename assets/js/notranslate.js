@@ -1,0 +1,1 @@
+(()=>{let m=document.createElement("meta");m.name="google",m.content="notranslate",document.head.appendChild(m);document.documentElement.setAttribute("lang","en");document.body.setAttribute("translate","no");})();
