@@ -2,20 +2,9 @@
 
 --- 
 
-## What to expect
-- Varied selection: from action to puzzles.
-- Instant play: no downloads, no sign-up.
-- Regular updates: new games and features. 
+## Welcome to the official *HyperRush Network* Repository!
 
-## Get started
-Visit The HyperRush Network, pick a game, and start playing.
-
-## Contribute
-- Found a bug or have an idea? Check the Issues tab.
-- Want to contribute? Fork the project and submit a pull request.
-
-## Technologies used
-HTML5, CSS3, JavaScript.
+You can relax here, get inspired, or whatever... Just make sure to follow the license :)
 
 ---
 
