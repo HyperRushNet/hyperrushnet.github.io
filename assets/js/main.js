@@ -22,11 +22,7 @@
   });
 
   appWrapper.addEventListener("click", (e) => {
-    if (
-      sidebar.classList.contains("open") &&
-      !sidebar.contains(e.target) &&
-      !menuToggle.contains(e.target)
-    ) {
+    if (sidebar.classList.contains("open") && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
       sidebar.classList.remove("open");
       appWrapper.classList.remove("active");
       body.classList.remove("lock-scroll");
@@ -34,9 +30,10 @@
   });
 
   function updateOverlaySize() {
-    if (!overlay) return;
-    overlay.style.width = window.innerWidth + "px";
-    overlay.style.height = window.innerHeight + "px";
+    if (overlay) {
+      overlay.style.width = window.innerWidth + "px";
+      overlay.style.height = window.innerHeight + "px";
+    }
   }
 
   function adjustGridColumns() {
@@ -50,6 +47,13 @@
 
     const cardWidth = (containerWidth - (maxPerRow - 1) * gap) / maxPerRow;
     gameCardsContainer.style.gridTemplateColumns = `repeat(${maxPerRow}, ${cardWidth}px)`;
+
+    const totalUsed = maxPerRow * cardWidth + (maxPerRow - 1) * gap;
+    const leftover = containerWidth - totalUsed;
+
+    if (Math.abs(leftover) > 1) {
+      requestAnimationFrame(adjustGridColumns); // blijf corrigeren tot exact
+    }
   }
 
   function onResize() {
