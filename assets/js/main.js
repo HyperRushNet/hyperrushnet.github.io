@@ -32,9 +32,19 @@
     }
   });
 
-  function updateOverlay() {
-    // Maak overlay zichtbaar via CSS op basis van .active class, dus hier niets nodig
+  // Oude resize handlers zoals jij ze wilde:
+
+  function updateOverlaySize() {
+    const overlay = document.querySelector(".overlay");
+    if (!overlay) return;
+    overlay.style.width = window.innerWidth + "px";
+    overlay.style.height = window.innerHeight + "px";
   }
+
+  window.addEventListener("resize", () => {
+    updateOverlaySize();
+    adjustGridColumns();
+  });
 
   window.addEventListener("resize", () => {
     if (!resizeWatching) {
@@ -183,7 +193,7 @@
     });
 
   document.addEventListener("DOMContentLoaded", () => {
+    updateOverlaySize();
     adjustGridColumns();
-    updateOverlay();
   });
 })();
