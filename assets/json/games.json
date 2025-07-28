@@ -3,7 +3,7 @@
       "number":1,
       "name":"10 Minutes Till Dawn",
       "category":"Survival",
-      "img":"/images/10-minutes-till-dawn.avif",
+      "img":"/images/10-minutes-till-dawn.png",
       "link":"/games-1/10-minutes-till-dawn/",
       "device":[
          "pc-touch",
@@ -14,7 +14,7 @@
       "number":2,
       "name":"1v1.lol",
       "category":"Battle",
-      "img":"/images/1v1-lol.avif",
+      "img":"/images/1v1-lol.png",
       "link":"/games-1/1v1-lol/",
       "device":[
          "pc-touch",
@@ -25,7 +25,7 @@
       "number":3,
       "name":"Offline Paradise",
       "category":"Platformer",
-      "img":"/images/offline-paradise.avif",
+      "img":"/images/offline-paradise.png",
       "link":"/games-1/OfflineParadise/",
       "device":[
          "pc-touch",
@@ -36,7 +36,7 @@
       "number":4,
       "name":"Adam and Eve 5 Part 2",
       "category":"Puzzle",
-      "img":"/images/adam-eve-2.avif",
+      "img":"/images/adam-eve-2.png",
       "link":"/games-1/adam-eve-2",
       "device":[
          "pc-touch",
@@ -49,7 +49,7 @@
       "number":5,
       "name":"Adam and Eve 5 Part 1",
       "category":"Puzzle",
-      "img":"/images/adam-eve-1.avif",
+      "img":"/images/adam-eve-1.png",
       "link":"/games-1/adam-eve",
       "device":[
          "pc-touch",
@@ -62,7 +62,7 @@
       "number":6,
       "name":"A Dark Room",
       "category":"Strategy",
-      "img":"/images/a-dark-room.avif",
+      "img":"/images/a-dark-room.png",
       "link":"/games-1/adarkroom",
       "device":[
          "pc-touch",
@@ -73,7 +73,7 @@
       "number":7,
       "name":"Alien Hominid",
       "category":"Battle",
-      "img":"/images/alien-hominid.avif",
+      "img":"/images/alien-hominid.png",
       "link":"/games-1/alienhominid",
       "device":[
          "pc-touch",
@@ -84,7 +84,7 @@
       "number":8,
       "name":"Angry Sharks",
       "category":"Casual",
-      "img":"/images/angry-sharks.avif",
+      "img":"/images/angry-sharks.png",
       "link":"/games-1/angry-sharks",
       "device":[
          "pc-touch",
@@ -97,7 +97,7 @@
       "number":9,
       "name":"Apple Shooter",
       "category":"Casual",
-      "img":"/images/apple-shooter.avif",
+      "img":"/images/apple-shooter.png",
       "link":"/games-1/apple-shooter",
       "device":[
          "pc-touch",
@@ -110,7 +110,7 @@
       "number":10,
       "name":"Arcane Archer",
       "category":"Survival",
-      "img":"/images/arcane-archer.avif",
+      "img":"/images/arcane-archer.png",
       "link":"/games-1/arcane-archer",
       "device":[
          "pc-touch",
@@ -123,7 +123,7 @@
       "number":11,
       "name":"Avalanche",
       "category":"Survival",
-      "img":"/images/avalanche.avif",
+      "img":"/images/avalanche.png",
       "link":"/games-1/avalanche",
       "device":[
          "pc-touch",
@@ -134,7 +134,7 @@
       "number":12,
       "name":"Awesome Tanks 2",
       "category":"Shooter",
-      "img":"/images/awesome-tanks-2.avif",
+      "img":"/images/awesome-tanks-2.png",
       "link":"/games-1/awesome-tanks-2",
       "device":[
          "pc-touch",
@@ -147,7 +147,7 @@
       "number":13,
       "name":"The Backrooms 2D",
       "category":"Horror",
-      "img":"/images/the-backrooms-2d.avif",
+      "img":"/images/the-backrooms-2d.png",
       "link":"/games-1/backrooms-2d",
       "device":[
          "pc-touch",
@@ -160,7 +160,7 @@
       "number":14,
       "name":"The Backrooms",
       "category":"Horror",
-      "img":"/images/the-backrooms.avif",
+      "img":"/images/the-backrooms.png",
       "link":"/games-1/backrooms",
       "device":[
          "pc-touch",
@@ -171,7 +171,7 @@
       "number":15,
       "name":"Bacon May Die",
       "category":"Battle",
-      "img":"/images/bacon-may-die.avif",
+      "img":"/images/bacon-may-die.png",
       "link":"/games-1/bacon-may-die",
       "device":[
          "pc-touch",
@@ -182,7 +182,7 @@
       "number":16,
       "name":"The Black Knight",
       "category":"Challenge",
-      "img":"/images/the-black-knight.avif",
+      "img":"/images/the-black-knight.png",
       "link":"/games-1/blackknight",
       "device":[
          "pc-touch",
@@ -195,7 +195,7 @@
       "number":17,
       "name":"Blumgi Slime",
       "category":"Platformer",
-      "img":"/images/blumgi-slime.avif",
+      "img":"/images/blumgi-slime.png",
       "link":"/games-1/blumgi-slime",
       "device":[
          "pc-touch",
@@ -208,7 +208,7 @@
       "number":18,
       "name":"Bob The Robber 4",
       "category":"Adventure",
-      "img":"/images/bob-the-robber-4.avif",
+      "img":"/images/bob-the-robber-4.png",
       "link":"/games-1/bob-the-robber-4",
       "device":[
          "pc-touch",
@@ -219,7 +219,7 @@
       "number":19,
       "name":"Bomb It 7",
       "category":"Battle",
-      "img":"/images/bomb-it-7.avif",
+      "img":"/images/bomb-it-7.png",
       "link":"/games-1/bomb-it-7",
       "device":[
          "pc-touch",
@@ -232,7 +232,7 @@
       "number":20,
       "name":"Boxel Rebound",
       "category":"Platformer",
-      "img":"/images/boxel-rebound.avif",
+      "img":"/images/boxel-rebound.png",
       "link":"/games-1/boxel-rebound",
       "device":[
          "pc-touch",
@@ -245,7 +245,7 @@
       "number":21,
       "name":"Bullet Force",
       "category":"Battle",
-      "img":"/images/bullet-force.avif",
+      "img":"/images/bullet-force.png",
       "link":"/games-1/bullet-force",
       "device":[
          "pc-touch",
