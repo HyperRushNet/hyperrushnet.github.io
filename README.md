@@ -11,4 +11,6 @@ The gamesite that will become great again..
 
 ---
 
-For questions or inquiries, please contact the owner, <br> hyperrushnetwork@gmail.com
+For questions or inquiries, please contact the owner: <br> 
+**Email:** [hyperrushnetwork@gmail.com](mailto:hyperrushnetwork@gmail.com)
+
