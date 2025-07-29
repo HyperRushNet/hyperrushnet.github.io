@@ -11,18 +11,6 @@ const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
 const appWrapper = document.getElementById("appWrapper");
 
-// Lenis instellen op sidebar en gameCardsContainer
-const lenisSidebar = new Lenis({ element: sidebar, smooth: true });
-const lenisGameCards = new Lenis({ element: gameCardsContainer, smooth: true });
-
-// Lenis animation loop
-function lenisLoop(time) {
-  lenisSidebar.raf(time);
-  lenisGameCards.raf(time);
-  requestAnimationFrame(lenisLoop);
-}
-requestAnimationFrame(lenisLoop);
-
 menuToggle.addEventListener("click", () => {
   const isOpen = sidebar.classList.toggle("open");
   appWrapper.classList.toggle("active", isOpen);
@@ -39,8 +27,11 @@ appWrapper.addEventListener("click", (e) => {
 });
 
 function updateOverlaySize() {
-  // overlay via ::after kan niet zo in JS, gebruik css fix
-  // of voeg een echte overlay div toe voor eenvoudiger styling
+  const overlay = appWrapper.querySelector("::after"); 
+  if (overlay) {
+    overlay.style.width = `${window.innerWidth}px`;
+    overlay.style.height = `${window.innerHeight}px`;
+  }
 }
 
 window.addEventListener("resize", () => {
@@ -199,3 +190,5 @@ document.addEventListener("DOMContentLoaded", () => {
   adjustGridColumns();
   updateOverlaySize();
 });
+ 
+    
