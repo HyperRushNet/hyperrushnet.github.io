@@ -11,6 +11,23 @@ const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
 const appWrapper = document.getElementById("appWrapper");
 
+// Lenis init
+const lenis = new Lenis({
+  duration: 1.2,
+  easing: (t) => t * (2 - t),
+  smooth: true,
+  direction: "vertical",
+  gestureDirection: "vertical",
+  smoothTouch: true,
+  touchMultiplier: 2,
+  infinite: false,
+});
+function raf(time) {
+  lenis.raf(time);
+  requestAnimationFrame(raf);
+}
+requestAnimationFrame(raf);
+
 menuToggle.addEventListener("click", () => {
   const isOpen = sidebar.classList.toggle("open");
   appWrapper.classList.toggle("active", isOpen);
@@ -27,22 +44,10 @@ appWrapper.addEventListener("click", (e) => {
 });
 
 function updateOverlaySize() {
-  const overlay = appWrapper.querySelector("::after"); 
-  if (overlay) {
-    overlay.style.width = `${window.innerWidth}px`;
-    overlay.style.height = `${window.innerHeight}px`;
-  }
+  // ::after pseudo-element kun je niet via JS pakken, dus dit werkt niet:
+  // const overlay = appWrapper.querySelector("::after"); 
+  // Je moet overlay via CSS regelen of een extra div gebruiken
 }
-
-window.addEventListener("resize", () => {
-  if (!resizeWatching) {
-    resizeWatching = true;
-    requestAnimationFrame(() => {
-      updateOverlaySize();
-      resizeWatching = false;
-    });
-  }
-});
 
 function renderCategories() {
   const categories = [...new Set(allGames.map(g => g.category))];
@@ -190,5 +195,3 @@ document.addEventListener("DOMContentLoaded", () => {
   adjustGridColumns();
   updateOverlaySize();
 });
- 
-    
