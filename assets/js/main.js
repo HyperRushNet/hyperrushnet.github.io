@@ -11,22 +11,17 @@ const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
 const appWrapper = document.getElementById("appWrapper");
 
-// Lenis init
-const lenis = new Lenis({
-  duration: 1.2,
-  easing: (t) => t * (2 - t),
-  smooth: true,
-  direction: "vertical",
-  gestureDirection: "vertical",
-  smoothTouch: true,
-  touchMultiplier: 2,
-  infinite: false,
-});
-function raf(time) {
-  lenis.raf(time);
-  requestAnimationFrame(raf);
+// Lenis instellen op sidebar en gameCardsContainer
+const lenisSidebar = new Lenis({ element: sidebar, smooth: true });
+const lenisGameCards = new Lenis({ element: gameCardsContainer, smooth: true });
+
+// Lenis animation loop
+function lenisLoop(time) {
+  lenisSidebar.raf(time);
+  lenisGameCards.raf(time);
+  requestAnimationFrame(lenisLoop);
 }
-requestAnimationFrame(raf);
+requestAnimationFrame(lenisLoop);
 
 menuToggle.addEventListener("click", () => {
   const isOpen = sidebar.classList.toggle("open");
@@ -44,10 +39,19 @@ appWrapper.addEventListener("click", (e) => {
 });
 
 function updateOverlaySize() {
-  // ::after pseudo-element kun je niet via JS pakken, dus dit werkt niet:
-  // const overlay = appWrapper.querySelector("::after"); 
-  // Je moet overlay via CSS regelen of een extra div gebruiken
+  // overlay via ::after kan niet zo in JS, gebruik css fix
+  // of voeg een echte overlay div toe voor eenvoudiger styling
 }
+
+window.addEventListener("resize", () => {
+  if (!resizeWatching) {
+    resizeWatching = true;
+    requestAnimationFrame(() => {
+      updateOverlaySize();
+      resizeWatching = false;
+    });
+  }
+});
 
 function renderCategories() {
   const categories = [...new Set(allGames.map(g => g.category))];
