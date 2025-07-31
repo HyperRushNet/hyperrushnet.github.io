@@ -1,0 +1,68 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Embedded Game</title>
+<style>
+  html, body {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    background: #000;
+    overflow: hidden;
+    font-family: sans-serif;
+  }
+  header {
+    position: absolute;
+    top: 10px;
+    left: 10px;
+    z-index: 9999;
+    background: rgba(0,0,0,0.6);
+    padding: 6px 10px;
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    transition: opacity 0.6s ease;
+    opacity: 1;
+  }
+  header.fade-out {
+    opacity: 0;
+    pointer-events: none;
+  }
+  header img {
+    height: 20px;
+    opacity: 0.85;
+    pointer-events: none;
+  }
+  header span {
+    color: #fff;
+    font-size: 13px;
+    opacity: 0.8;
+  }
+  iframe {
+    border: none;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+  }
+</style>
+</head>
+<body>
+
+<header id="branding">
+  <img src="https://hyperrushnet.github.io/assets/images/icons/light.png" alt="Logo">
+  <span>Powered by HyperRush</span>
+</header>
+
+<iframe src="https://example.com" allowfullscreen title="Embedded Game"></iframe>
+
+<script>
+  setTimeout(() => {
+    document.getElementById('branding').classList.add('fade-out');
+  }, 4000);
+</script>
+
+</body>
+</html>
