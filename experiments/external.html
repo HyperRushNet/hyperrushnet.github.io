@@ -1,0 +1,43 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="UTF-8">
+  <title>Domeincontrole</title>
+</head>
+<body>
+  <h1>Domeincontrole</h1>
+  <pre id="output">Laden...</pre>
+
+  <script>
+    function getRootDomain(url) {
+      try {
+        const u = new URL(url);
+        return u.protocol + '//' + u.hostname;
+      } catch (e) {
+        return null;
+      }
+    }
+
+    window.addEventListener('DOMContentLoaded', () => {
+      const output = document.getElementById('output');
+      const currentRoot = getRootDomain(location.href);
+      const referrerRoot = getRootDomain(document.referrer);
+
+      if (!referrerRoot) {
+        output.textContent = 'Geen referrer gevonden. Mogelijk direct of vanuit about:blank geopend.';
+        return;
+      }
+
+      if (currentRoot === referrerRoot) {
+        output.textContent = 'Toegestaan: zelfde hoofddomein\n' +
+                             'Huidig: ' + currentRoot + '\n' +
+                             'Referrer: ' + referrerRoot;
+      } else {
+        output.textContent = 'Niet toegestaan: verschillend hoofddomein\n' +
+                             'Huidig: ' + currentRoot + '\n' +
+                             'Referrer: ' + referrerRoot;
+      }
+    });
+  </script>
+</body>
+</html>
