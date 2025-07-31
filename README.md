@@ -10,6 +10,6 @@ The gamesite that will become great again..
 > Make sure to read the full LICENSE before using this repository in any form.
 
 For questions or inquiries, please contact the owner: <br> 
-> **Email:** [hyperrushnetwork@gmail.com](mailto:hyperrushnetwork@gmail.com)
-
+> **Email:** [hyperrushnetwork@gmail.com](mailto:hyperrushnetwork@gmail.com) <br>
+> **YouTube** [@hyperrushnetwork](https://youtube.com/@hyperrushnetwork)
 ---
