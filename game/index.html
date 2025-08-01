@@ -122,7 +122,7 @@ const loadGame = async () => {
 
   iframe = document.createElement("iframe");
   iframe.src = game.link;
-  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin allow-popups allow-popups-to-escape-sandbox");
   iframe.onload = () => {
     injectIntoIframe();
     iframe.style.display = "block";
