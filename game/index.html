@@ -31,8 +31,10 @@
 (async () => {
   const redirect = () => location.href = "/";
 
-  const params = new URLSearchParams(location.search);
-  const nr = parseInt(params.get("nr"));
+  // → Get game number from hash like #/1
+  const hash = location.hash.slice(1); // "/1"
+  const parts = hash.split("/");
+  const nr = parseInt(parts[1]);
   if (!nr || isNaN(nr)) return redirect();
 
   let games;
@@ -54,7 +56,7 @@
   document.title = `${game.name} - HyperRush`;
 
   const iframe = document.createElement("iframe");
-  iframe.loading = "eager"; // performance hint
+  iframe.loading = "eager";
   iframe.src = game.link;
   iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
   iframe.onerror = () => redirect();
@@ -88,4 +90,3 @@
 </script>
 </body>
 </html>
-     
