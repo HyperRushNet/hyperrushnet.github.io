@@ -31,13 +31,8 @@
 (async () => {
   const redirect = () => location.href = "/";
 
-  // → Get game number from hash like #/1
-  const hash = location.hash.slice(1); // "/1"
-  const parts = hash.split("/");
-  const nr = parseInt(parts[1]);
-  if (!nr || isNaN(nr)) return redirect();
+  let games = [];
 
-  let games;
   try {
     const controller = new AbortController();
     const timeout = setTimeout(() => controller.abort(), 5000);
@@ -50,19 +45,26 @@
     return redirect();
   }
 
-  const game = games.find(g => g.number === nr);
-  if (!game) return redirect();
-
-  document.title = `${game.name} - HyperRush`;
-
   const iframe = document.createElement("iframe");
   iframe.loading = "eager";
-  iframe.src = game.link;
   iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
   iframe.onerror = () => redirect();
   document.body.appendChild(iframe);
 
   const blockerScript = `/*! RedirectBlocker v1.1 | MIT */(()=>{const a=b=>window.hrn?.notifications?.show("Redirect blocked!","info","3000"),c=window.open;window.open=function(b,d,...e){return d&&(d.includes("_top")||d.includes("_parent"))?(a("window.open → "+d),null):c.apply(this,[b,d,...e])},location.assign=function(b){a("location.assign")},location.replace=function(b){a("location.replace")};const d=(b,c)=>{try{const d=Object.getOwnPropertyDescriptor(b,"location");(!d||d.configurable)&&Object.defineProperty(b,"location",{configurable:!0,enumerable:!0,get:()=>window.location,set:d=>{a(c+".location = "+d)}})}catch(e){}};d(window,"window"),d(top,"top"),d(parent,"parent"),document.addEventListener("click",b=>{let c=b.target;for(;c&&c!==document;){if("A"===c.tagName&&c.href){a("<a href>"),b.preventDefault();break}c=c.parentNode}},!0)})();`;
+
+  const loadGameFromHash = () => {
+    const hash = location.hash.slice(1); // "/1"
+    const parts = hash.split("/");
+    const nr = parseInt(parts[1]);
+    if (!nr || isNaN(nr)) return redirect();
+
+    const game = games.find(g => g.number === nr);
+    if (!game) return redirect();
+
+    document.title = `${game.name} - HyperRush`;
+    iframe.src = game.link;
+  };
 
   iframe.onload = () => {
     try {
@@ -86,6 +88,10 @@
       console.warn("Injection error:", err);
     }
   };
+
+  loadGameFromHash();
+
+  window.addEventListener("hashchange", loadGameFromHash);
 })();
 </script>
 </body>
