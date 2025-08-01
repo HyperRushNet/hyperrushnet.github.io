@@ -1,0 +1,105 @@
+const redirect = () => location.href = "/";
+let iframe, games;
+
+const injectIntoIframe = () => {
+  try {
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc || !doc.head) return;
+
+    const scripts = [];
+
+    const disableLogs = doc.createElement("script");
+    disableLogs.textContent = 'console.log=console.debug=console.warn=console.error=()=>{};';
+    scripts.push(disableLogs);
+
+    const capFPS = doc.createElement("script");
+    capFPS.textContent = `
+let last=0;
+function loop(t){
+  if(t-last>16){
+    if(window.__updateGame)window.__updateGame();
+    if(window.__renderGame)window.__renderGame();
+    last=t;
+  }
+  requestAnimationFrame(loop);
+}
+requestAnimationFrame(loop);`;
+    scripts.push(capFPS);
+
+    const pauseScript = doc.createElement("script");
+    pauseScript.textContent = `
+document.addEventListener("visibilitychange",()=>{
+  if(document.hidden){
+    if(window.__pauseGame)window.__pauseGame();
+  }else{
+    if(window.__resumeGame)window.__resumeGame();
+  }
+});`;
+    scripts.push(pauseScript);
+
+    const passiveFix = doc.createElement("script");
+    passiveFix.textContent = `
+["touchstart","touchmove","wheel"].forEach(e=>{
+  window.addEventListener(e,()=>{}, {passive:true});
+});`;
+    scripts.push(passiveFix);
+
+    const notifyScript = doc.createElement("script");
+    notifyScript.src = "./hrn-notifications.min.js";
+    notifyScript.onload = () => {
+      try {
+        const blocker = doc.createElement("script");
+        blocker.textContent = '/*! RedirectBlocker v1.1 | MIT */(()=>{const a=b=>window.hrn?.notifications?.show("Redirect blocked!","info","3000"),c=window.open;window.open=function(b,d,...e){return d&&(d.includes("_top")||d.includes("_parent"))?(a("window.open → "+d),null):c.apply(this,[b,d,...e])},location.assign=function(b){a("location.assign")},location.replace=function(b){a("location.replace")};const d=(b,c)=>{try{const d=Object.getOwnPropertyDescriptor(b,"location");(!d||d.configurable)&&Object.defineProperty(b,"location",{configurable:!0,enumerable:!0,get:()=>window.location,set:d=>{a(c+".location = "+d)}})}catch(e){}};d(window,"window"),d(top,"top"),d(parent,"parent"),document.addEventListener("click",b=>{let c=b.target;for(;c&&c!==document;){if("A"===c.tagName&&c.href){a("<a href>"),b.preventDefault();break}c=c.parentNode}},!0)})();';
+        doc.head.appendChild(blocker);
+      } catch (err) {
+        console.warn("Blocker inject failed", err);
+      }
+    };
+    notifyScript.onerror = () => console.warn("Notification script failed to load");
+    doc.head.appendChild(notifyScript);
+
+    scripts.forEach(s => doc.head.appendChild(s));
+  } catch (e) {
+    console.warn("Iframe inject failed", e);
+  }
+};
+
+const loadGame = async () => {
+  const hash = location.hash.slice(1).split("/")[1];
+  const nr = parseInt(hash);
+  if (!nr || isNaN(nr)) return redirect();
+
+  if (!games) {
+    try {
+      const controller = new AbortController();
+      const timeout = setTimeout(() => controller.abort(), 5000);
+      const res = await fetch("./games.json", { signal: controller.signal });
+      clearTimeout(timeout);
+      if (!res.ok) throw new Error("Invalid response");
+      games = await res.json();
+    } catch (e) {
+      console.error("Failed to load games.json:", e);
+      return redirect();
+    }
+  }
+
+  const game = games.find(g => g.number === nr);
+  if (!game) return redirect();
+
+  document.title = `${game.name} - HyperRush`;
+  if (iframe) iframe.remove();
+
+  iframe = document.createElement("iframe");
+  iframe.src = game.link;
+  iframe.setAttribute("sandbox", "allow-scripts allow-same-origin");
+  iframe.onload = () => {
+    injectIntoIframe();
+    iframe.style.display = "block";
+    document.getElementById("loader").style.display = "none";
+  };
+  iframe.onerror = () => redirect();
+  document.body.appendChild(iframe);
+};
+
+window.addEventListener("hashchange", () => loadGame());
+loadGame();
