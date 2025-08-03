@@ -1,12 +1,13 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <style>
+        /* Dark theme for the entire body */
         body {
-            background-color: #141414; /* Donker thema */
-            color: white; /* Witte tekstkleur */
+            background-color: #141414;
+            color: white;
             font-family: 'Arial', sans-serif;
             display: flex;
             justify-content: center;
@@ -14,88 +15,180 @@
             height: 100vh;
             margin: 0;
         }
+        /* Container for the app */
         .container {
-            background-color: #3a3a3a; /* Donkere achtergrond voor de container */
+            background-color: #3a3a3a;
             border-radius: 15px;
             padding: 30px;
             text-align: center;
             box-shadow: 0 0 20px rgba(0, 0, 0, 0.5);
             position: relative;
-            width: 300px; /* Vaste breedte voor de container */
+            width: 300px;
         }
+        /* Styling for the select box and button */
         select, button {
             padding: 10px;
             margin-top: 10px;
             border: none;
             border-radius: 5px;
-            background-color: #555; /* Donkergrijze achtergrond voor invoerelementen */
-            color: white; /* Witte tekstkleur */
+            background-color: #555;
+            color: white;
             cursor: pointer;
             width: 100%;
-            font-size: 16px; /* Grotere lettergrootte */
-            transition: background-color 0.3s; /* Voor een mooie hover effect */
+            font-size: 16px;
+            transition: background-color 0.3s;
         }
+        /* Hover effect for select and button */
         select:hover, button:hover {
-            background-color: #666; /* Iets donkerder bij hover */
+            background-color: #666;
         }
+        /* Focus effect for select and button */
         select:focus, button:focus {
             outline: none;
-            background-color: #777; /* Nog donkerder bij focus */
+            background-color: #777;
         }
-        #willekeurigWoord {
+        /* Styling for the displayed word */
+        #randomWord {
             margin-top: 20px;
-            font-size: 40px; /* Grotere lettergrootte voor het woord */
-            font-weight: bold; /* Vetgedrukt voor betere zichtbaarheid */
-            color: white; /* Witte kleur voor het woord */
-            display: none; /* Verborgen bij de start */
+            font-size: 40px;
+            font-weight: bold;
+            color: white;
+            display: none; /* Hidden by default */
         }
     </style>
 </head>
 <body>
     <div class="container">
         <div id="inputArea">
-            <label for="moeilijkheidsgraad">Kies een moeilijkheidsgraad:</label>
-            <select id="moeilijkheidsgraad">
-                <option value="makkelijk">Makkelijk</option>
-                <option value="gemiddeld">Gemiddeld</option>
-                <option value="moeilijk">Moeilijk</option>
+            <label for="difficulty">Choose a difficulty level:</label>
+            <select id="difficulty">
+                <option value="easy">Easy</option>
+                <option value="medium">Medium</option>
+                <option value="hard">Hard</option>
             </select>
-            <button onclick="genereerWoord()">Genereer Woord</button>
+            <button onclick="generateWord()">Generate Word</button>
         </div>
-        <h2 id="willekeurigWoord"></h2>
+        <h2 id="randomWord"></h2>
     </div>
 
     <script>
-        const woorden = {
-            makkelijk: [
-                "hond", "kat", "appel", "huis", "boom", "auto", "fiets", "tafel", "stoel", "boek", "camera", "taart", "schildpad", "zon", "regenboog", "trein", "school", "pet", "pizza", "klok", "strand", "feest", "rugzak", "zee", "voetbal", "sneeuwpop", "bloem", "dierentuin", "glas", "bed", "jas", "deur", "tuin", "fiets", "schaar", "boter", "kaas", "glas", "muur", "deur", "dak", "bakker", "winkel", "kom", "beker", "taart", "mes", "vork", "lamp", "kapstok", "struik", "jas", "muts", "bal", "bank", "kast", "vis", "boot", "brug", "bloem", "blok", "appel", "peer", "ijs", "banaan", "koffer", "ster", "ruimte", "paard", "mol", "ei", "emmer", "vis", "muur", "schoen", "knop", "hand", "oog", "tand", "zon", "lucht", "ster", "pad", "raam", "geld", "boek", "kaart", "stoep", "papier", "bel", "doos", "kip", "kat", "hond", "deur", "muur", "raam", "bel", "fiets", "fles", "voet", "huis", "water", "brood", "tas", "gras", "stoel", "kop", "vork", "jas", "sok", "kist", "poort", "rol", "roos", "zeep", "lamp",
+        // Dictionary of words categorized by difficulty.
+        // The lists have been expanded with many more common object names.
+        const words = {
+            easy: [
+                "sun", "moon", "star", "book", "pen", "chair", "table", "car", "cup", "ball", "apple", "door", "wall",
+                "shoe", "hat", "boat", "plane", "tree", "flower", "grass", "bed", "lamp", "sock", "box", "house",
+                "cat", "dog", "key", "coin", "fork", "knife", "spoon", "glass", "clock", "watch", "ring", "phone",
+                "kite", "flag", "belt", "desk", "soap", "oven", "rug", "towel", "bag", "toy", "fish", "bird", "frog",
+                "nest", "rock", "sand", "rope", "map", "globe", "lock", "tire", "bus", "train", "ship", "bike", "duck",
+                "bear", "pig", "cow", "goat", "lion", "wolf", "seed", "leaf", "root", "stem", "branch", "path", "road",
+                "roof", "bell", "drum", "hand", "foot", "eye", "ear", "nose", "mouth", "neck", "arm", "leg", "hair",
+                "desk", "sink", "bath", "glove", "cap", "bowl", "plate", "mug", "pot", "pan", "bottle", "can", "jar",
+                "lid", "tap", "pipe", "cable", "cord", "wire", "plug", "nail", "screw", "nut", "bolt", "brick", "stone",
+                "wood", "metal", "paper", "cloth", "yarn", "thread", "needle", "button", "zipper", "fork", "plate",
+                "juice", "milk", "water", "spoon", "sugar", "salt", "pepper", "rice", "bread", "butter", "cheese",
+                "egg", "fish", "meat", "bone", "skin", "nail", "hair", "eye", "ear", "nose", "chin", "face", "head",
+                "hand", "knee", "foot", "toe", "arm", "elbow", "leg", "thumb", "fist", "back", "chest", "rib", "lung",
+                "heart", "blood", "stomach", "brain", "tooth", "tongue", "lip", "cheek", "gum", "jaw", "neck", "body",
+                "earring", "hat", "sock", "shoe", "boot", "belt", "tie", "pin", "glove", "scarf", "coat", "shirt",
+                "dress", "skirt", "pants", "suit", "vest", "jeans", "ring", "watch", "bracelet", "necklace", "gem",
+                "ring", "chain", "phone", "radio", "tv", "camera", "photo", "mirror", "brush", "comb", "towel", "soap",
+                "sponge", "shampoo", "lotion", "perfume", "box", "bag", "jar", "can", "bottle", "key", "lock", "chain",
+                "rope", "string", "thread", "wire", "cable", "nail", "screw", "bolt", "nut", "washer", "pin", "glue",
+                "paint", "brush", "pencil", "pen", "ink", "paper", "book", "page", "text", "word", "letter", "note",
+                "card", "map", "globe", "sign", "light", "bulb", "lamp", "fire", "smoke", "ash", "coal", "wood", "rock",
+                "sand", "dirt", "mud", "water", "ice", "steam", "wind", "storm", "rain", "snow", "fog", "cloud", "sky",
+                "sun", "moon", "star", "air", "gas", "oil", "fuel", "fire", "plant", "tree", "leaf", "flower", "fruit",
+                "seed", "root", "stem", "branch", "bark", "twig", "forest", "field", "garden", "farm", "animal", "pet"
             ],
-            gemiddeld: [
-                "kampvuur", "winkelcentrum", "wolkenkrabber", "regenjas", "zandkasteel", "avontuur", "verrekijker", "schaduw", "schilderij", "dagdroom", "picknick", "uitje", "uitdaging", "moeras", "ijskast", "geheugen", "komedie", "natuur", "spookhuis", "bergbeklimmen", "nachtmerrie", "topkok", "windmolen", "uitje", "puzzel", "schooljaar", "kalender", "regenboog", "boomgaard", "mozaïek", "avontuur", "vogelnest", "winterjas", "puzzelstuk", "museum", "strandbal", "hoorn", "wielrenner", "tuinfeest", "uitzendbureau", "schilderskwast", "zonsondergang", "boekenkast", "paraplu", "fietspad", "regenjas", "naaldboom", "doolhof", "trampoline", "klokhuis", "pantoffel", "strandwandeling", "aquarium", "kleurpotloden", "brandweerwagen", "verkeersbord", "zandstorm", "limonade", "bloemkool", "picknickkleed", "juwelier", "dennenboom", "uitkijkpost", "geluid", "kompas", "sieraad", "speurtocht", "doorgeefluik", "golven", "vakbond", "onderzeeër", "wolkenlucht", "ontspanning", "uitvinding", "theatershow", "winkelier", "balkon", "uitzicht", "mozaïek", "geheugen", "hemelvaart", "podium", "kluis", "verdieping", "boekhouding",
+            medium: [
+                "backpack", "umbrella", "guitar", "computer", "telephone", "window", "television", "motorcycle",
+                "bicycle", "sandwich", "keyboard", "pillow", "blanket", "sunglasses", "bottle", "castle", "bridge",
+                "garden", "microphone", "camera", "mirror", "basket", "cushion", "diamond", "helmet", "jacket",
+                "lantern", "ladder", "mansion", "necklace", "parachute", "painting", "scooter", "suitcase",
+                "swimming", "trumpet", "volcano", "whistle", "airplane", "building", "firefighter", "hospital",
+                "library", "magazine", "notebook", "stadium", "theater", "trophy", "telescope", "microscope",
+                "binoculars", "calculator", "firefly", "iceberg", "lantern", "magnet", "mountain", "ocean", "pillow",
+                "rainbow", "robot", "satellite", "scientist", "snowflake", "supermarket", "telephone", "tornado",
+                "traffic", "waterfall", "windmill", "carousel", "fireworks", "fountain", "hotdog", "keyboard",
+                "lighthouse", "limousine", "microphone", "parachute", "pancakes", "penguin", "pirate", "popcorn",
+                "robot", "sandwich", "skeleton", "squirrel", "submarine", "umbrella", "unicorn", "vampire", "violin",
+                "xylophone", "yacht", "zebra", "chimney", "cupboard", "doorknob", "headphone", "headphones",
+                "microphone", "railroad", "rollercoaster", "screwdriver", "thermostat", "videogame", "waterbottle",
+                "windshield", "xylophone", "zipper", "blender", "microwave", "refrigerator", "toaster", "kettle",
+                "vacuum", "dishwasher", "flashlight", "thermometer", "thermos", "scissors", "screwdriver", "hammer",
+                "wrench", "spanner", "ruler", "compass", "protractor", "calculator", "stapler", "highlighter",
+                "binder", "envelope", "postcard", "stamp", "ticket", "brochure", "pamphlet", "menu", "receipt",
+                "ticket", "coupon", "voucher", "password", "username", "email", "website", "database", "program",
+                "software", "hardware", "desktop", "laptop", "tablet", "screen", "monitor", "speaker", "mouse",
+                "keyboard", "printer", "scanner", "router", "modem", "battery", "adapter", "charger", "earphone",
+                "headset", "webcam", "joystick", "console", "controller", "helmet", "goggles", "gloves", "skates",
+                "skateboard", "surfboard", "snowboard", "ski", "sledge", "tent", "sleepingbag", "backpack",
+                "campfire", "lantern", "compass", "map", "binocular", "fishingrod", "lifejacket", "canoe", "kayak",
+                "paddle", "oar", "snorkel", "flipper", "goggles", "diving", "swimmingpool", "waterslide", "carousel",
+                "ferriswheel", "rollercoaster", "ticket", "popcorn", "soda", "pretzel", "hotdog", "hamburger",
+                "pizza", "spaghetti", "lasagna", "macaroni", "sushi", "taco", "burrito", "enchilada", "quesadilla",
+                "nachos", "guacamole", "salsa", "chili", "curry", "soup", "stew", "salad", "sandwich", "toast",
+                "waffle", "pancake", "muffin", "donut", "cookie", "cake", "pie", "tart", "pudding", "jello", "candy",
+                "chocolate", "lollipop", "gum", "caramel", "toffee", "biscuit", "cracker", "breadstick"
             ],
-            moeilijk: [
-                "archeologie", "bewustzijn", "ruimtevaart", "telepathie", "universiteit", "compassie", "verslagenheid", "complexiteit", "intelligentie", "projectie", "analyse", "wetenschap", "symbool", "filosofie", "navigatie", "remedie", "onderzoek", "toepassing", "architectuur", "synthese", "strategie", "planologie", "ethiek", "oriëntatie", "paradox", "emotie", "definitie", "innovatie", "circulatie", "abstractie", "coördinatie", "theorie", "terminologie", "documentatie", "implicatie", "formule", "encyclopedie", "isolatie", "visie", "dialectiek", "thematiek", "fundering", "reactie", "ethiek", "reflectie", "mutatie", "objectiviteit", "subjectiviteit", "karakteristiek", "experiment", "hypothese", "beargumentering", "associatie", "meditatie", "paradigma", "rationaliteit", "retoriek", "socialisatie", "identiteit", "existentialisme", "methodologie", "synthetisch", "compositie", "conclusie", "voorspelling", "subjectivisme", "decentralisatie", "autonomie", "grondbeginselen", "oprechtheid", "causale", "moraliseren", "retorische", "radicaliteit", "evenwicht", "interpretatie", "vermogen", "patroonherkenning", "psychologie", "pedagogiek", "abstract", "algemeen",
-            ],
+            hard: [
+                "archaeology", "consciousness", "astronaut", "telepathy", "university", "compassion", "dejection",
+                "complexity", "intelligence", "projection", "analysis", "science", "symbol", "philosophy",
+                "navigation", "remedy", "research", "application", "architecture", "synthesis", "strategy",
+                "urbanism", "ethics", "orientation", "paradox", "emotion", "definition", "innovation",
+                "circulation", "abstraction", "coordination", "theory", "terminology", "documentation",
+                "implication", "formula", "encyclopedia", "isolation", "vision", "dialectics", "thematics",
+                "foundation", "reaction", "reflection", "mutation", "objectivity", "subjectivity",
+                "characteristic", "experiment", "hypothesis", "argumentation", "association", "meditation",
+                "paradigm", "rationality", "rhetoric", "socialization", "identity", "existentialism",
+                "methodology", "synthetic", "composition", "conclusion", "prediction", "subjectivism",
+                "decentralization", "autonomy", "principles", "sincerity", "causality", "moralization",
+                "radicalism", "equilibrium", "interpretation", "capacity", "pattern-recognition", "psychology",
+                "pedagogy", "abstract", "generalization", "cathedral", "monument", "skyscraper", "lighthouse",
+                "carousel", "aquarium", "telescope", "microscope", "calculator", "headphones", "microphone",
+                "elevator", "library", "restaurant", "fountain", "sculpture", "subconscious", "hypothesis",
+                "parliament", "revolution", "constitution", "jurisdiction", "amendment", "bureaucracy",
+                "jurisprudence", "metropolis", "metaphor", "allegory", "personification", "onomatopoeia",
+                "hyperbole", "rhetoric", "paradox", "oxymoron", "juxtaposition", "synesthesia", "euphemism",
+                "colloquialism", "etymology", "semantics", "syntax", "phonology", "morphology", "pragmatics",
+                "sociology", "anthropology", "geography", "cartography", "geology", "climatology", "ecology",
+                "botany", "zoology", "astronomy", "physics", "chemistry", "biology", "genetics", "biochemistry",
+                "microbiology", "immunology", "pharmacology", "toxicology", "neurology", "cardiology", "oncology",
+                "endocrinology", "dermatology", "radiology", "anesthesiology", "gastroenterology", "hematology",
+                "pathology", "nephrology", "pulmonology", "rheumatology", "gerontology", "pediatrics", "psychiatry",
+                "criminology", "sociolinguistics", "epistemology", "hermeneutics", "ontology", "phenomenology",
+                "deconstruction", "structuralism", "postmodernism", "existentialism", "nihilism", "utilitarianism",
+                "hedonism", "stoicism", "epicureanism", "scepticism", "empiricism", "rationalism", "idealism",
+                "materialism", "dualism", "monism", "pluralism", "absolutism", "relativism", "universalism",
+                "individualism", "collectivism", "capitalism", "socialism", "communism", "fascism", "democracy",
+                "theocracy", "anarchy", "monarchy", "oligarchy", "dictatorship", "totalitarianism", "nationalism",
+                "pacifism", "feminism", "environmentalism", "humanitarianism", "globalism", "isolationism",
+                "populism", "liberalism", "conservatism", "libertarianism", "multiculturalism", "internationalism"
+            ]
         };
 
-        function genereerWoord() {
-            const moeilijkheidsgraad = document.getElementById("moeilijkheidsgraad").value;
-            const mogelijkeWoorden = woorden[moeilijkheidsgraad];
-            const randomIndex = Math.floor(Math.random() * mogelijkeWoorden.length);
-            const willekeurigWoord = mogelijkeWoorden[randomIndex];
+        /**
+         * Generates and displays a random word based on the selected difficulty.
+         * The input area is hidden and the word is shown for a brief period before resetting.
+         */
+        function generateWord() {
+            const difficulty = document.getElementById("difficulty").value;
+            const possibleWords = words[difficulty];
+            const randomIndex = Math.floor(Math.random() * possibleWords.length);
+            const randomWord = possibleWords[randomIndex];
             
-            // Verberg de input elementen en toon het woord
+            // Hide the input elements and show the word
             document.getElementById("inputArea").style.display = "none";
-            document.getElementById("willekeurigWoord").innerText = willekeurigWoord;
-            document.getElementById("willekeurigWoord").style.display = "block";
+            document.getElementById("randomWord").innerText = randomWord;
+            document.getElementById("randomWord").style.display = "block";
 
-            // Reset alles na 3 seconden
+            // Reset everything after 3 seconds
             setTimeout(() => {
-                document.getElementById("willekeurigWoord").style.display = "none";
+                document.getElementById("randomWord").style.display = "none";
                 document.getElementById("inputArea").style.display = "block";
-            }, 1000);
+            }, 3000);
         }
     </script>
 </body>
 </html>
-      
