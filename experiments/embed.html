@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Embedded Game</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; height: 100%; background: #000; overflow: hidden;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+    -webkit-font-smoothing: antialiased; -moz-osx-font-smoothing: grayscale;
+  }
+  header {
+    position: fixed;
+    top: 12px; left: 12px;
+    background: rgba(0,0,0,0.5);
+    backdrop-filter: blur(6px);
+    -webkit-backdrop-filter: blur(10px);
+    padding: 8px 14px;
+    border-radius: 10px;
+    display: flex; align-items: center; gap: 12px;
+    color: #eee;
+    font-size: 14px;
+    font-weight: 600;
+    user-select: none;
+    pointer-events: auto;
+    transition: opacity 0.8s ease, transform 0.8s ease;
+    will-change: opacity, transform;
+    box-shadow: 0 0 8px rgba(255,255,255,0.1);
+  }
+  header.fade-out {
+    opacity: 0;
+    transform: translateY(-10px);
+    pointer-events: none;
+  }
+  .logo-wrapper {
+    position: relative;
+    width: 24px;
+    height: 24px;
+  }
+  .logo-wrapper img, .logo-wrapper .fallback-icon {
+    width: 24px;
+    height: 24px;
+    object-fit: contain;
+    display: block;
+  }
+  .spinner {
+    position: absolute;
+    top: 0; left: 0;
+    width: 24px; height: 24px;
+    border: 2px solid #ccc;
+    border-top: 2px solid transparent;
+    border-radius: 50%;
+    animation: spin 1s linear infinite;
+    z-index: 10;
+  }
+  .hidden {
+    display: none !important;
+  }
+  @keyframes spin {
+    to { transform: rotate(360deg); }
+  }
+  .fallback-icon {
+    filter: invert(1);
+    opacity: 0.7;
+  }
+  header a {
+    color: #90ee90;
+    text-decoration: none;
+    font-weight: 700;
+    transition: color 0.3s ease;
+  }
+  header a:hover,
+  header a:focus {
+    color: #90caf9;
+    outline: none;
+    text-decoration: underline;
+  }
+  iframe {
+    border: none;
+    width: 100vw;
+    height: 100vh;
+    display: block;
+    background: #111;
+  }
+</style>
+</head>
+<body>
+
+<header id="branding" aria-label="Branding">
+  <div class="logo-wrapper">
+    <div class="spinner" id="spinner"></div>
+    <img id="logo-img" src="https://hyperrushnet.github.io/assets/images/icons/light.png" alt="HyperRush logo" />
+    <img id="fallback-icon" class="fallback-icon hidden" src="https://fonts.gstatic.com/s/i/materialsymbols/link/default/24px.svg" alt="Link icon" />
+  </div>
+  <span>Powered by <a href="https://hyperrushnet.github.io" target="_blank" rel="noopener noreferrer">HyperRush</a></span>
+</header>
+
+<iframe src="https://example.com" allowfullscreen title="Embedded Game" loading="lazy"></iframe>
+
+<script>
+  const branding = document.getElementById('branding');
+  const logo = document.getElementById('logo-img');
+  const spinner = document.getElementById('spinner');
+  const fallback = document.getElementById('fallback-icon');
+  let retryCount = 0;
+
+  const hideSpinner = () => spinner.classList.add('hidden');
+  const showFallback = () => {
+    logo.classList.add('hidden');
+    fallback.classList.remove('hidden');
+    hideSpinner();
+  };
+
+  logo.addEventListener('load', () => {
+    hideSpinner();
+  });
+
+  logo.addEventListener('error', () => {
+    retryCount++;
+    if (retryCount <= 2) {
+      // Retry loading the image
+      setTimeout(() => {
+        logo.src = logo.src.split('?')[0] + '?retry=' + Date.now();
+      }, 500);
+    } else {
+      showFallback();
+    }
+  });
+
+  // Fade logic
+  let fadeTimeout;
+
+  const scheduleFade = (delay = 1000) => {
+    clearTimeout(fadeTimeout);
+    fadeTimeout = setTimeout(() => {
+      branding.classList.add('fade-out');
+    }, delay);
+  };
+
+  branding.addEventListener('mouseenter', () => {
+    clearTimeout(fadeTimeout);
+    branding.classList.remove('fade-out');
+  });
+
+  branding.addEventListener('mouseleave', () => {
+    scheduleFade(1000);
+  });
+
+  setTimeout(() => scheduleFade(1000), 4000);
+
+  branding.addEventListener('transitionend', () => {
+    if (branding.classList.contains('fade-out')) branding.remove();
+  });
+</script>
+
+</body>
+</html>
