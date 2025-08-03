@@ -73,7 +73,7 @@
 
     <script>
         // Dictionary of words categorized by difficulty.
-        // The lists have been expanded with many more common object names.
+        // The lists have been significantly expanded with more common object names.
         const words = {
             easy: [
                 "sun", "moon", "star", "book", "pen", "chair", "table", "car", "cup", "ball", "apple", "door", "wall",
@@ -99,7 +99,17 @@
                 "card", "map", "globe", "sign", "light", "bulb", "lamp", "fire", "smoke", "ash", "coal", "wood", "rock",
                 "sand", "dirt", "mud", "water", "ice", "steam", "wind", "storm", "rain", "snow", "fog", "cloud", "sky",
                 "sun", "moon", "star", "air", "gas", "oil", "fuel", "fire", "plant", "tree", "leaf", "flower", "fruit",
-                "seed", "root", "stem", "branch", "bark", "twig", "forest", "field", "garden", "farm", "animal", "pet"
+                "seed", "root", "stem", "branch", "bark", "twig", "forest", "field", "garden", "farm", "animal", "pet",
+                "bus", "car", "taxi", "van", "truck", "train", "bike", "scooter", "motorcycle", "wheel", "engine",
+                "seat", "window", "roof", "door", "handle", "mirror", "light", "headlight", "tire", "bumper", "brake",
+                "gas", "pedal", "street", "road", "path", "bridge", "tunnel", "traffic", "light", "sign", "post",
+                "corner", "square", "park", "garden", "yard", "lawn", "fence", "gate", "doorbell", "letterbox",
+                "chimney", "porch", "patio", "deck", "pool", "shed", "garage", "basement", "attic", "stairs", "hall",
+                "kitchen", "bedroom", "bathroom", "livingroom", "closet", "drawer", "shelf", "cabinet", "fridge",
+                "freezer", "stove", "oven", "microwave", "sink", "faucet", "shower", "toilet", "tub", "mirror", "towel",
+                "brush", "paste", "soap", "shampoo", "lotion", "comb", "hairbrush", "lipstick", "perfume", "cotton",
+                "sponge", "razor", "blade", "pill", "medicine", "bandage", "tissue", "paper", "bin", "trash", "dust",
+                "broom", "mop", "bucket", "vacuum", "iron", "board", "clothes", "hanger", "laundry", "basket"
             ],
             medium: [
                 "backpack", "umbrella", "guitar", "computer", "telephone", "window", "television", "motorcycle",
@@ -130,7 +140,20 @@
                 "pizza", "spaghetti", "lasagna", "macaroni", "sushi", "taco", "burrito", "enchilada", "quesadilla",
                 "nachos", "guacamole", "salsa", "chili", "curry", "soup", "stew", "salad", "sandwich", "toast",
                 "waffle", "pancake", "muffin", "donut", "cookie", "cake", "pie", "tart", "pudding", "jello", "candy",
-                "chocolate", "lollipop", "gum", "caramel", "toffee", "biscuit", "cracker", "breadstick"
+                "chocolate", "lollipop", "gum", "caramel", "toffee", "biscuit", "cracker", "breadstick", "apartment",
+                "barbecue", "boulevard", "cemetery", "chalet", "continent", "disaster", "dormitory", "earthquake",
+                "electricity", "escalator", "fabric", "fairground", "fantasy", "geyser", "gondola", "headquarters",
+                "hurricane", "hypnotist", "interview", "journey", "labyrinth", "lavatory", "linguistics", "luncheon",
+                "mammoth", "manuscript", "monastery", "monument", "neptune", "orchestra", "pavilion", "porcupine",
+                "propeller", "quadrant", "quadrilateral", "quarantine", "rainforest", "receptionist", "recreation",
+                "rhinoceros", "rehearsal", "restaurant", "seaplane", "seahorse", "shipwreck", "stargazer", "subway",
+                "superintendent", "telegraph", "therapist", "thermometer", "thunderstorm", "tiramisu", "typewriter",
+                "underground", "undergrowth", "university", "vegetable", "volleyball", "waitress", "warehouse",
+                "wharf", "whirlpool", "wilderness", "windsock", "workshop", "accordion", "archipelago", "balalaika",
+                "barometer", "calamity", "chandelier", "corridor", "deodorant", "encyclopedia", "gladiator",
+                "harpsichord", "hieroglyphics", "hydrofoil", "incandescent", "jurisprudence", "kaleidoscope",
+                "kryptonite", "lexicographer", "marionette", "metamorphosis", "navigation", "neoclassical",
+                "ornithologist", "parliament", "peninsula", "periscope", "stethoscope", "symphony"
             ],
             hard: [
                 "archaeology", "consciousness", "astronaut", "telepathy", "university", "compassion", "dejection",
@@ -164,7 +187,21 @@
                 "individualism", "collectivism", "capitalism", "socialism", "communism", "fascism", "democracy",
                 "theocracy", "anarchy", "monarchy", "oligarchy", "dictatorship", "totalitarianism", "nationalism",
                 "pacifism", "feminism", "environmentalism", "humanitarianism", "globalism", "isolationism",
-                "populism", "liberalism", "conservatism", "libertarianism", "multiculturalism", "internationalism"
+                "populism", "liberalism", "conservatism", "libertarianism", "multiculturalism", "internationalism",
+                "metaphysics", "cosmology", "epistemology", "axiology", "aesthetics", "logic", "deduction", "induction",
+                "abduction", "syllogism", "dialectic", "eschatology", "teleology", "ontology", "gnoseology",
+                "hermeneutics", "semiotics", "linguistics", "philology", "epigraphy", "palaeography", "numismatics",
+                "heraldry", "genealogy", "vexillology", "toponymy", "onomastics", "archaeoastronomy", "ethnobotany",
+                "paleontology", "ichnology", "geochronology", "petrology", "mineralogy", "crystallography",
+                "vulcanology", "seismology", "hydrology", "limnology", "oceanography", "glaciology", "meteorology",
+                "climatology", "aerology", "biogeography", "ecology", "autecology", "synecology", "ethology",
+                "genetics", "cytology", "histology", "embryology", "physiology", "pathology", "virology", "bacteriology",
+                "mycology", "algology", "bryology", "pteridology", "dendrology", "pomology", "oenology", "taxonomy",
+                "systematics", "chorology", "palaeontology", "anthropology", "ethnology", "archaeology", "sociology",
+                "demography", "criminology", "penology", "victimology", "sociobiology", "psychology", "neuroscience",
+                "psychiatry", "neurology", "gerontology", "pediatrics", "oncology", "hematology", "immunology",
+                "endocrinology", "gastroenterology", "nephrology", "pulmonology", "rheumatology", "cardiology",
+                "anesthesiology", "dermatology", "radiology", "ophthalmology", "otorhinolaryngology", "urology"
             ]
         };
 
