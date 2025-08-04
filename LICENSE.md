@@ -13,5 +13,5 @@ The contents of this repository are **strictly protected**. Unless **explicitly 
 Unauthorized use may result in takedown actions or other legal measures.
 
 For licensing or permission inquiries, please contact:  
-📧 hyperrushnetwork@gmail.com
+hyperrushnetwork@gmail.com
     
