@@ -1,1 +1,17 @@
-
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HyperRush</title>
+<link rel="manifest" href="manifest.json" />
+<script>
+if('serviceWorker' in navigator){
+  navigator.serviceWorker.register('/service-worker.js').catch(console.error);
+}
+</script>
+</head>
+<body>
+<h1>Welkom bij HyperRush</h1>
+</body>
+</html>
