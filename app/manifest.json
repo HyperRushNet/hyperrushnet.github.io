@@ -1,11 +1,11 @@
 {
-  "name": "Simple PWA",
-  "short_name": "PWA",
-  "start_url": "/",
-  "scope": "/",
+  "name": "HyperRush",
+  "short_name": "HyperRush",
+  "start_url": "./",
+  "scope": "./",
   "display": "standalone",
   "background_color": "#000000",
-  "theme_color": "#000000",
+  "theme_color": "#05002e",
   "icons": [
     {
       "src": "https://placehold.co/512x512",
