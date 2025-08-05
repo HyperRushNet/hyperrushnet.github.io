@@ -8,25 +8,39 @@
   <meta name="theme-color" content="#05002e" />
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+      navigator.serviceWorker.register('./service-worker.js')
+        .then(() => console.log('✅ Service worker geregistreerd'))
+        .catch(err => console.error('❌ Fout bij service worker:', err));
+    } else {
+      console.warn('⚠️ Service worker niet ondersteund');
     }
 
     let deferredPrompt;
 
     window.addEventListener('beforeinstallprompt', (e) => {
+      console.log('✅ beforeinstallprompt getriggerd');
       e.preventDefault();
       deferredPrompt = e;
 
       const installBtn = document.getElementById('install-btn');
-      if (installBtn) installBtn.style.display = 'block';
+      if (installBtn) {
+        installBtn.style.display = 'block';
+        console.log('ℹ️ Installatieknop zichtbaar gemaakt');
+      }
 
       installBtn.onclick = () => {
         installBtn.style.display = 'none';
+        console.log('🟢 Installatieprompt geopend...');
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => {
+        deferredPrompt.userChoice.then((choiceResult) => {
+          console.log('✅ Gebruikerkeuze:', choiceResult.outcome);
           deferredPrompt = null;
         });
       };
+    });
+
+    window.addEventListener('load', () => {
+      console.log('🌐 Pagina geladen');
     });
   </script>
   <style>
