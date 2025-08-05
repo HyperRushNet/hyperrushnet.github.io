@@ -1,17 +1,56 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>HyperRush</title>
-<link rel="manifest" href="./manifest.json" />
-<script>
-if('serviceWorker' in navigator){
-  navigator.serviceWorker.register('./service-worker.js').catch(console.error);
-}
-</script>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>HyperRush</title>
+  <link rel="manifest" href="./manifest.json" />
+  <meta name="theme-color" content="#05002e" />
+  <script>
+    if ('serviceWorker' in navigator) {
+      navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+    }
+
+    let deferredPrompt;
+
+    window.addEventListener('beforeinstallprompt', (e) => {
+      e.preventDefault();
+      deferredPrompt = e;
+
+      const installBtn = document.getElementById('install-btn');
+      if (installBtn) installBtn.style.display = 'block';
+
+      installBtn.onclick = () => {
+        installBtn.style.display = 'none';
+        deferredPrompt.prompt();
+        deferredPrompt.userChoice.then(() => {
+          deferredPrompt = null;
+        });
+      };
+    });
+  </script>
+  <style>
+    #install-btn {
+      display: none;
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      z-index: 1000;
+      padding: 12px 20px;
+      background: #05002e;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      font-size: 16px;
+      cursor: pointer;
+    }
+    #install-btn:hover {
+      background: #1a0e6f;
+    }
+  </style>
 </head>
 <body>
-<h1>Welcome to HyperRush</h1>
+  <h1>Welcome to HyperRush</h1>
+  <button id="install-btn">App installeren</button>
 </body>
 </html>
