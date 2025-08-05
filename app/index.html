@@ -3,44 +3,28 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>HyperRush</title>
-  <link rel="manifest" href="./manifest.json" />
-  <meta name="theme-color" content="#05002e" />
+  <title>Simple PWA</title>
+  <link rel="manifest" href="manifest.json" />
+  <meta name="theme-color" content="#000000" />
   <script>
     if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('./service-worker.js')
-        .then(() => console.log('✅ Service worker geregistreerd'))
-        .catch(err => console.error('❌ Fout bij service worker:', err));
-    } else {
-      console.warn('⚠️ Service worker niet ondersteund');
+      navigator.serviceWorker.register('service-worker.js')
+        .then(() => console.log('✅ SW geregistreerd'))
+        .catch(console.error);
     }
 
     let deferredPrompt;
-
     window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('✅ beforeinstallprompt getriggerd');
+      console.log('✅ beforeinstallprompt');
       e.preventDefault();
       deferredPrompt = e;
-
-      const installBtn = document.getElementById('install-btn');
-      if (installBtn) {
-        installBtn.style.display = 'block';
-        console.log('ℹ️ Installatieknop zichtbaar gemaakt');
-      }
-
-      installBtn.onclick = () => {
-        installBtn.style.display = 'none';
-        console.log('🟢 Installatieprompt geopend...');
+      const btn = document.getElementById('install-btn');
+      btn.style.display = 'block';
+      btn.onclick = () => {
+        btn.style.display = 'none';
         deferredPrompt.prompt();
-        deferredPrompt.userChoice.then((choiceResult) => {
-          console.log('✅ Gebruikerkeuze:', choiceResult.outcome);
-          deferredPrompt = null;
-        });
+        deferredPrompt.userChoice.then(() => deferredPrompt = null);
       };
-    });
-
-    window.addEventListener('load', () => {
-      console.log('🌐 Pagina geladen');
     });
   </script>
   <style>
@@ -49,22 +33,17 @@
       position: fixed;
       bottom: 20px;
       right: 20px;
-      z-index: 1000;
       padding: 12px 20px;
-      background: #05002e;
+      background: black;
       color: white;
       border: none;
-      border-radius: 6px;
-      font-size: 16px;
-      cursor: pointer;
-    }
-    #install-btn:hover {
-      background: #1a0e6f;
+      border-radius: 5px;
     }
   </style>
 </head>
 <body>
-  <h1>Welcome to HyperRush</h1>
-  <button id="install-btn">App installeren</button>
+  <h1>Simple PWA</h1>
+  <img src="https://placehold.co/300x300" alt="placeholder">
+  <button id="install-btn">Installeer App</button>
 </body>
 </html>
