@@ -1,8 +1,8 @@
 {
   "name": "HyperRush",
   "short_name": "HyperRush",
-  "start_url": "./",
-  "scope": "./",
+  "start_url": "/",
+  "scope": "/",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#05002e",
