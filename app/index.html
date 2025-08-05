@@ -1,49 +1,46 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Simple PWA</title>
-  <link rel="manifest" href="manifest.json" />
-  <meta name="theme-color" content="#000000" />
-  <script>
-    if ('serviceWorker' in navigator) {
-      navigator.serviceWorker.register('service-worker.js')
-        .then(() => console.log('✅ SW geregistreerd'))
-        .catch(console.error);
-    }
-
-    let deferredPrompt;
-    window.addEventListener('beforeinstallprompt', (e) => {
-      console.log('✅ beforeinstallprompt');
-      e.preventDefault();
-      deferredPrompt = e;
-      const btn = document.getElementById('install-btn');
-      btn.style.display = 'block';
-      btn.onclick = () => {
-        btn.style.display = 'none';
-        deferredPrompt.prompt();
-        deferredPrompt.userChoice.then(() => deferredPrompt = null);
-      };
-    });
-  </script>
-  <style>
-    #install-btn {
-      display: none;
-      position: fixed;
-      bottom: 20px;
-      right: 20px;
-      padding: 12px 20px;
-      background: black;
-      color: white;
-      border: none;
-      border-radius: 5px;
-    }
-  </style>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>HyperRush</title>
+<link rel="manifest" href="./manifest.json" />
+<script>
+if ('serviceWorker' in navigator) {
+  navigator.serviceWorker.register('./service-worker.js').catch(console.error);
+}
+</script>
 </head>
 <body>
-  <h1>Simple PWA</h1>
-  <img src="https://placehold.co/300x300" alt="placeholder">
-  <button id="install-btn">Installeer App</button>
+<h1>Welcome to HyperRush</h1>
+
+<script>
+let deferredPrompt;
+window.addEventListener('beforeinstallprompt', (e) => {
+  e.preventDefault();
+  deferredPrompt = e;
+  const btn = document.createElement('button');
+  btn.textContent = 'Install HyperRush';
+  btn.style.position = 'fixed';
+  btn.style.bottom = '20px';
+  btn.style.right = '20px';
+  btn.style.padding = '10px 20px';
+  btn.style.zIndex = '9999';
+  document.body.appendChild(btn);
+  btn.onclick = () => {
+    deferredPrompt.prompt();
+    deferredPrompt.userChoice.then(choiceResult => {
+      if (choiceResult.outcome === 'accepted') {
+        console.log('User accepted the install prompt');
+      } else {
+        console.log('User dismissed the install prompt');
+      }
+      deferredPrompt = null;
+      btn.remove();
+    });
+  };
+});
+</script>
+
 </body>
 </html>
