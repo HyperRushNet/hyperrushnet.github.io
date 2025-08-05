@@ -1,8 +1,8 @@
 {
   "name": "Simple PWA",
   "short_name": "PWA",
-  "start_url": "/",
-  "scope": "/",
+  "start_url": "/hhh",
+  "scope": "/hhh",
   "display": "standalone",
   "background_color": "#000000",
   "theme_color": "#000000",
