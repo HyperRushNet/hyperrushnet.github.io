@@ -8,7 +8,7 @@
   "theme_color": "#05002e",
   "icons": [
     {
-      "src": "/app/assets/images/round-500.png",
+      "src": "./round-500.png",
       "sizes": "500x500",
       "type": "image/png",
       "purpose": "maskable"
