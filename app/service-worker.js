@@ -38,7 +38,7 @@ self.addEventListener('fetch', event => {
     if (event.request.mode === 'navigate') {
         event.respondWith(
             fetch(event.request)
-                .catch(() => caches.match('/assets/templates/offline.html'))
+                .catch(() => caches.match('/app/offline.html'))
         );
     } else {
         event.respondWith(
