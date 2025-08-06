@@ -7,6 +7,7 @@ The contents of this repository are **strictly protected**. Unless **explicitly 
 - **Fork, clone, or copy** this repository in any form.
 - **Download, reuse, or distribute** any of the **images** contained in this repository.
 - **Extract, replicate, or repurpose** any of the **assets** (code, media, or other files) from this repository.
+- **Use the name "HyperRush Network" or "HyperRush Games" anywhere.
 
 > These restrictions apply specifically to this repository and **do not affect** other public repositories owned by HyperRushNet.
 
