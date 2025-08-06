@@ -22,7 +22,27 @@ html, body {
   font-family: Arial, sans-serif;
   background-color: #0C2F79;
   overflow-x: hidden;
+  margin: 0;
+  position: relative;
+  z-index: 0;
 }
+
+body::before {
+  content: "";
+  position: fixed;
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-image: url("/assets/images/background/1.png");
+  background-size: cover;
+  background-position: center;
+  filter: brightness(0.5) blur(4px);
+  z-index: -1;
+  pointer-events: none;
+}
+
+
 
 body.lock-scroll {
   overflow: hidden;
