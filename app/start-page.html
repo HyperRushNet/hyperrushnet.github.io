@@ -1,0 +1,34 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Games</title>
+  <style>
+    body { margin: 0; font-family: sans-serif; }
+    iframe { width: 100vw; height: 100vh; border: none; }
+  </style>
+</head>
+<body>
+  <iframe id="main-frame"></iframe>
+
+  <script>
+    const iframe = document.getElementById('main-frame');
+
+    function loadPage() {
+      if (navigator.onLine) {
+        iframe.src = '/';
+      } else {
+        iframe.src = '/assets/templates/offline.html';
+      }
+    }
+
+    // Laad juiste pagina bij het openen
+    loadPage();
+
+    // Optioneel: ook reageren op netwerkveranderingen live
+    window.addEventListener('online', loadPage);
+    window.addEventListener('offline', loadPage);
+  </script>
+</body>
+</html>
