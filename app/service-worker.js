@@ -1,6 +1,7 @@
-const CACHE_NAME = 'v1';
+const CACHE_NAME = 'v2';
 const URLS_TO_CACHE = [
     './start-page.html',
+    './round-500.png',
     '/assets/images/logo/white.png',
     '/assets/images/logo/black.png',
     '/assets/templates/offline.html',
