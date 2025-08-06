@@ -1,4 +1,4 @@
-const CACHE_NAME = 'v7';
+const CACHE_NAME = 'v8';
 const URLS_TO_CACHE = [
     '/app/start-page.html',
     '/app/round-500.png',
