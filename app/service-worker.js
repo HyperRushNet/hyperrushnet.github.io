@@ -1,11 +1,13 @@
-const CACHE_NAME = 'v6';
+const CACHE_NAME = 'v7';
 const URLS_TO_CACHE = [
     '/app/start-page.html',
     '/app/round-500.png',
     '/assets/images/logo/white.png',
     '/assets/images/logo/black.png',
     '/assets/images/favicon/000000.png',
-    '/assets/images/favicon/ffffff.png'
+    '/assets/images/favicon/ffffff.png',
+    '/app/offline.html'
+    
 ];
 
 self.addEventListener('install', event => {
