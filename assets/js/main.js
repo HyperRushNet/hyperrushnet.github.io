@@ -48,7 +48,7 @@ function renderCategories() {
   const categories = [...new Set(allGames.map(g => g.category))];
   categoryList.innerHTML = "";
   const allBtn = document.createElement("button");
-  allBtn.textContent = "Alle games";
+  allBtn.textContent = "All Games";
   allBtn.onclick = () => {
     activeCategory = null;
     renderGames(allGames);
@@ -87,8 +87,8 @@ function renderGames(games) {
 
     const img = document.createElement("img");
     img.loading = "lazy";
-    img.src = game.img;
-    img.alt = `${game.name} afbeelding`;
+    img.src = game.img + "?v=" + Date.now();
+    img.alt = `${game.name} Img`;
 
     const originalSrc = game.img;
     const fallbackSrc = "https://placehold.co/600x400/2C2F33/FFFFFF?text=FAILED&font=montserrat&bold=true&font_size=48";
