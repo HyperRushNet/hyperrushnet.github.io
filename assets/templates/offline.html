@@ -16,7 +16,7 @@
     }
 
     html, body {
-      height: 100vh;
+      height: 100%;
       width: 100vw;
       overflow: hidden;
     }
@@ -32,12 +32,6 @@
       position: relative;
     }
     
-    .link {
-    color: lightblue;
-    }
-    .link:hover {
-    color: lightgreen;
-    }
 
     body::before {
       content: "";
@@ -72,7 +66,7 @@
   <div class="message">
     <h1>You are offline</h1>
     <p>Your internet connection is down.</p>
-    <p>Please check it and <a href="javascript:location.reload();" class="link">try again</a>.</p>
+    <p>Please check it and try again.</p>
   </div>
 </body>
 </html>
