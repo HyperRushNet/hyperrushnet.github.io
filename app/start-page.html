@@ -19,41 +19,26 @@
       width: 100vw;
       height: 100vh;
       border: none;
-      display: none;
-    }
-    #offline-message {
-      display: none;
-      text-align: center;
-      padding: 20px;
     }
   </style>
 </head>
 <body>
   <iframe id="main-frame"></iframe>
-  <div id="offline-message">
-    <h1>Je bent offline</h1>
-    <p>Controleer je internetverbinding en probeer opnieuw.</p>
-  </div>
 
   <script>
     const iframe = document.getElementById('main-frame');
-    const message = document.getElementById('offline-message');
 
-    function updateView() {
-      if (navigator.onLine) {
-        iframe.style.display = 'block';
-        message.style.display = 'none';
-        iframe.src = '/'; // Of een andere pagina
-      } else {
-        iframe.style.display = 'none';
-        message.style.display = 'block';
-      }
-    }
-
-    updateView();
-
-    window.addEventListener('online', updateView);
-    window.addEventListener('offline', updateView);
+    fetch('/internet-test.txt', { method: 'GET', cache: 'no-store' })
+      .then(response => {
+        if (response.ok) {
+          window.location.href = '/';
+        } else {
+          iframe.src = '/app/offline.html';
+        }
+      })
+      .catch(() => {
+        iframe.src = '/app/offline.html';
+      });
   </script>
 </body>
 </html>
