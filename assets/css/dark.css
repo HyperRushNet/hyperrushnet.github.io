@@ -94,7 +94,7 @@ body.lock-scroll {
   left: 0;
   height: 100vh;
   width: var(--sidebar-width);
-  background: #02091A;
+  background: #212121;
   padding: 1rem;
   box-shadow: 2px 0 5px rgba(0,0,0,0.8);
   overflow-y: auto;
@@ -170,7 +170,7 @@ body.lock-scroll {
   border: 1px solid #444;
   border-radius: 0.375rem;
   font-size: 1rem;
-  background: #051E55;
+  background: #272626;
   color: #f1f1f1;
 }
 
@@ -202,7 +202,7 @@ body.lock-scroll {
   width: 100%;
   padding: 0.85rem 0.75rem;
   margin-bottom: 0.5rem;
-  background: #041945;
+  background: #2D2C2C;
   border-radius: 0.375rem;
   cursor: pointer;
   font-size: 1rem;
@@ -214,7 +214,7 @@ body.lock-scroll {
 }
 
 #categoryList button:hover {
-  background: #051E55;
+  background: #252424;
   color: black;
 }
 
