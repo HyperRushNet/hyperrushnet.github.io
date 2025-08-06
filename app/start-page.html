@@ -5,28 +5,55 @@
   <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Games</title>
   <style>
-    body { margin: 0; font-family: sans-serif; }
-    iframe { width: 100vw; height: 100vh; border: none; }
+    body {
+      margin: 0;
+      font-family: sans-serif;
+      background: #000;
+      color: #fff;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      height: 100vh;
+    }
+    iframe {
+      width: 100vw;
+      height: 100vh;
+      border: none;
+      display: none;
+    }
+    #offline-message {
+      display: none;
+      text-align: center;
+      padding: 20px;
+    }
   </style>
 </head>
 <body>
   <iframe id="main-frame"></iframe>
+  <div id="offline-message">
+    <h1>Je bent offline</h1>
+    <p>Controleer je internetverbinding en probeer opnieuw.</p>
+  </div>
 
   <script>
     const iframe = document.getElementById('main-frame');
+    const message = document.getElementById('offline-message');
 
-    function loadPage() {
+    function updateView() {
       if (navigator.onLine) {
-        iframe.src = '/';  // Of een andere pagina die je wilt tonen
+        iframe.style.display = 'block';
+        message.style.display = 'none';
+        iframe.src = '/'; // Of een andere pagina
       } else {
-        iframe.src = '/assets/templates/offline.html';
+        iframe.style.display = 'none';
+        message.style.display = 'block';
       }
     }
 
-    loadPage();
+    updateView();
 
-    window.addEventListener('online', loadPage);
-    window.addEventListener('offline', loadPage);
+    window.addEventListener('online', updateView);
+    window.addEventListener('offline', updateView);
   </script>
 </body>
 </html>
