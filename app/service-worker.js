@@ -1,4 +1,4 @@
-const CACHE_NAME = 'v2';
+const CACHE_NAME = 'v3';
 const URLS_TO_CACHE = [
     '/app/start-page.html',
     '/app/round-500.png',
@@ -13,9 +13,7 @@ self.addEventListener('install', event => {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
-            .then(cache => {
-                return cache.addAll(URLS_TO_CACHE);
-            })
+            .then(cache => cache.addAll(URLS_TO_CACHE))
             .catch(error => console.error('Caching fout:', error))
     );
 });
@@ -36,11 +34,15 @@ self.addEventListener('activate', event => {
 });
 
 self.addEventListener('fetch', event => {
-    event.respondWith(
-        caches.match(event.request)
-            .then(response => {
-                return response || fetch(event.request);
-            })
-            .catch(error => console.error('Fout bij ophalen:', error))
-    );
+    if (event.request.mode === 'navigate') {
+        event.respondWith(
+            fetch(event.request)
+                .catch(() => caches.match('/assets/templates/offline.html'))
+        );
+    } else {
+        event.respondWith(
+            caches.match(event.request)
+                .then(response => response || fetch(event.request))
+        );
+    }
 });
