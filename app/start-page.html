@@ -2,7 +2,7 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
   <title>Games</title>
   <style>
     body { margin: 0; font-family: sans-serif; }
@@ -17,16 +17,14 @@
 
     function loadPage() {
       if (navigator.onLine) {
-        iframe.src = '/';
+        iframe.src = '/app/start-page.html';  // Of een andere pagina die je wilt tonen
       } else {
         iframe.src = '/assets/templates/offline.html';
       }
     }
 
-    // Laad juiste pagina bij het openen
     loadPage();
 
-    // Optioneel: ook reageren op netwerkveranderingen live
     window.addEventListener('online', loadPage);
     window.addEventListener('offline', loadPage);
   </script>
