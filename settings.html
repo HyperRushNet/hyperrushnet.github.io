@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Tabs met een enkele iframe</title>
+    <title>Settings</title>
     <style>
         /* Algemene stijlen */
         * {
@@ -217,10 +217,35 @@
                 transform: rotate(360deg);
             }
         }
+
+        /* OVERLAY VOOR DE HELE PAGINA */
+        #full-page-loader {
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: #121212;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            z-index: 9999;
+            transition: opacity 0.5s ease-in-out;
+            opacity: 1;
+        }
+
+        #full-page-loader.hidden {
+            opacity: 0;
+            pointer-events: none;
+        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
+    <div id="full-page-loader">
+        <span class="loader"></span>
+    </div>
+
     <aside id="sidebar" aria-label="Navigation">
         <button class="active" onclick="showTab(this)" aria-selected="true" data-src="https://example.com"><i class="material-symbols-outlined">person</i><span>Profile</span></button>
         <button onclick="showTab(this)" aria-selected="false" data-src="https://example.com"><i class="material-symbols-outlined">lock</i><span>Privacy</span></button>
@@ -244,13 +269,28 @@
         const buttons = sidebar.querySelectorAll('button:not(#toggleSidebarBtn)');
         const mainIframe = document.getElementById('main-iframe');
         const loaderOverlay = document.getElementById('loader-overlay');
+        const fullPageLoader = document.getElementById('full-page-loader');
+
+        // Functie voor de animatie binnen de iframe
+        function animateIframeLoad() {
+            setTimeout(() => {
+                mainIframe.style.opacity = '1';
+                loaderOverlay.classList.add('hidden');
+            }, 300);
+        }
+
+        // Functie om de volledige pagina te laden
+        function hideFullPageLoader() {
+            setTimeout(() => {
+                fullPageLoader.classList.add('hidden');
+            }, 500);
+        }
 
         function showTab(btn) {
-            // Stap 1: Toon de laadanimatie direct en verberg de iframe.
+            // Toon de laadanimatie direct en verberg de iframe.
             loaderOverlay.classList.remove('hidden');
             mainIframe.style.opacity = '0';
 
-            // Verwijder de 'active' class van alle knoppen en voeg deze toe aan de geklikte knop.
             buttons.forEach(b => {
                 b.classList.remove('active');
                 b.setAttribute('aria-selected', 'false');
@@ -258,22 +298,11 @@
             btn.classList.add('active');
             btn.setAttribute('aria-selected', 'true');
 
-            // Stap 2: Na een korte vertraging, wijzig de URL van de iframe.
-            // Dit geeft de CSS-overgang tijd om te starten, wat 'schokken' voorkomt.
+            // Wijzig de URL van de iframe.
             setTimeout(() => {
                 mainIframe.src = btn.dataset.src;
             }, 100);
         }
-
-        // Stap 3: De iframe is geladen, toon de inhoud en verberg de laadanimatie.
-        mainIframe.onload = () => {
-            // Wacht een moment om de CSS-transitie van de iframe (opacity) te laten werken.
-            setTimeout(() => {
-                mainIframe.style.opacity = '1';
-                // Verberg de laadanimatie na de iframe zichtbaar is.
-                loaderOverlay.classList.add('hidden');
-            }, 300);
-        };
 
         function toggleSidebar() {
             if (window.innerWidth > 768) {
@@ -304,10 +333,14 @@
             updateToggleButton();
         }
 
+        // Event listeners voor het laden van de pagina
         window.addEventListener('DOMContentLoaded', () => {
-            handleResize();
-            mainIframe.onload();
+             handleResize();
+             // Wacht tot de eerste iframe geladen is en verberg dan de loader
+             mainIframe.addEventListener('load', animateIframeLoad, { once: true });
         });
+
+        window.addEventListener('load', hideFullPageLoader);
         window.addEventListener('resize', handleResize);
     </script>
 </body>
