@@ -28,7 +28,7 @@
   <script>
     const iframe = document.getElementById('main-frame');
 
-    fetch('/internet-test.txt', { method: 'GET', cache: 'no-store' })
+    fetch('/assets/templates/internet-test.txt', { method: 'GET', cache: 'no-store' })
       .then(response => {
         if (response.ok) {
           window.location.href = '/';
