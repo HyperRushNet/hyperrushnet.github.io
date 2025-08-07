@@ -1,326 +1,85 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Instellingen</title>
+<title>Tabs with iframe & loader</title>
 <style>
-  /* Reset & base */
-  * {
-    margin: 0; padding: 0; box-sizing: border-box;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-  }
-  html, body {
-    height: 100%;
-    background: #121212;
-    color: #e0e0e0;
-  }
-  body {
-    display: flex;
-    min-height: 100vh;
-    overflow: hidden;
-  }
-
-  /* Sidebar */
-  #sidebar {
-    flex-shrink: 0;
-    width: 260px;
-    background: #1f1f1f;
-    display: flex;
-    flex-direction: column;
-    overflow-y: auto;
-    box-shadow: 2px 0 8px rgba(0,0,0,0.7);
-    transition: width 0.12s ease;
-    padding: 20px 0;
-  }
-  #sidebar.collapsed {
-    width: 70px;
-  }
-
-  /* Buttons */
-  #sidebar button {
-    all: unset;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    gap: 14px;
-    padding: 14px 24px;
-    font-size: 0.95rem;
-    color: #ccc;
-    border-left: 4px solid transparent;
-    transition:
-      background-color 0.12s ease,
-      color 0.12s ease,
-      border-color 0.12s ease;
-    margin-bottom: 6px;
-  }
-  #sidebar button i.material-symbols-outlined {
-    font-variation-settings:
-      'FILL' 0,
-      'wght' 400,
-      'GRAD' 0,
-      'opsz' 24;
-    font-size: 1.3rem;
-    width: 26px;
-    text-align: center;
-    user-select: none;
-  }
-  #sidebar button span {
-    white-space: nowrap;
-    user-select: none;
-    transition: opacity 0.15s ease;
-  }
-
-  #sidebar.collapsed button span {
-    opacity: 0;
-    pointer-events: none;
-  }
-
-  #sidebar button:hover:not(.active) {
-    background-color: #2a2a2a;
-    color: #fff;
-  }
-  #sidebar button.active {
-    color: #00aaff;
-    border-left-color: #00aaff;
-    background-color: #151515;
-    font-weight: 600;
-  }
-
-  /* Remove default focus outline and blue line */
-  #sidebar button:focus {
-    outline: none;
-    box-shadow: none;
-  }
-
-  /* Scrollbar sidebar */
-  #sidebar::-webkit-scrollbar {
-    width: 8px;
-  }
-  #sidebar::-webkit-scrollbar-thumb {
-    background: #444;
-    border-radius: 4px;
-  }
-  #sidebar::-webkit-scrollbar-track {
-    background: #1f1f1f;
-  }
-
-  /* Content area */
-  #content {
-    flex-grow: 1;
-    overflow-y: auto;
-    padding: 30px 40px;
-    background: #181818;
-    display: flex;
-    justify-content: center;
-  }
-  .content-inner {
-    max-width: 900px;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    gap: 40px;
-  }
-
-  /* Headings */
-  h1 {
-    font-size: clamp(1.3rem, 2vw, 1.8rem);
-    font-weight: 700;
-    color: #00aaff;
-    margin-bottom: 12px;
-    letter-spacing: 0.03em;
-  }
-
-  /* Settings */
-  .setting {
-    display: flex;
-    flex-direction: column;
-    gap: 10px;
-    margin-bottom: 6px;
-  }
-  .setting label {
-    font-weight: 600;
-    font-size: clamp(0.9rem, 1vw, 1rem);
-    color: #bbb;
-    margin-bottom: 4px;
-  }
-  .setting input,
-  .setting select {
-    padding: 12px 6px;
-    font-size: 0.95rem;
-    border-radius: 8px;
-    border: 1.5px solid #333;
-    background-color: #222;
-    color: #eee;
-    transition: border-color 0.12s ease, background-color 0.12s ease;
-    margin-bottom: 8px;
-  }
-  .setting input::placeholder {
-    color: #666;
-  }
-  .setting input:focus,
-  .setting select:focus {
-    outline: none;
-    border-color: #00aaff;
-    background-color: #1a1a1a;
-  }
-
-  /* Info paragraph */
-  #over p {
-    font-size: clamp(0.95rem, 1.3vw, 1.1rem);
-    line-height: 1.7;
-    color: #999;
-    margin-bottom: 18px;
-  }
-
-  /* Toggle sidebar button */
-  #toggleSidebarBtn {
-    margin-top: auto;
-    border-top: 1px solid #333;
-    padding-top: 14px;
-    font-weight: 600;
-    color: #777;
-    transition: color 0.12s ease;
-  }
-  #toggleSidebarBtn:hover {
-    color: #00aaff;
-  }
-
-  /* Mobile */
-  @media (max-width: 768px) {
-    #sidebar {
-      position: fixed;
-      left: 0;
-      top: 0;
-      height: 100vh;
-      width: 70px !important;
-      z-index: 1000;
-      box-shadow: 2px 0 10px rgba(0,0,0,0.9);
-      padding: 20px 0;
-    }
-    #sidebar button span {
-      display: none !important;
-    }
-    #toggleSidebarBtn {
-      display: none !important;
-    }
-    #content {
-      padding: 20px 25px;
-      margin-left: 70px;
-    }
-  }
+  *{margin:0;padding:0;box-sizing:border-box;font-family:sans-serif;}
+  html,body{height:100%;background:#121212;color:#eee;display:flex;overflow:hidden;}
+  #sidebar{width:260px;background:#1f1f1f;display:flex;flex-direction:column;overflow-y:auto;padding:20px 0;box-shadow:2px 0 8px #000;}
+  #sidebar.collapsed{width:70px;}
+  #sidebar button{all:unset;cursor:pointer;display:flex;align-items:center;gap:14px;padding:14px 24px;color:#ccc;border-left:4px solid transparent;margin-bottom:6px;transition:0.12s;}
+  #sidebar button i{font-variation-settings:'FILL' 0,'wght' 400,'GRAD' 0,'opsz' 24;font-size:1.3rem;width:26px;text-align:center;user-select:none;}
+  #sidebar button span{white-space:nowrap;user-select:none;transition:opacity 0.15s;}
+  #sidebar.collapsed button span{opacity:0;pointer-events:none;}
+  #sidebar button:hover:not(.active){background:#2a2a2a;color:#fff;}
+  #sidebar button.active{color:#0af;border-left-color:#0af;background:#151515;font-weight:600;}
+  #sidebar button:focus{outline:none;box-shadow:none;}
+  #content{flex-grow:1;position:relative;background:#181818;overflow:hidden;display:flex;align-items:center;justify-content:center;}
+  iframe{width:100%;height:100vh;border:none;display:none;}
+  iframe.active{display:block;}
+  #spinner{position:absolute;top:50%;left:50%;width:48px;height:48px;margin:-24px 0 0 -24px;border:5px solid #444;border-top-color:#0af;border-radius:50%;animation:spin 1s linear infinite;display:none;z-index:10;}
+  #toggleSidebarBtn{margin-top:auto;border-top:1px solid #333;padding:14px;color:#777;cursor:pointer;transition:color 0.12s;}
+  #toggleSidebarBtn:hover{color:#0af;}
+  @keyframes spin{to{transform:rotate(360deg);}}
 </style>
 <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
-
-  <aside id="sidebar" aria-label="Navigatie">
-    <button class="active" onclick="showPanel('profiel', this)" role="tab" aria-selected="true"><i class="material-symbols-outlined">person</i><span>Profiel</span></button>
-    <button onclick="showPanel('privacy', this)" role="tab" aria-selected="false"><i class="material-symbols-outlined">lock</i><span>Privacy</span></button>
-    <button onclick="showPanel('taal', this)" role="tab" aria-selected="false"><i class="material-symbols-outlined">language</i><span>Taal</span></button>
-    <button onclick="showPanel('systeem', this)" role="tab" aria-selected="false"><i class="material-symbols-outlined">computer</i><span>Systeem</span></button>
-    <button onclick="showPanel('over', this)" role="tab" aria-selected="false"><i class="material-symbols-outlined">info</i><span>Over</span></button>
-    <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Sidebar inklappen/uitklappen"><i class="material-symbols-outlined">keyboard_double_arrow_left</i><span>Sidebar inklappen</span></button>
+  <aside id="sidebar" aria-label="Navigation">
+    <button class="active" onclick="showTab('profile', this)" aria-selected="true" data-src="profile.html"><i class="material-symbols-outlined">person</i><span>Profile</span></button>
+    <button onclick="showTab('privacy', this)" aria-selected="false" data-src="privacy.html"><i class="material-symbols-outlined">lock</i><span>Privacy</span></button>
+    <button onclick="showTab('language', this)" aria-selected="false" data-src="language.html"><i class="material-symbols-outlined">language</i><span>Language</span></button>
+    <button onclick="showTab('system', this)" aria-selected="false" data-src="system.html"><i class="material-symbols-outlined">computer</i><span>System</span></button>
+    <button onclick="showTab('about', this)" aria-selected="false" data-src="about.html"><i class="material-symbols-outlined">info</i><span>About</span></button>
+    <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Toggle sidebar"><i class="material-symbols-outlined">keyboard_double_arrow_left</i><span>Collapse</span></button>
   </aside>
 
   <main id="content" role="tabpanel">
-    <div class="content-inner">
-      <section id="profiel" class="panel" style="display:block" aria-label="Profiel instellingen">
-        <h1>Profiel</h1>
-        <div class="setting">
-          <label for="username">Gebruikersnaam</label>
-          <input id="username" type="text" placeholder="Jouw naam..." autocomplete="username" />
-        </div>
-        <div class="setting">
-          <label for="email">Email</label>
-          <input id="email" type="email" placeholder="voorbeeld@mail.com" autocomplete="email" />
-        </div>
-      </section>
-
-      <section id="privacy" class="panel" style="display:none" aria-label="Privacy instellingen">
-        <h1>Privacy</h1>
-        <div class="setting">
-          <label for="tracking">Trackingbescherming</label>
-          <select id="tracking" autocomplete="off">
-            <option>Basis</option>
-            <option>Gebalanceerd</option>
-            <option>Strikt</option>
-          </select>
-        </div>
-        <div class="setting">
-          <label for="savePasswords">Wachtwoorden opslaan</label>
-          <select id="savePasswords" autocomplete="off">
-            <option>Ja</option>
-            <option>Nee</option>
-          </select>
-        </div>
-      </section>
-
-      <section id="taal" class="panel" style="display:none" aria-label="Taal instellingen">
-        <h1>Taal</h1>
-        <div class="setting">
-          <label for="language">Voorkeurstaal</label>
-          <select id="language" autocomplete="off">
-            <option>Nederlands</option>
-            <option>Engels</option>
-            <option>Duits</option>
-            <option>Frans</option>
-          </select>
-        </div>
-      </section>
-
-      <section id="systeem" class="panel" style="display:none" aria-label="Systeem instellingen">
-        <h1>Systeem</h1>
-        <div class="setting">
-          <label for="theme">Thema</label>
-          <select id="theme" autocomplete="off">
-            <option>Donker</option>
-            <option>Licht</option>
-            <option>System default</option>
-          </select>
-        </div>
-        <div class="setting">
-          <label for="notifications">Meldingen</label>
-          <select id="notifications" autocomplete="off">
-            <option>Aan</option>
-            <option>Uit</option>
-          </select>
-        </div>
-      </section>
-
-      <section id="over" class="panel" style="display:none" aria-label="Over deze applicatie">
-        <h1>Over</h1>
-        <p>Deze app is gemaakt om je instellingen eenvoudig en snel aan te passen met een strak design.</p>
-        <p>Alle gegevens worden lokaal opgeslagen en niet gedeeld.</p>
-      </section>
-    </div>
+    <div id="spinner"></div>
+    <iframe id="iframe-profile" src="profile.html" class="active" title="Profile"></iframe>
+    <iframe id="iframe-privacy" title="Privacy"></iframe>
+    <iframe id="iframe-language" title="Language"></iframe>
+    <iframe id="iframe-system" title="System"></iframe>
+    <iframe id="iframe-about" title="About"></iframe>
   </main>
 
 <script>
   const sidebar = document.getElementById('sidebar');
   const toggleBtn = document.getElementById('toggleSidebarBtn');
   const buttons = sidebar.querySelectorAll('button:not(#toggleSidebarBtn)');
-  const panels = document.querySelectorAll('.panel');
+  const iframes = {
+    profile: document.getElementById('iframe-profile'),
+    privacy: document.getElementById('iframe-privacy'),
+    language: document.getElementById('iframe-language'),
+    system: document.getElementById('iframe-system'),
+    about: document.getElementById('iframe-about'),
+  };
+  const spinner = document.getElementById('spinner');
 
-  function showPanel(id, btn) {
-    panels.forEach(p => {
-      p.style.display = p.id === id ? 'block' : 'none';
-    });
-    buttons.forEach(b => {
-      b.classList.remove('active');
-      b.setAttribute('aria-selected', 'false');
-    });
+  function showTab(id, btn){
+    buttons.forEach(b=>{b.classList.remove('active');b.setAttribute('aria-selected','false');});
     btn.classList.add('active');
-    btn.setAttribute('aria-selected', 'true');
+    btn.setAttribute('aria-selected','true');
+    Object.values(iframes).forEach(f=>f.classList.remove('active'));
+    const iframe=iframes[id];
+    if(!iframe.src){
+      spinner.style.display='block';
+      iframe.src=btn.getAttribute('data-src');
+      iframe.onload=()=>{spinner.style.display='none';iframe.classList.add('active');};
+    } else {
+      spinner.style.display='none';
+      iframe.classList.add('active');
+    }
   }
 
-  function toggleSidebar() {
+  function toggleSidebar(){
     sidebar.classList.toggle('collapsed');
-    const collapsed = sidebar.classList.contains('collapsed');
-    toggleBtn.querySelector('span').textContent = collapsed ? 'Sidebar uitklappen' : 'Sidebar inklappen';
-    toggleBtn.querySelector('i').textContent = collapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
+    const collapsed=sidebar.classList.contains('collapsed');
+    toggleBtn.querySelector('span').textContent=collapsed?'Expand':'Collapse';
+    toggleBtn.querySelector('i').textContent=collapsed?'keyboard_double_arrow_right':'keyboard_double_arrow_left';
   }
 </script>
-
 </body>
 </html>
