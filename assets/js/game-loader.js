@@ -276,11 +276,14 @@
 (() => {
   const methods = ["log", "info", "warn", "error", "debug", "trace"];
   for (const method of methods) {
-    console[method] = () => {
+    const original = console[method];
+    console[method] = (...args) => {
       console.clear();
+      original.apply(console, args);
     };
   }
 })();
+
 
 
 })();
