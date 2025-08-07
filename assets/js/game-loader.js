@@ -6,7 +6,6 @@
   const game = games.find(g => g.link.toLowerCase().replace(/\/$/, "") === path);
   if (!game) return;
 
-  // Horror waarschuwing met confirm
   if (game.category.toLowerCase() === "horror") {
     const proceed = confirm(`Warning: "${game.name}" is a horror game. Do you want to continue?`);
     if (!proceed) {
@@ -15,7 +14,6 @@
     }
   }
 
-  // Titel forceren en terugzetten als die verandert
   const setTitle = () => document.title = game.name;
   setTitle();
 
@@ -24,9 +22,7 @@
   });
   observer.observe(document.querySelector('title') || document.head.appendChild(document.createElement('title')), { childList: true });
 
-  // Redirect / externe navigatie blokkeren en waarschuwing tonen
   const showWarning = (msg) => {
-    // Als je een custom notifications systeem hebt, gebruik dat, anders alert
     if (window.hrn?.notifications?.show) {
       window.hrn.notifications.show(msg, "info", 3000);
     } else {
@@ -34,21 +30,27 @@
     }
   };
 
-  // window.open blokkeren bij _top/_parent targets
+  // Targets om te blokkeren
+  const blockedTargets = [
+    "_top", "_parent", "_blank", "_self", "_new", "_search",
+    "_media", "_content", "_popup", "_external", "_help", "_window"
+  ];
+
+  // Blokkeer window.open met ongewenste target
   const originalOpen = window.open;
   window.open = function(url, target, ...args) {
-    if (target && (target.includes("_top") || target.includes("_parent"))) {
-      showWarning("Redirect blocked: window.open with target " + target);
+    if (target && blockedTargets.includes(target.toLowerCase())) {
+      showWarning(`Redirect blocked: window.open with target "${target}"`);
       return null;
     }
     return originalOpen.call(window, url, target, ...args);
   };
 
-  // location.assign en location.replace blokkeren
+  // Blokkeer location redirects
   location.assign = (url) => showWarning("Redirect blocked: location.assign");
   location.replace = (url) => showWarning("Redirect blocked: location.replace");
 
-  // Protect locatie property op window, top en parent
+  // Bescherm location property op window, top, parent
   const protectLocation = (obj, name) => {
     try {
       const desc = Object.getOwnPropertyDescriptor(obj, "location");
@@ -66,16 +68,19 @@
     protectLocation(obj, i === 0 ? "window" : i === 1 ? "top" : "parent")
   );
 
-  // Link clicks blokkeren
+  // Link clicks blokkeren met ongewenste target
   document.addEventListener(
     "click",
     (e) => {
       let el = e.target;
       while (el && el !== document) {
         if (el.tagName === "A" && el.href) {
-          showWarning("Redirect blocked: <a> click");
-          e.preventDefault();
-          break;
+          const target = el.getAttribute("target")?.toLowerCase();
+          if (target && blockedTargets.includes(target)) {
+            showWarning(`Redirect blocked: <a> click with target "${target}"`);
+            e.preventDefault();
+            break;
+          }
         }
         el = el.parentNode;
       }
