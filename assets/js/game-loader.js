@@ -209,15 +209,15 @@
     const originalOpen = window.open;
     window.open = function (url, target, ...args) {
       if (target && blockedTargets.includes(target.toLowerCase())) {
-        showWarning(`Redirect blocked: window.open with target "${target}"`);
+        showWarning(`Redirect blocked`);
         return null;
       }
       return originalOpen.call(window, url, target, ...args);
     };
   
     // Blokkeer location redirects
-    location.assign = (url) => showWarning("Redirect blocked: location.assign");
-    location.replace = (url) => showWarning("Redirect blocked: location.replace");
+    location.assign = (url) => showWarning("Redirect blocked");
+    location.replace = (url) => showWarning("Redirect blocked");
   
     // Bescherm location property op window, top, parent
     const protectLocation = (obj, name) => {
