@@ -1,18 +1,34 @@
 (async () => {
-  const games = await fetch("https://hyperrushnet.github.io/assets/json/games.json").then(r => r.json());
+  const originalFetch = window.fetch;
+  const originalXHROpen = XMLHttpRequest.prototype.open;
+  let allowNetwork = false;
+
+  // Intercept fetch
+  window.fetch = async (...args) => {
+    if (!allowNetwork) {
+      console.warn("Blocked fetch request:", args[0]);
+      return new Response(null, { status: 403, statusText: "Blocked by modal confirm" });
+    }
+    return originalFetch(...args);
+  };
+
+  // Intercept XMLHttpRequest
+  XMLHttpRequest.prototype.open = function(method, url, ...rest) {
+    if (!allowNetwork) {
+      console.warn("Blocked XHR request:", url);
+      this.abort();
+      return;
+    }
+    return originalXHROpen.call(this, method, url, ...rest);
+  };
+
+  const games = await originalFetch("https://hyperrushnet.github.io/assets/json/games.json").then(r => r.json());
   const path = location.pathname.replace(/\/(index\.html)?$/, "").toLowerCase();
   const game = games.find(g => g.link.toLowerCase().replace(/\/$/, "") === path);
   if (!game) return;
 
-  // Create and show confirm modal
   const showCustomConfirm = (message) => {
     return new Promise(resolve => {
-      if (document.getElementById("customConfirmModal")) {
-        document.getElementById("modalMessage").textContent = message;
-        modal.style.display = "flex";
-        return;
-      }
-
       const modal = document.createElement("div");
       modal.id = "customConfirmModal";
       modal.style = `
@@ -20,7 +36,6 @@
         background: #000; display: flex; align-items: center; justify-content: center;
         z-index: 999999;
       `;
-
       modal.innerHTML = `
         <div style="
           background: #fff; padding: 36px; border-radius: 14px;
@@ -34,11 +49,11 @@
           </div>
         </div>
       `;
-
       document.body.appendChild(modal);
 
       document.getElementById("confirmYes").onclick = () => {
         modal.remove();
+        allowNetwork = true;
         resolve(true);
       };
       document.getElementById("confirmNo").onclick = () => {
@@ -46,7 +61,6 @@
         resolve(false);
       };
 
-      // Mute and pause all audio/video
       document.querySelectorAll('audio, video').forEach(el => {
         el.muted = true;
         el.pause();
@@ -60,12 +74,12 @@
       location.href = "/";
       return;
     }
+  } else {
+    allowNetwork = true;
   }
 
-  // Title lock
   const setTitle = () => document.title = game.name;
   setTitle();
-
   const observer = new MutationObserver(() => {
     if (document.title !== game.name) setTitle();
   });
@@ -125,8 +139,7 @@
     }
   }, true);
 
-  // Load the game script (only after confirm)
-  const gameScriptUrl = game.script || "/game/main.js"; // adjust if needed
+  const gameScriptUrl = game.script || "/game/main.js";
   const script = document.createElement("script");
   script.src = gameScriptUrl;
   script.defer = true;
