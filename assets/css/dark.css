@@ -182,6 +182,8 @@ body.lock-scroll {
 #searchBtn img {
   width: 16px;
   height: 16px;
+  max-height: 16px;
+  max-width: 16px;
   filter: invert(69%) sepia(96%) saturate(409%) hue-rotate(180deg) brightness(103%) contrast(90%);
 }
 
