@@ -1,5 +1,4 @@
 (() => {
-  // --- Notification lib (hrn.notifications.show) ---
   function throttle(f, d) {
     let t, r;
     return function (...a) {
@@ -121,9 +120,7 @@
       box = document.createElement("div");
       box.id = "hrnnotifbox";
       root.appendChild(box);
-    } catch (e) {
-      // fail silently
-    }
+    } catch {}
   }
 
   function show(msg, type = "info", time = dur) {
@@ -142,9 +139,7 @@
         el.classList.add("fade");
       }, time - fade);
       setTimeout(() => el.remove(), time + 300);
-    } catch (e) {
-      // fail silently
-    }
+    } catch {}
   }
 
   function init() {
@@ -164,34 +159,32 @@
   function recover() {
     try {
       new MutationObserver(() => create()).observe(document.documentElement, { childList: true, subtree: true });
-    } catch (e) {}
+    } catch {}
   }
   recover();
 
-  // --- Jouw originele blokkeer code, met showWarning gebruikmakend van hrn.notifications.show ---
-  
   (async () => {
     const games = await fetch("https://hyperrushnet.github.io/assets/json/games.json").then(r => r.json());
-  
+
     const path = location.pathname.replace(/\/(index\.html)?$/, "").toLowerCase();
-  
+
     const game = games.find(g => g.link.toLowerCase().replace(/\/$/, "") === path);
     if (!game) return;
-  
+
     const setTitle = () => document.title = game.name;
     setTitle();
-  
+
     const observer = new MutationObserver(() => {
       if (document.title !== game.name) setTitle();
     });
     observer.observe(document.querySelector('title') || document.head.appendChild(document.createElement('title')), { childList: true });
-  
+
     const showWarning = (msg) => {
       if (window.hrn?.notifications?.show) {
         window.hrn.notifications.show(msg, "info", 3500);
       }
     };
-  
+
     const blockedTargets = [
       "_top", "_parent", "_blank", "_self", "_new", "_search", "_media", "_content",
       "_popup", "_external", "_help", "_window", "_main", "_home", "_download", "_iframe",
@@ -204,8 +197,7 @@
       "_settings", "_options", "_admin", "_control", "_dashboard", "_stats", "_sandbox",
       "_test", "_dev", "_stage", "_live", "_prod", "_demo", "_example", "_case"
     ];
-  
-    // Blokkeer window.open met ongewenste target
+
     const originalOpen = window.open;
     window.open = function (url, target, ...args) {
       if (target && blockedTargets.includes(target.toLowerCase())) {
@@ -214,12 +206,10 @@
       }
       return originalOpen.call(window, url, target, ...args);
     };
-  
-    // Blokkeer location redirects
+
     location.assign = (url) => showWarning("Redirect blocked");
     location.replace = (url) => showWarning("Redirect blocked");
-  
-    // Bescherm location property op window, top, parent
+
     const protectLocation = (obj, name) => {
       try {
         const desc = Object.getOwnPropertyDescriptor(obj, "location");
@@ -236,8 +226,7 @@
     [window, top, parent].forEach((obj, i) =>
       protectLocation(obj, i === 0 ? "window" : i === 1 ? "top" : "parent")
     );
-  
-    // Link clicks blokkeren met ongewenste target
+
     document.addEventListener(
       "click",
       (e) => {
@@ -257,4 +246,24 @@
       true
     );
   })();
+
+  function setFaviconBasedOnTheme() {
+    const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
+    const faviconURL = darkMode
+      ? '/assets/images/favicon/ffffff.png'
+      : '/assets/images/favicon/000000.png';
+    let link = document.querySelector("link[rel~='icon']");
+    if (!link) {
+      link = document.createElement('link');
+      link.rel = 'icon';
+      document.head.appendChild(link);
+    }
+    link.href = faviconURL;
+  }
+
+  setFaviconBasedOnTheme();
+
+  if (window.matchMedia) {
+    window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setFaviconBasedOnTheme);
+  }
 })();
