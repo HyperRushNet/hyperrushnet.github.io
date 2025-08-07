@@ -115,15 +115,28 @@
             width: calc(100vw - 70px);
         }
 
-        #content iframe {
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+        }
+
+        .tab-iframe {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
             border: none;
-            transition: opacity 0.3s ease-in-out;
+            /* Nu wordt de overgang van opacity en visibility gecombineerd */
+            visibility: hidden;
             opacity: 0;
+            transition: opacity 0.5s ease-in-out, visibility 0.5s;
+        }
+
+        .tab-iframe.active {
+            visibility: visible;
+            opacity: 1;
         }
 
         /* Sidebar toggle knop */
@@ -175,26 +188,23 @@
         }
         
         /* LAADANIMATIE STIJLEN */
-        #loader-overlay {
-            position: absolute;
+        #full-page-loader {
+            position: fixed;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            background: rgba(18, 18, 18, 0.9);
+            background: #121212;
             display: flex;
             justify-content: center;
             align-items: center;
-            z-index: 10;
-            transition: opacity 0.3s ease-in-out, visibility 0.3s;
+            z-index: 9999;
+            transition: opacity 0.5s ease-in-out;
             opacity: 1;
-            visibility: visible;
-            pointer-events: all;
         }
 
-        #loader-overlay.hidden {
+        #full-page-loader.hidden {
             opacity: 0;
-            visibility: hidden;
             pointer-events: none;
         }
 
@@ -217,27 +227,6 @@
                 transform: rotate(360deg);
             }
         }
-
-        /* OVERLAY VOOR DE HELE PAGINA */
-        #full-page-loader {
-            position: fixed;
-            top: 0;
-            left: 0;
-            width: 100%;
-            height: 100%;
-            background: #121212;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-            z-index: 9999;
-            transition: opacity 0.5s ease-in-out;
-            opacity: 1;
-        }
-
-        #full-page-loader.hidden {
-            opacity: 0;
-            pointer-events: none;
-        }
     </style>
     <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
@@ -247,61 +236,56 @@
     </div>
 
     <aside id="sidebar" aria-label="Navigation">
-        <button class="active" onclick="showTab(this)" aria-selected="true" data-src="https://example.com"><i class="material-symbols-outlined">person</i><span>Profile</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-src="https://example.com"><i class="material-symbols-outlined">lock</i><span>Privacy</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-src="https://example.com"><i class="material-symbols-outlined">language</i><span>Language</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-src="https://example.com"><i class="material-symbols-outlined">computer</i><span>System</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-src="https://example.com"><i class="material-symbols-outlined">info</i><span>About</span></button>
+        <button class="active" onclick="showTab(this)" aria-selected="true" data-tab="tab-1"><i class="material-symbols-outlined">person</i><span>Profile</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-2"><i class="material-symbols-outlined">lock</i><span>Privacy</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-3"><i class="material-symbols-outlined">language</i><span>Language</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-4"><i class="material-symbols-outlined">computer</i><span>System</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-5"><i class="material-symbols-outlined">info</i><span>About</span></button>
         <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Toggle sidebar"><i class="material-symbols-outlined">keyboard_double_arrow_left</i><span>Collapse</span></button>
     </aside>
 
     <main id="content" role="tabpanel">
-        <div id="loader-overlay">
-            <span class="loader"></span>
+        <div class="iframe-container">
+            <iframe id="tab-1" class="tab-iframe active" src="https://example.com/tab1.html" title="Profile"></iframe>
+            <iframe id="tab-2" class="tab-iframe" src="https://example.com/tab2.html" title="Privacy"></iframe>
+            <iframe id="tab-3" class="tab-iframe" src="https://example.com/tab3.html" title="Language"></iframe>
+            <iframe id="tab-4" class="tab-iframe" src="https://example.com/tab4.html" title="System"></iframe>
+            <iframe id="tab-5" class="tab-iframe" src="https://example.com/tab5.html" title="About"></iframe>
         </div>
-        <iframe id="main-iframe" src="https://example.com" title="Main Content"></iframe>
     </main>
 
     <script>
         const sidebar = document.getElementById('sidebar');
         const content = document.getElementById('content');
         const toggleBtn = document.getElementById('toggleSidebarBtn');
-        const buttons = sidebar.querySelectorAll('button:not(#toggleSidebarBtn)');
-        const mainIframe = document.getElementById('main-iframe');
-        const loaderOverlay = document.getElementById('loader-overlay');
+        const tabButtons = sidebar.querySelectorAll('button:not(#toggleSidebarBtn)');
+        const iframes = document.querySelectorAll('.tab-iframe');
         const fullPageLoader = document.getElementById('full-page-loader');
 
-        // Functie voor de animatie binnen de iframe
-        function animateIframeLoad() {
-            setTimeout(() => {
-                mainIframe.style.opacity = '1';
-                loaderOverlay.classList.add('hidden');
-            }, 300);
-        }
-
-        // Functie om de volledige pagina te laden
-        function hideFullPageLoader() {
-            setTimeout(() => {
-                fullPageLoader.classList.add('hidden');
-            }, 500);
-        }
+        let iframesLoadedCount = 0;
+        const totalIframes = iframes.length;
+        const transitionDuration = 500; // 0.5 seconden
 
         function showTab(btn) {
-            // Toon de laadanimatie direct en verberg de iframe.
-            loaderOverlay.classList.remove('hidden');
-            mainIframe.style.opacity = '0';
+            const targetTabId = btn.dataset.tab;
+            const currentActiveIframe = document.querySelector('.tab-iframe.active');
+            const newActiveIframe = document.getElementById(targetTabId);
 
-            buttons.forEach(b => {
+            if (currentActiveIframe === newActiveIframe) return; // Doe niets als de actieve tab al geklikt is
+
+            // Stap 1: Activeer de overgang van de knoppen en fade-out de huidige iframe
+            tabButtons.forEach(b => {
                 b.classList.remove('active');
                 b.setAttribute('aria-selected', 'false');
             });
             btn.classList.add('active');
             btn.setAttribute('aria-selected', 'true');
+            currentActiveIframe.classList.remove('active');
 
-            // Wijzig de URL van de iframe.
+            // Stap 2: Na de fade-out animatie, fade-in de nieuwe iframe
             setTimeout(() => {
-                mainIframe.src = btn.dataset.src;
-            }, 100);
+                newActiveIframe.classList.add('active');
+            }, transitionDuration);
         }
 
         function toggleSidebar() {
@@ -333,14 +317,21 @@
             updateToggleButton();
         }
 
-        // Event listeners voor het laden van de pagina
         window.addEventListener('DOMContentLoaded', () => {
              handleResize();
-             // Wacht tot de eerste iframe geladen is en verberg dan de loader
-             mainIframe.addEventListener('load', animateIframeLoad, { once: true });
+
+             iframes.forEach(iframe => {
+                 iframe.addEventListener('load', () => {
+                     iframesLoadedCount++;
+                     if (iframesLoadedCount === totalIframes) {
+                         setTimeout(() => {
+                             fullPageLoader.classList.add('hidden');
+                         }, 500);
+                     }
+                 }, { once: true });
+             });
         });
 
-        window.addEventListener('load', hideFullPageLoader);
         window.addEventListener('resize', handleResize);
     </script>
 </body>
