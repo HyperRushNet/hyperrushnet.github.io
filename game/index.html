@@ -3,6 +3,10 @@
 <head>
   <meta charset="UTF-8" /> 
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <!-- Light mode favicon -->
+  <link rel="icon" href="/assets/images/favicon/000000.png" media="(prefers-color-scheme: light)">
+  <!-- Dark mode favicon -->
+  <link rel="icon" href="/assets/images/favicon/ffffff.png" media="(prefers-color-scheme: dark)">  
   <title>Loading - HyperRushNet</title>
   <script src="/assets/js/notranslate.min.js"></script>
   <style>
@@ -28,7 +32,6 @@
 </head>
 <body>
 <div id="loader"><div></div></div>
-<script src="/assets/js/faviconchanger.min.js" defer></script>
 <script>
 const redirect = () => location.href = "/";
 let iframe, games;
