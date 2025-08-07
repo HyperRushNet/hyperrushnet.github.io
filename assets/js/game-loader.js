@@ -16,10 +16,9 @@
 
   const showWarning = (msg) => {
     if (window.hrn?.notifications?.show) {
-      window.hrn.notifications.show(msg, "info", 3000);
-    } else {
-      alert(msg);
-    }
+      window.hrn.notifications.show(msg, "info", 3500);
+    } 
+    // Geen fallback alert meer
   };
 
   const blockedTargets = [
@@ -76,7 +75,7 @@
         if (el.tagName === "A" && el.href) {
           const target = el.getAttribute("target")?.toLowerCase();
           if (target && blockedTargets.includes(target)) {
-            showWarning(`Redirect blocked: <a> click with target "${target}"`);
+            showWarning(`Redirect blocked`);
             e.preventDefault();
             break;
           }
