@@ -1,85 +1,96 @@
-(async () => {
-  const games = await fetch("https://hyperrushnet.github.io/assets/json/games.json").then(r => r.json());
+(async() => {
+    const games = await fetch("/assets/json/games.json").then(r => r.json());
 
-  const path = location.pathname.replace(/\/(index\.html)?$/, "").toLowerCase();
-  const game = games.find(g => g.link.toLowerCase().replace(/\/$/, "") === path);
-  if (!game) return;
+    const path = location.pathname.replace(/\/(index\.html)?$/, "").toLowerCase();
 
-  // 🕶️ Anti-jumpscare overlay (alleen voor horror)
-  if (game.category.toLowerCase() === "horror") {
-    const overlay = document.createElement("div");
-    overlay.style.cssText = `
-      position: fixed;
-      inset: 0;
-      background: ${window.matchMedia('(prefers-color-scheme: dark)').matches ? '#000' : '#fff'};
-      z-index: 2147483647;
-    `;
-    document.body.appendChild(overlay);
+    const game = games.find(g => g.link.toLowerCase().replace(/\/$/, "") === path);
+    if (!game) return;
 
-    const proceed = confirm(`Warning: "${game.name}" is a horror game. Do you want to continue?`);
-    if (!proceed) {
-      location.href = "/";
-      return;
+    if (game.category.toLowerCase() === "horror") {
+        const proceed = confirm(`Warning: "${game.name}" is a horror game. Do you want to continue?`);
+        if (!proceed) {
+            location.href = "/";
+            return;
+        }
     }
 
-    overlay.remove();
-  }
+    const setTitle = () => document.title = game.name;
+    setTitle();
 
-  // 🎮 Titel instellen en observeren
-  const setTitle = () => document.title = game.name;
-  setTitle();
-  const observer = new MutationObserver(() => {
-    if (document.title !== game.name) setTitle();
-  });
-  observer.observe(document.querySelector('title') || document.head.appendChild(document.createElement('title')), { childList: true });
-
-  // 🛡️ Blokkeer alle vormen van redirects/popup/open-nav hacks
-  const blockNavigation = () => {
-    const noop = () => null;
-    const noopStr = { get: () => noop, set: noop };
-
-    // Blokkeer standaard methodes
-    window.open = noop;
-    window.location.assign = noop;
-    window.location.replace = noop;
-    window.location.reload = noop;
-
-    // Blokkeer window.top/parent manipulaties
-    try {
-      Object.defineProperty(window.top, "location", { set: noop });
-      Object.defineProperty(window.parent, "location", { set: noop });
-      Object.freeze(window.location);
-    } catch {}
-
-    try {
-      Object.defineProperty(window, "top", { configurable: false, writable: false, value: window });
-      Object.defineProperty(window, "parent", { configurable: false, writable: false, value: window });
-      Object.defineProperty(window, "frameElement", { configurable: false, writable: false, value: null });
-      Object.defineProperty(window, "frames", { configurable: false, writable: false, value: [] });
-      Object.defineProperty(window, "self", { configurable: false, writable: false, value: window });
-    } catch {}
-
-    try {
-      delete window.opener;
-    } catch {}
-
-    try {
-      window.onbeforeunload = null;
-    } catch {}
-
-    // Extra observer: detecteer en blokkeer anchors en iframes
-    const domBlockObserver = new MutationObserver((mutations) => {
-      mutations.forEach(m => {
-        [...m.addedNodes].forEach(node => {
-          if (node.tagName === 'A') node.target = '_self';
-          if (node.tagName === 'IFRAME') {
-            node.remove(); // of: node.src = 'about:blank'
-          }
-        });
-      });
+    const observer = new MutationObserver(() => {
+        if (document.title !== game.name) setTitle();
     });
-    domBlockObserver.observe(document.body, { childList: true, subtree: true });
-  };
+    observer.observe(document.querySelector('title') || document.head.appendChild(document.createElement('title')), {
+        childList: true
+    });
 
-  blockNavigation();
+    const showWarning = (msg) => {
+        if (window.hrn ? .notifications ? .show) {
+            window.hrn.notifications.show(msg, "info", 3000);
+        } else {
+            alert(msg);
+        }
+    };
+
+    const blockedTargets = [
+        "_top", "_parent", "_blank", "_self", "_new", "_search", "_media", "_content",
+        "_popup", "_external", "_help", "_window", "_main", "_home", "_download", "_iframe",
+        "_dialog", "_browser", "_redirect", "_login", "_register", "_logoff", "_exit",
+        "_start", "_end", "_print", "_view", "_edit", "_share", "_preview", "_run",
+        "_exec", "_forward", "_back", "_open", "_about", "_contact", "_support", "_close",
+        "_tab", "_page", "_lightbox", "_modal", "_child", "_parentframe", "_topframe", "_overlay",
+        "_portal", "_dash", "_menu", "_panel", "_win", "_float", "_tool", "_tray",
+        "_mediawindow", "_fullscreen", "_expand", "_collapse", "_gallery", "_zoom", "_profile",
+        "_settings", "_options", "_admin", "_control", "_dashboard", "_stats", "_sandbox",
+        "_test", "_dev", "_stage", "_live", "_prod", "_demo", "_example", "_case"
+    ];
+
+
+    const originalOpen = window.open;
+    window.open = function(url, target, ...args) {
+        if (target && blockedTargets.includes(target.toLowerCase())) {
+            showWarning(`Redirect blocked: window.open with target "${target}"`);
+            return null;
+        }
+        return originalOpen.call(window, url, target, ...args);
+    };
+
+    location.assign = (url) => showWarning("Redirect blocked: location.assign");
+    location.replace = (url) => showWarning("Redirect blocked: location.replace");
+
+    const protectLocation = (obj, name) => {
+        try {
+            const desc = Object.getOwnPropertyDescriptor(obj, "location");
+            if (!desc || desc.configurable) {
+                Object.defineProperty(obj, "location", {
+                    configurable: true,
+                    enumerable: true,
+                    get: () => window.location,
+                    set: (url) => showWarning(`${name}.location = ${url} blocked`),
+                });
+            }
+        } catch {}
+    };
+    [window, top, parent].forEach((obj, i) =>
+        protectLocation(obj, i === 0 ? "window" : i === 1 ? "top" : "parent")
+    );
+
+    document.addEventListener(
+        "click",
+        (e) => {
+            let el = e.target;
+            while (el && el !== document) {
+                if (el.tagName === "A" && el.href) {
+                    const target = el.getAttribute("target") ? .toLowerCase();
+                    if (target && blockedTargets.includes(target)) {
+                        showWarning(`Redirect blocked: <a> click with target "${target}"`);
+                        e.preventDefault();
+                        break;
+                    }
+                }
+                el = el.parentNode;
+            }
+        },
+        true
+    );
 })();
