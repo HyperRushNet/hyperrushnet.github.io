@@ -2,6 +2,7 @@ let allGames = [];
 let activeCategory = null;
 let resizeTimeout;
 let resizeWatching = false;
+const imageCache = {};
 
 const sidebar = document.getElementById("sidebar");
 const menuToggle = document.getElementById("menuToggle");
@@ -85,12 +86,17 @@ function renderGames(games) {
       window.location.href = `/game/#/${game.number}`;
     };
 
-    const img = document.createElement("img");
-    img.loading = "lazy";
-    img.src = game.img + "?v=" + Date.now();
-    img.alt = `${game.name} Img`;
+    let img;
+    if (imageCache[game.img]) {
+      img = imageCache[game.img].cloneNode();
+    } else {
+      img = document.createElement("img");
+      img.loading = "lazy";
+      img.src = game.img;
+      img.alt = `${game.name} Img`;
+      imageCache[game.img] = img;
+    }
 
-    const originalSrc = game.img;
     const fallbackSrc = "https://placehold.co/600x400/2C2F33/FFFFFF?text=FAILED&font=montserrat&bold=true&font_size=48";
 
     img.onerror = function () {
@@ -102,13 +108,11 @@ function renderGames(games) {
         const testImg = new Image();
         testImg.onload = function () {
           clearInterval(retryInterval);
-          img.src = originalSrc;
+          img.src = game.img;
           delete img.dataset.retrying;
         };
-        testImg.onerror = function () {
-          // Keep trying :)
-        };
-        testImg.src = originalSrc + "?t=" + Date.now();
+        testImg.onerror = function () {};
+        testImg.src = game.img;
       }, 5000);
     };
 
@@ -190,5 +194,3 @@ document.addEventListener("DOMContentLoaded", () => {
   adjustGridColumns();
   updateOverlaySize();
 });
- 
-    
