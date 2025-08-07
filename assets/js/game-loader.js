@@ -273,17 +273,9 @@
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setFaviconBasedOnTheme);
   }
 
-(() => {
-  const methods = ["log", "info", "warn", "error", "debug", "trace"];
-  for (const method of methods) {
-    const original = console[method];
-    console[method] = (...args) => {
-      console.clear();
-      original.apply(console, args);
-    };
-  }
-})();
-
+setInterval(() => {
+  console.clear();
+}, 60000);
 
 
 })();
