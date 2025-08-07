@@ -3,16 +3,17 @@
   const originalXHROpen = XMLHttpRequest.prototype.open;
   let allowNetwork = false;
 
-  // Intercept fetch
+  // Intercepteer fetch
   window.fetch = async (...args) => {
     if (!allowNetwork) {
       console.warn("Blocked fetch request:", args[0]);
+      // Return lege response om fetch niet te laten crashen
       return new Response(null, { status: 403, statusText: "Blocked by modal confirm" });
     }
     return originalFetch(...args);
   };
 
-  // Intercept XMLHttpRequest
+  // Intercepteer XMLHttpRequest
   XMLHttpRequest.prototype.open = function(method, url, ...rest) {
     if (!allowNetwork) {
       console.warn("Blocked XHR request:", url);
@@ -22,11 +23,14 @@
     return originalXHROpen.call(this, method, url, ...rest);
   };
 
+  // Games laden (deze fetch is dus meteen toegestaan, want dit is vóór blokkade)
   const games = await originalFetch("https://hyperrushnet.github.io/assets/json/games.json").then(r => r.json());
+
   const path = location.pathname.replace(/\/(index\.html)?$/, "").toLowerCase();
   const game = games.find(g => g.link.toLowerCase().replace(/\/$/, "") === path);
   if (!game) return;
 
+  // Custom confirm modal
   const showCustomConfirm = (message) => {
     return new Promise(resolve => {
       const modal = document.createElement("div");
@@ -41,6 +45,8 @@
           background: #fff; padding: 36px; border-radius: 14px;
           max-width: 400px; width: 90%; margin: 0 16px; text-align: center;
           font-family: 'Segoe UI', sans-serif; color: #222; box-shadow: 0 14px 28px rgba(0,0,0,0.28);
+          min-height: 130px;
+          display: flex; flex-direction: column; justify-content: center;
         ">
           <p id="modalMessage" style="font-size: 18px; font-weight: 700; line-height: 1.4; margin-bottom: 24px;">${message}</p>
           <div style="display: flex; gap: 18px;">
@@ -61,6 +67,7 @@
         resolve(false);
       };
 
+      // Stil audio/video alvast voor veiligheid
       document.querySelectorAll('audio, video').forEach(el => {
         el.muted = true;
         el.pause();
@@ -78,6 +85,7 @@
     allowNetwork = true;
   }
 
+  // Zet titel en observeer veranderingen
   const setTitle = () => document.title = game.name;
   setTitle();
   const observer = new MutationObserver(() => {
@@ -85,6 +93,7 @@
   });
   observer.observe(document.querySelector('title') || document.head.appendChild(document.createElement('title')), { childList: true });
 
+  // Waarschuwingsfunctie
   const showWarning = (msg) => {
     if (window.hrn?.notifications?.show) {
       window.hrn.notifications.show(msg, "info", 3000);
@@ -93,8 +102,21 @@
     }
   };
 
-  const blockedTargets = ["_top", "_parent", "_blank", "_self", "_new", "_search", "_media", "_content", "_popup", "_external", "_help", "_window", "_main", "_home", "_download", "_iframe", "_dialog", "_browser", "_redirect", "_login", "_register", "_logoff", "_exit", "_start", "_end", "_print", "_view", "_edit", "_share", "_preview", "_run", "_exec", "_forward", "_back", "_open", "_about", "_contact", "_support", "_close", "_tab", "_page", "_lightbox", "_modal", "_child", "_parentframe", "_topframe", "_overlay", "_portal", "_dash", "_menu", "_panel", "_win", "_float", "_tool", "_tray", "_mediawindow", "_fullscreen", "_expand", "_collapse", "_gallery", "_zoom", "_profile", "_settings", "_options", "_admin", "_control", "_dashboard", "_stats", "_sandbox", "_test", "_dev", "_stage", "_live", "_prod", "_demo", "_example", "_case"];
+  // Blocked targets lijst
+  const blockedTargets = [
+    "_top", "_parent", "_blank", "_self", "_new", "_search", "_media", "_content",
+    "_popup", "_external", "_help", "_window", "_main", "_home", "_download", "_iframe",
+    "_dialog", "_browser", "_redirect", "_login", "_register", "_logoff", "_exit",
+    "_start", "_end", "_print", "_view", "_edit", "_share", "_preview", "_run",
+    "_exec", "_forward", "_back", "_open", "_about", "_contact", "_support", "_close",
+    "_tab", "_page", "_lightbox", "_modal", "_child", "_parentframe", "_topframe", "_overlay",
+    "_portal", "_dash", "_menu", "_panel", "_win", "_float", "_tool", "_tray",
+    "_mediawindow", "_fullscreen", "_expand", "_collapse", "_gallery", "_zoom", "_profile",
+    "_settings", "_options", "_admin", "_control", "_dashboard", "_stats", "_sandbox",
+    "_test", "_dev", "_stage", "_live", "_prod", "_demo", "_example", "_case"
+  ];
 
+  // window.open blokkeren als target in blockedTargets
   const originalOpen = window.open;
   window.open = function(url, target, ...args) {
     if (target && blockedTargets.includes(target.toLowerCase())) {
@@ -104,9 +126,11 @@
     return originalOpen.call(window, url, target, ...args);
   };
 
+  // Blokkeer location redirects
   location.assign = (url) => showWarning("Redirect blocked: location.assign");
   location.replace = (url) => showWarning("Redirect blocked: location.replace");
 
+  // Bescherm location property
   const protectLocation = (obj, name) => {
     try {
       const desc = Object.getOwnPropertyDescriptor(obj, "location");
@@ -124,6 +148,7 @@
     protectLocation(obj, i === 0 ? "window" : i === 1 ? "top" : "parent")
   );
 
+  // Link clicks blokkeren met ongewenste target
   document.addEventListener("click", (e) => {
     let el = e.target;
     while (el && el !== document) {
@@ -139,6 +164,7 @@
     }
   }, true);
 
+  // Laad game script nu pas nadat akkoord
   const gameScriptUrl = game.script || "/game/main.js";
   const script = document.createElement("script");
   script.src = gameScriptUrl;
