@@ -13,7 +13,7 @@
 
   "icons": [
     {
-      "src": "/app/round-500.png",
+      "src": "./round-500.png",
       "sizes": "500x500",
       "type": "image/png"
     }
@@ -32,10 +32,10 @@
       }]
     },
     {
-      "name": "Instellingen",
-      "short_name": "Instellingen",
-      "description": "Pas je voorkeuren aan",
-      "url": "/app/settings.html",
+      "name": "Settings",
+      "short_name": "Settings",
+      "description": "Change the look and feel of the HyperRush Game site.",
+      "url": "/settings.html",
       "icons": [{
         "src": "./settings-icon.png",
         "sizes": "512x512",
