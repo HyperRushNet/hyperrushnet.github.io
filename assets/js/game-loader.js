@@ -5,6 +5,7 @@
   const game = games.find(g => g.link.toLowerCase().replace(/\/$/, "") === path);
   if (!game) return;
 
+  // Gebruik custom dialog in plaats van confirm
   if (game.category.toLowerCase() === "horror") {
     const proceed = await createCustomDialog(`Warning: "${game.name}" is a horror game. Do you want to continue?`);
     if (!proceed) {
@@ -29,8 +30,20 @@
     }
   };
 
-  const blockedTargets = [/* (je lijst blijft onveranderd) */];
+  const blockedTargets = [
+    "_top", "_parent", "_blank", "_self", "_new", "_search", "_media", "_content",
+    "_popup", "_external", "_help", "_window", "_main", "_home", "_download", "_iframe",
+    "_dialog", "_browser", "_redirect", "_login", "_register", "_logoff", "_exit",
+    "_start", "_end", "_print", "_view", "_edit", "_share", "_preview", "_run",
+    "_exec", "_forward", "_back", "_open", "_about", "_contact", "_support", "_close",
+    "_tab", "_page", "_lightbox", "_modal", "_child", "_parentframe", "_topframe", "_overlay",
+    "_portal", "_dash", "_menu", "_panel", "_win", "_float", "_tool", "_tray",
+    "_mediawindow", "_fullscreen", "_expand", "_collapse", "_gallery", "_zoom", "_profile",
+    "_settings", "_options", "_admin", "_control", "_dashboard", "_stats", "_sandbox",
+    "_test", "_dev", "_stage", "_live", "_prod", "_demo", "_example", "_case"
+  ];
 
+  // Blokkeer window.open met ongewenste target
   const originalOpen = window.open;
   window.open = function(url, target, ...args) {
     if (target && blockedTargets.includes(target.toLowerCase())) {
@@ -40,9 +53,11 @@
     return originalOpen.call(window, url, target, ...args);
   };
 
+  // Blokkeer location redirects
   location.assign = (url) => showWarning("Redirect blocked: location.assign");
   location.replace = (url) => showWarning("Redirect blocked: location.replace");
 
+  // Bescherm location property op window, top, parent
   const protectLocation = (obj, name) => {
     try {
       const desc = Object.getOwnPropertyDescriptor(obj, "location");
@@ -60,6 +75,7 @@
     protectLocation(obj, i === 0 ? "window" : i === 1 ? "top" : "parent")
   );
 
+  // Link clicks blokkeren met ongewenste target
   document.addEventListener(
     "click",
     (e) => {
@@ -80,10 +96,10 @@
   );
 })();
 
-// Custom Dialog Function
+// ✅ Custom async dialog vervangt confirm()
 function createCustomDialog(message) {
   return new Promise((resolve) => {
-    // Create backdrop
+    // Backdrop
     const backdrop = document.createElement("div");
     backdrop.style.cssText = `
       position: fixed;
@@ -93,10 +109,10 @@ function createCustomDialog(message) {
       display: flex;
       align-items: center;
       justify-content: center;
-      z-index: 10000;
+      z-index: 999999;
     `;
 
-    // Create dialog box
+    // Dialog
     const dialog = document.createElement("div");
     dialog.style.cssText = `
       background: white;
@@ -104,7 +120,8 @@ function createCustomDialog(message) {
       border-radius: 8px;
       max-width: 400px;
       text-align: center;
-      box-shadow: 0 4px 12px rgba(0,0,0,0.2);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.3);
+      font-family: sans-serif;
     `;
     dialog.innerHTML = `
       <p style="margin-bottom: 20px; font-size: 16px;">${message}</p>
