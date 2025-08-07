@@ -21,12 +21,12 @@
 
   "shortcuts": [
     {
-      "name": "Blader door games",
-      "short_name": "Games",
-      "description": "Bekijk de volledige gamebibliotheek",
-      "url": "/app/library.html",
+      "name": "Homepage",
+      "short_name": "Home",
+      "description": "Search trough all the games.",
+      "url": "/",
       "icons": [{
-        "src": "https://cdn-icons-png.flaticon.com/512/4240/4240231.png",
+        "src": "./home-icon.png",
         "sizes": "512x512",
         "type": "image/png"
       }]
@@ -37,7 +37,7 @@
       "description": "Pas je voorkeuren aan",
       "url": "/app/settings.html",
       "icons": [{
-        "src": "https://cdn-icons-png.flaticon.com/512/4240/4240231.png",
+        "src": "./settings-icon.png",
         "sizes": "512x512",
         "type": "image/png"
       }]
