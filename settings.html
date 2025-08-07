@@ -1,237 +1,326 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8">
-  <title>Instellingen</title>
-  <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <style>
-    * {
-      margin: 0;
-      padding: 0;
-      box-sizing: border-box;
-      font-family: system-ui, sans-serif;
-    }
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Instellingen</title>
+<style>
+  /* Reset & base */
+  * {
+    margin: 0; padding: 0; box-sizing: border-box;
+    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+  }
+  html, body {
+    height: 100%;
+    background: #121212;
+    color: #e0e0e0;
+  }
+  body {
+    display: flex;
+    min-height: 100vh;
+    overflow: hidden;
+  }
 
-    html, body {
-      height: 100%;
-    }
+  /* Sidebar */
+  #sidebar {
+    flex-shrink: 0;
+    width: 260px;
+    background: #1f1f1f;
+    display: flex;
+    flex-direction: column;
+    overflow-y: auto;
+    box-shadow: 2px 0 8px rgba(0,0,0,0.7);
+    transition: width 0.12s ease;
+    padding: 20px 0;
+  }
+  #sidebar.collapsed {
+    width: 70px;
+  }
 
-    body {
-      background: #1e1e1e;
-      color: #fff;
-      display: flex;
-      flex-direction: row;
-      overflow: hidden;
-    }
+  /* Buttons */
+  #sidebar button {
+    all: unset;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    padding: 14px 24px;
+    font-size: 0.95rem;
+    color: #ccc;
+    border-left: 4px solid transparent;
+    transition:
+      background-color 0.12s ease,
+      color 0.12s ease,
+      border-color 0.12s ease;
+    margin-bottom: 6px;
+  }
+  #sidebar button i.material-symbols-outlined {
+    font-variation-settings:
+      'FILL' 0,
+      'wght' 400,
+      'GRAD' 0,
+      'opsz' 24;
+    font-size: 1.3rem;
+    width: 26px;
+    text-align: center;
+    user-select: none;
+  }
+  #sidebar button span {
+    white-space: nowrap;
+    user-select: none;
+    transition: opacity 0.15s ease;
+  }
 
+  #sidebar.collapsed button span {
+    opacity: 0;
+    pointer-events: none;
+  }
+
+  #sidebar button:hover:not(.active) {
+    background-color: #2a2a2a;
+    color: #fff;
+  }
+  #sidebar button.active {
+    color: #00aaff;
+    border-left-color: #00aaff;
+    background-color: #151515;
+    font-weight: 600;
+  }
+
+  /* Remove default focus outline and blue line */
+  #sidebar button:focus {
+    outline: none;
+    box-shadow: none;
+  }
+
+  /* Scrollbar sidebar */
+  #sidebar::-webkit-scrollbar {
+    width: 8px;
+  }
+  #sidebar::-webkit-scrollbar-thumb {
+    background: #444;
+    border-radius: 4px;
+  }
+  #sidebar::-webkit-scrollbar-track {
+    background: #1f1f1f;
+  }
+
+  /* Content area */
+  #content {
+    flex-grow: 1;
+    overflow-y: auto;
+    padding: 30px 40px;
+    background: #181818;
+    display: flex;
+    justify-content: center;
+  }
+  .content-inner {
+    max-width: 900px;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    gap: 40px;
+  }
+
+  /* Headings */
+  h1 {
+    font-size: clamp(1.3rem, 2vw, 1.8rem);
+    font-weight: 700;
+    color: #00aaff;
+    margin-bottom: 12px;
+    letter-spacing: 0.03em;
+  }
+
+  /* Settings */
+  .setting {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+    margin-bottom: 6px;
+  }
+  .setting label {
+    font-weight: 600;
+    font-size: clamp(0.9rem, 1vw, 1rem);
+    color: #bbb;
+    margin-bottom: 4px;
+  }
+  .setting input,
+  .setting select {
+    padding: 12px 6px;
+    font-size: 0.95rem;
+    border-radius: 8px;
+    border: 1.5px solid #333;
+    background-color: #222;
+    color: #eee;
+    transition: border-color 0.12s ease, background-color 0.12s ease;
+    margin-bottom: 8px;
+  }
+  .setting input::placeholder {
+    color: #666;
+  }
+  .setting input:focus,
+  .setting select:focus {
+    outline: none;
+    border-color: #00aaff;
+    background-color: #1a1a1a;
+  }
+
+  /* Info paragraph */
+  #over p {
+    font-size: clamp(0.95rem, 1.3vw, 1.1rem);
+    line-height: 1.7;
+    color: #999;
+    margin-bottom: 18px;
+  }
+
+  /* Toggle sidebar button */
+  #toggleSidebarBtn {
+    margin-top: auto;
+    border-top: 1px solid #333;
+    padding-top: 14px;
+    font-weight: 600;
+    color: #777;
+    transition: color 0.12s ease;
+  }
+  #toggleSidebarBtn:hover {
+    color: #00aaff;
+  }
+
+  /* Mobile */
+  @media (max-width: 768px) {
     #sidebar {
-      flex-shrink: 0;
-      width: 280px;
-      min-width: 60px;
-      background: #2d2d2d;
-      transition: 0.3s;
-      display: flex;
-      flex-direction: column;
-      gap: 2px;
-      overflow-y: auto;
+      position: fixed;
+      left: 0;
+      top: 0;
+      height: 100vh;
+      width: 70px !important;
+      z-index: 1000;
+      box-shadow: 2px 0 10px rgba(0,0,0,0.9);
+      padding: 20px 0;
     }
-
-    #sidebar.collapsed {
-      width: 60px;
-    }
-
-    #sidebar button {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      padding: 12px 20px;
-      background: none;
-      border: none;
-      color: #fff;
-      font-size: 15px;
-      cursor: pointer;
-      text-align: left;
-      width: 100%;
-      transition: 0.2s;
-    }
-
-    #sidebar button i {
-      width: 20px;
-      text-align: center;
-      font-style: normal;
-    }
-
     #sidebar button span {
-      transition: 0.3s;
+      display: none !important;
     }
-
-    #sidebar.collapsed button span {
-      display: none;
+    #toggleSidebarBtn {
+      display: none !important;
     }
-
-    #sidebar button:hover {
-      background: #3a3a3a;
-    }
-
-    #sidebar button.active {
-      background: #0078d7;
-    }
-
     #content {
-      flex-grow: 1;
-      flex-shrink: 1;
-      flex-basis: 0;
-      overflow-y: auto;
-      padding: 20px;
-      display: flex;
-      justify-content: center;
+      padding: 20px 25px;
+      margin-left: 70px;
     }
-
-    .content-inner {
-      width: 100%;
-      max-width: 900px;
-      display: flex;
-      flex-direction: column;
-      gap: 30px;
-    }
-
-    h1 {
-      font-size: clamp(1.5rem, 2vw, 2.5rem);
-      margin-bottom: 10px;
-    }
-
-    .setting {
-      display: flex;
-      flex-direction: column;
-      gap: 8px;
-    }
-
-    .setting label {
-      font-weight: bold;
-      font-size: clamp(0.9rem, 1vw, 1.1rem);
-    }
-
-    .setting input,
-    .setting select {
-      width: 100%;
-      padding: 12px;
-      font-size: 1rem;
-      border: none;
-      border-radius: 4px;
-      background: #3a3a3a;
-      color: #fff;
-    }
-
-    /* Mobile sidebar altijd ingeklapt */
-    @media (max-width: 768px) {
-      #sidebar {
-        width: 60px !important;
-      }
-
-      #sidebar button span {
-        display: none;
-      }
-
-      #toggleSidebarBtn {
-        display: none !important;
-      }
-
-      #content {
-        padding: 15px;
-      }
-    }
-  </style>
+  }
+</style>
+<link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
 
-  <aside id="sidebar">
-    <button class="active" onclick="showPanel('profiel', this)"><i>👤</i><span>Profiel</span></button>
-    <button onclick="showPanel('privacy', this)"><i>🔒</i><span>Privacy</span></button>
-    <button onclick="showPanel('taal', this)"><i>🌐</i><span>Taal</span></button>
-    <button onclick="showPanel('systeem', this)"><i>💻</i><span>Systeem</span></button>
-    <button onclick="showPanel('over', this)"><i>ℹ️</i><span>Over</span></button>
-    <button id="toggleSidebarBtn" onclick="toggleSidebar()"><i>🡸</i><span>Sidebar inklappen</span></button>
+  <aside id="sidebar" aria-label="Navigatie">
+    <button class="active" onclick="showPanel('profiel', this)" role="tab" aria-selected="true"><i class="material-symbols-outlined">person</i><span>Profiel</span></button>
+    <button onclick="showPanel('privacy', this)" role="tab" aria-selected="false"><i class="material-symbols-outlined">lock</i><span>Privacy</span></button>
+    <button onclick="showPanel('taal', this)" role="tab" aria-selected="false"><i class="material-symbols-outlined">language</i><span>Taal</span></button>
+    <button onclick="showPanel('systeem', this)" role="tab" aria-selected="false"><i class="material-symbols-outlined">computer</i><span>Systeem</span></button>
+    <button onclick="showPanel('over', this)" role="tab" aria-selected="false"><i class="material-symbols-outlined">info</i><span>Over</span></button>
+    <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Sidebar inklappen/uitklappen"><i class="material-symbols-outlined">keyboard_double_arrow_left</i><span>Sidebar inklappen</span></button>
   </aside>
 
-  <main id="content">
+  <main id="content" role="tabpanel">
     <div class="content-inner">
-      <section id="profiel" class="panel">
+      <section id="profiel" class="panel" style="display:block" aria-label="Profiel instellingen">
         <h1>Profiel</h1>
         <div class="setting">
-          <label>Gebruikersnaam</label>
-          <input type="text" placeholder="Jouw naam...">
+          <label for="username">Gebruikersnaam</label>
+          <input id="username" type="text" placeholder="Jouw naam..." autocomplete="username" />
         </div>
         <div class="setting">
-          <label>Email</label>
-          <input type="email" placeholder="voorbeeld@mail.com">
+          <label for="email">Email</label>
+          <input id="email" type="email" placeholder="voorbeeld@mail.com" autocomplete="email" />
         </div>
       </section>
 
-      <section id="privacy" class="panel" style="display:none">
+      <section id="privacy" class="panel" style="display:none" aria-label="Privacy instellingen">
         <h1>Privacy</h1>
         <div class="setting">
-          <label>Trackingbescherming</label>
-          <select>
+          <label for="tracking">Trackingbescherming</label>
+          <select id="tracking" autocomplete="off">
             <option>Basis</option>
             <option>Gebalanceerd</option>
             <option>Strikt</option>
           </select>
         </div>
         <div class="setting">
-          <label>Wachtwoorden opslaan</label>
-          <select>
+          <label for="savePasswords">Wachtwoorden opslaan</label>
+          <select id="savePasswords" autocomplete="off">
             <option>Ja</option>
             <option>Nee</option>
           </select>
         </div>
       </section>
 
-      <section id="taal" class="panel" style="display:none">
+      <section id="taal" class="panel" style="display:none" aria-label="Taal instellingen">
         <h1>Taal</h1>
         <div class="setting">
-          <label>Voorkeurstaal</label>
-          <select>
+          <label for="language">Voorkeurstaal</label>
+          <select id="language" autocomplete="off">
             <option>Nederlands</option>
             <option>Engels</option>
             <option>Duits</option>
+            <option>Frans</option>
           </select>
         </div>
       </section>
 
-      <section id="systeem" class="panel" style="display:none">
+      <section id="systeem" class="panel" style="display:none" aria-label="Systeem instellingen">
         <h1>Systeem</h1>
         <div class="setting">
-          <label>Versnelling door hardware</label>
-          <select>
-            <option>Ingeschakeld</option>
-            <option>Uitgeschakeld</option>
+          <label for="theme">Thema</label>
+          <select id="theme" autocomplete="off">
+            <option>Donker</option>
+            <option>Licht</option>
+            <option>System default</option>
+          </select>
+        </div>
+        <div class="setting">
+          <label for="notifications">Meldingen</label>
+          <select id="notifications" autocomplete="off">
+            <option>Aan</option>
+            <option>Uit</option>
           </select>
         </div>
       </section>
 
-      <section id="over" class="panel" style="display:none">
-        <h1>Over deze app</h1>
-        <p style="font-size:clamp(1rem,1.5vw,1.2rem);line-height:1.6;">
-          Versie: 1.0.0<br>
-          Gemaakt door: Jouw Team<br>
-          Deze instellingenpagina is volledig responsive, clean en future-proof.
-        </p>
+      <section id="over" class="panel" style="display:none" aria-label="Over deze applicatie">
+        <h1>Over</h1>
+        <p>Deze app is gemaakt om je instellingen eenvoudig en snel aan te passen met een strak design.</p>
+        <p>Alle gegevens worden lokaal opgeslagen en niet gedeeld.</p>
       </section>
     </div>
   </main>
 
-  <script>
-    function showPanel(id, btn) {
-      document.querySelectorAll('.panel').forEach(p => p.style.display = 'none')
-      document.getElementById(id).style.display = 'block'
-      document.querySelectorAll('#sidebar button').forEach(b => b.classList.remove('active'))
-      btn.classList.add('active')
-    }
+<script>
+  const sidebar = document.getElementById('sidebar');
+  const toggleBtn = document.getElementById('toggleSidebarBtn');
+  const buttons = sidebar.querySelectorAll('button:not(#toggleSidebarBtn)');
+  const panels = document.querySelectorAll('.panel');
 
-    function toggleSidebar() {
-      const sidebar = document.getElementById('sidebar')
-      sidebar.classList.toggle('collapsed')
-    }
-  </script>
+  function showPanel(id, btn) {
+    panels.forEach(p => {
+      p.style.display = p.id === id ? 'block' : 'none';
+    });
+    buttons.forEach(b => {
+      b.classList.remove('active');
+      b.setAttribute('aria-selected', 'false');
+    });
+    btn.classList.add('active');
+    btn.setAttribute('aria-selected', 'true');
+  }
+
+  function toggleSidebar() {
+    sidebar.classList.toggle('collapsed');
+    const collapsed = sidebar.classList.contains('collapsed');
+    toggleBtn.querySelector('span').textContent = collapsed ? 'Sidebar uitklappen' : 'Sidebar inklappen';
+    toggleBtn.querySelector('i').textContent = collapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
+  }
+</script>
+
 </body>
 </html>
