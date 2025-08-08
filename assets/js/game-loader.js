@@ -207,6 +207,28 @@
     location.assign = (url) => showWarning("Redirect blocked");
     location.replace = (url) => showWarning("Redirect blocked");
 
+    // Blokkeer directe toewijzing aan location.href
+    (() => {
+      try {
+        const locationProto = Object.getPrototypeOf(window.location);
+        const originalHrefDesc = Object.getOwnPropertyDescriptor(locationProto, "href");
+
+        if (originalHrefDesc && originalHrefDesc.configurable) {
+          Object.defineProperty(window.location, "href", {
+            configurable: false,
+            enumerable: true,
+            get() {
+              return originalHrefDesc.get.call(this);
+            },
+            set(url) {
+              showWarning(`Redirect via location.href = "${url}" geblokkeerd`);
+              // redirect niet uitvoeren
+            }
+          });
+        }
+      } catch {}
+    })();
+
     const protectLocation = (obj, name) => {
       try {
         const desc = Object.getOwnPropertyDescriptor(obj, "location");
