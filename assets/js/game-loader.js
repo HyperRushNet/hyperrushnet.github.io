@@ -190,43 +190,31 @@
       }
     };
 
-    // Nieuwe functie om te checken of URL intern is (zelfde domein)
-    const isInternal = (url) => {
-      try {
-        const parsed = new URL(url, location.href);
-        return parsed.origin === location.origin;
-      } catch {
-        return false;
-      }
-    };
+    const blockedTargets = [
+      "_top", "_parent", "_blank", "_self", "_new", "_search", "_media", "_content",
+      "_popup", "_external", "_help", "_window", "_main", "_home", "_download", "_iframe",
+      "_dialog", "_browser", "_redirect", "_login", "_register", "_logoff", "_exit",
+      "_start", "_end", "_print", "_view", "_edit", "_share", "_preview", "_run",
+      "_exec", "_forward", "_back", "_open", "_about", "_contact", "_support", "_close",
+      "_tab", "_page", "_lightbox", "_modal", "_child", "_parentframe", "_topframe", "_overlay",
+      "_portal", "_dash", "_menu", "_panel", "_win", "_float", "_tool", "_tray",
+      "_mediawindow", "_fullscreen", "_expand", "_collapse", "_gallery", "_zoom", "_profile",
+      "_settings", "_options", "_admin", "_control", "_dashboard", "_stats", "_sandbox",
+      "_test", "_dev", "_stage", "_live", "_prod", "_demo", "_example", "_case"
+    ];
 
-    // Override window.open om externe url's te blokkeren
     const originalOpen = window.open;
     window.open = function (url, target, ...args) {
-      if (url && !isInternal(url)) {
-        showWarning(`Redirect naar externe site geblokkeerd`);
+      if (target && blockedTargets.includes(target.toLowerCase())) {
+        showWarning(`Redirect blocked`);
         return null;
       }
       return originalOpen.call(window, url, target, ...args);
     };
 
-    // Override location.assign en location.replace om externe redirect te blokkeren
-    location.assign = (url) => {
-      if (!isInternal(url)) {
-        showWarning("Redirect naar externe site geblokkeerd");
-        return;
-      }
-      window.location.assign(url);
-    };
-    location.replace = (url) => {
-      if (!isInternal(url)) {
-        showWarning("Redirect naar externe site geblokkeerd");
-        return;
-      }
-      window.location.replace(url);
-    };
+    location.assign = (url) => showWarning("Redirect blocked");
+    location.replace = (url) => showWarning("Redirect blocked");
 
-    // Bescherm locatie properties van window, top en parent
     const protectLocation = (obj, name) => {
       try {
         const desc = Object.getOwnPropertyDescriptor(obj, "location");
@@ -235,13 +223,7 @@
             configurable: true,
             enumerable: true,
             get: () => window.location,
-            set: (url) => {
-              if (!isInternal(url)) {
-                showWarning(`${name}.location = ${url} geblokkeerd`);
-              } else {
-                window.location = url;
-              }
-            },
+            set: (url) => showWarning(`${name}.location = ${url} blocked`),
           });
         }
       } catch {}
@@ -251,15 +233,15 @@
       protectLocation(obj, i === 0 ? "window" : i === 1 ? "top" : "parent")
     );
 
-    // Klik handler op <a> om externe links te blokkeren
     document.addEventListener(
       "click",
       (e) => {
         let el = e.target;
         while (el && el !== document) {
           if (el.tagName === "A" && el.href) {
-            if (!isInternal(el.href)) {
-              showWarning(`Redirect naar externe site geblokkeerd`);
+            const target = el.getAttribute("target")?.toLowerCase();
+            if (target && blockedTargets.includes(target)) {
+              showWarning(`Redirect blocked`);
               e.preventDefault();
               break;
             }
@@ -291,8 +273,14 @@
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setFaviconBasedOnTheme);
   }
 
-  setInterval(() => {
-    console.clear();
-  }, 60000);
+(() => {
+  const methods = ["log", "info", "warn", "error", "debug", "trace"];
+  for (const method of methods) {
+    console[method] = () => {
+      console.clear();
+    };
+  }
+})();
+
 
 })();
