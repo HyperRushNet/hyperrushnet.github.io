@@ -1,116 +1,102 @@
 (() => {
-  const alertMsg = "Navigatie geblokkeerd door beveiliging!";
-
-  // --- Overlay die ALLES blokkeert ---
-  const overlay = document.createElement("div");
-  Object.assign(overlay.style, {
+  // Notificatie container
+  let container = document.createElement("div");
+  Object.assign(container.style, {
     position: "fixed",
-    top: "0",
-    left: "0",
-    width: "100vw",
-    height: "100vh",
-    backgroundColor: "rgba(0,0,0,0.5)",
-    color: "white",
-    fontSize: "2rem",
-    display: "flex",
-    alignItems: "center",
-    justifyContent: "center",
-    zIndex: 2147483647, // max z-index
-    userSelect: "none",
-    pointerEvents: "auto",
+    top: "12px",
+    right: "12px",
+    zIndex: 2147483647,
+    fontFamily: "sans-serif",
+    fontSize: "14px",
+    pointerEvents: "none",
+    maxWidth: "300px",
   });
-  overlay.textContent = alertMsg;
+  document.body.appendChild(container);
 
-  // Voeg toe aan body
-  document.documentElement.appendChild(overlay);
-
-  // Blokkeer ALLE pointer events op de hele pagina
-  document.documentElement.style.pointerEvents = "none";
-  // Behalve op overlay zelf
-  overlay.style.pointerEvents = "auto";
-
-  // --- Helper functie voor alert + blokkeermelding ---
-  function blockNavigation(msg) {
-    console.warn("Blocked navigation: ", msg);
-    alert(alertMsg);
+  // Functie om notificatie te tonen
+  function showNotification(msg, duration = 3000) {
+    const notif = document.createElement("div");
+    notif.textContent = msg;
+    Object.assign(notif.style, {
+      background: "#fee2e2",
+      color: "#900",
+      padding: "8px 12px",
+      marginTop: "8px",
+      borderRadius: "5px",
+      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
+      pointerEvents: "auto",
+      userSelect: "none",
+    });
+    container.appendChild(notif);
+    setTimeout(() => {
+      notif.style.transition = "opacity 0.5s";
+      notif.style.opacity = "0";
+      setTimeout(() => notif.remove(), 500);
+    }, duration);
   }
 
-  // --- Overwrite window.open ---
-  const originalWindowOpen = window.open;
-  window.open = function (...args) {
-    blockNavigation(`window.open(${args.join(", ")})`);
-    return null;
+  // Detecteer en blokkeer ongewenste redirects
+  function blockNavigation(msg) {
+    console.warn("Blocked navigation:", msg);
+    showNotification(`Navigatie geblokkeerd`);
+  }
+
+  // --- window.open overschrijven ---
+  const origOpen = window.open;
+  window.open = function (url, target, ...args) {
+    // Optioneel: alleen blokkeer target als het begint met underscore behalve _hrncustomredirect
+    if (target && target.startsWith("_") && target.toLowerCase() !== "_hrncustomredirect") {
+      blockNavigation(`window.open met target '${target}' geblokkeerd`);
+      return null;
+    }
+    return origOpen.call(window, url, target, ...args);
   };
 
-  // --- Overwrite location.assign en location.replace ---
-  const locationProto = Object.getPrototypeOf(window.location);
-  ['assign', 'replace'].forEach(method => {
-    const original = window.location[method];
-    window.location[method] = function (url) {
-      blockNavigation(`location.${method}(${url})`);
+  // --- location.assign & replace overschrijven ---
+  ["assign", "replace"].forEach(fnName => {
+    const origFn = window.location[fnName];
+    window.location[fnName] = function (url) {
+      blockNavigation(`window.location.${fnName}(${url}) geblokkeerd`);
     };
   });
 
-  // --- Overwrite window.location setter ---
+  // --- location setter overschrijven ---
   try {
-    Object.defineProperty(window, 'location', {
-      configurable: false,
+    Object.defineProperty(window, "location", {
+      configurable: true,
       enumerable: true,
-      get() { return window.location; },
-      set(url) { blockNavigation(`window.location = ${url}`); }
+      get: () => window.location,
+      set: (url) => {
+        blockNavigation(`window.location = ${url} geblokkeerd`);
+      },
     });
-  } catch(e) {
-    // fallback: sommige browsers blokkeren dit
-  }
+  } catch {}
 
-  // --- Blokkeer link clicks overal ---
+  // --- Link clicks onderscheppen ---
   document.addEventListener("click", e => {
     let el = e.target;
     while (el && el !== document) {
       if (el.tagName === "A" && el.href) {
-        e.preventDefault();
-        e.stopImmediatePropagation();
-        blockNavigation(`Klik op link naar ${el.href}`);
-        break;
+        const target = el.getAttribute("target")?.toLowerCase();
+        if (target && target.startsWith("_") && target !== "_hrncustomredirect") {
+          e.preventDefault();
+          e.stopImmediatePropagation();
+          blockNavigation(`Link met target '${target}' geblokkeerd`);
+          break;
+        }
       }
       el = el.parentNode;
     }
   }, true);
 
-  // --- Blokkeer navigatie via keyboard (bv. F5, Ctrl+R, Alt+Left) ---
-  window.addEventListener("keydown", e => {
-    if (
-      e.key === "F5" || 
-      (e.ctrlKey && e.key.toLowerCase() === "r") ||
-      (e.altKey && e.key === "ArrowLeft")
-    ) {
-      e.preventDefault();
-      blockNavigation(`Navigatie via keyboard: ${e.key}`);
-    }
-  }, true);
-
-  // --- Blokkeer beforeunload (tab sluiten / refresh) ---
-  window.addEventListener("beforeunload", e => {
-    e.preventDefault();
-    e.returnValue = alertMsg;
-    return alertMsg;
-  });
-
-  // --- Blokkeer pagehide / unload events ---
-  window.addEventListener("pagehide", e => {
-    e.preventDefault();
-    blockNavigation("Pagehide event");
-  });
-
-  // --- Overwrite Unity WebGL OpenURL calls via SendMessage & Module ---
+  // --- Unity WebGL OpenURL patchen ---
   function blockUnityOpenURL(url) {
-    blockNavigation(`Unity OpenURL geprobeerd: ${url}`);
+    blockNavigation(`Unity OpenURL poging naar: ${url} geblokkeerd`);
   }
 
-  // unityInstance SendMessage hack (Unity < 2021)
-  if(window.unityInstance && typeof window.unityInstance.SendMessage === "function") {
+  if (window.unityInstance?.SendMessage) {
     const origSendMessage = window.unityInstance.SendMessage;
-    window.unityInstance.SendMessage = function(go, method, param) {
+    window.unityInstance.SendMessage = function (go, method, param) {
       if (method.toLowerCase() === "openurl") {
         blockUnityOpenURL(param);
         return;
@@ -119,13 +105,18 @@
     };
   }
 
-  // Module.OpenURL hack (Unity 2021+)
-  if(window.Module && typeof window.Module.OpenURL === "function") {
+  if (window.Module?.OpenURL) {
     const origOpenURL = window.Module.OpenURL;
-    window.Module.OpenURL = function(url) {
+    window.Module.OpenURL = function (url) {
       blockUnityOpenURL(url);
     };
   }
 
-  console.log("🚫 Ultieme navigatie blokkades geactiveerd!");
+  // --- beforeunload event niet blokkeren om niet irritant te zijn ---
+  // Alleen een console.warn als gebruiker probeert te refreshen/verlaten.
+  window.addEventListener("beforeunload", (e) => {
+    console.warn("beforeunload event gedetecteerd, maar niet geblokkeerd.");
+  });
+
+  console.log("✅ Navigatie blokker actief, maar gameplay blijft werken.");
 })();
