@@ -1,104 +1,84 @@
 (() => {
-  // Zorg dat notifications bestaan
-  if (!window.hrn) window.hrn = {};
-  if (!window.hrn.notifications) {
-    window.hrn.notifications = {};
-  }
-  if (!window.hrn.notifications.show) {
-    window.hrn.notifications.show = (msg, type = "info", time = 3000) => alert(msg);
-  }
+  const showWarning = (msg) => {
+    alert("🔒 Redirect geblokkeerd: " + msg);
+    // Hier kan je ook jouw notificatie gebruiken:
+    // window.hrn?.notifications?.show(msg, "warning", 4000);
+  };
 
-  const notify = (msg) => {
+  const preventRedirect = (objName, obj) => {
     try {
-      window.hrn.notifications.show(msg, "error", 3500);
-    } catch {
-      alert(msg);
+      const originalHref = obj.location.href;
+
+      Object.defineProperty(obj, "location", {
+        configurable: true,
+        enumerable: true,
+        get: () => window.location,
+        set: (val) => {
+          showWarning(`${objName}.location = "${val}" geblokkeerd`);
+        },
+      });
+
+      ["assign", "replace"].forEach(method => {
+        if (typeof obj.location[method] === "function") {
+          obj.location[method] = function (...args) {
+            showWarning(`${objName}.location.${method}("${args[0]}") geblokkeerd`);
+          };
+        }
+      });
+
+      // let ook op href direct setten
+      Object.defineProperty(obj.location, "href", {
+        configurable: true,
+        enumerable: true,
+        get: () => originalHref,
+        set: (val) => {
+          showWarning(`${objName}.location.href = "${val}" geblokkeerd`);
+        },
+      });
+    } catch (e) {
+      console.warn(`Kan ${objName}.location niet beveiligen`, e);
     }
   };
 
-  // Huidige URL onthouden
-  let currentUrl = location.href;
-
-  // Functie om terug te zetten naar de oude URL en notificeren
-  function blockRedirect(reason) {
-    if (location.href !== currentUrl) {
-      notify(`Redirect geblokkeerd: ${reason}`);
-      // Terugzetten zonder reload
-      history.pushState(null, document.title, currentUrl);
-    }
-  }
-
-  // Override location.href setter
-  Object.defineProperty(window.location, 'href', {
-    configurable: true,
-    enumerable: true,
-    get() {
-      return currentUrl;
-    },
-    set(url) {
-      notify(`Redirect geblokkeerd via location.href = ${url}`);
-      // Niet toestaan
-    }
+  ["window", "top", "parent"].forEach(name => {
+    try {
+      preventRedirect(name, eval(name));
+    } catch {}
   });
 
-  // Override assign
-  const originalAssign = location.assign;
-  location.assign = function(url) {
-    notify(`Redirect geblokkeerd via location.assign(${url})`);
-    // niet uitvoeren
-  };
-
-  // Override replace
-  const originalReplace = location.replace;
-  location.replace = function(url) {
-    notify(`Redirect geblokkeerd via location.replace(${url})`);
-    // niet uitvoeren
-  };
-
-  // Override history.pushState en replaceState om URL manipulatie te detecteren
-  const originalPushState = history.pushState;
-  history.pushState = function(state, title, url) {
-    if (url && url !== currentUrl) {
-      notify(`Redirect geblokkeerd via history.pushState(${url})`);
-      return; // Niet doorvoeren
+  // window.open blokkeren met specifieke target check
+  const originalOpen = window.open;
+  window.open = function (url, target = "", ...rest) {
+    if (url && typeof url === "string" && !target.includes("hrncustom")) {
+      showWarning(`window.open("${url}", "${target}") geblokkeerd`);
+      return null;
     }
-    return originalPushState.apply(this, arguments);
+    return originalOpen.call(window, url, target, ...rest);
   };
 
-  const originalReplaceState = history.replaceState;
-  history.replaceState = function(state, title, url) {
-    if (url && url !== currentUrl) {
-      notify(`Redirect geblokkeerd via history.replaceState(${url})`);
-      return; // Niet doorvoeren
-    }
-    return originalReplaceState.apply(this, arguments);
-  };
-
-  // Monitor URL elke 100ms (fallback)
-  setInterval(() => {
-    if (location.href !== currentUrl) {
-      blockRedirect('URL verandering gedetecteerd');
-    }
-  }, 100);
-
-  // Blokkeer ook links met target die niet mag (volgens jouw regels)
-  const isBlockedTarget = (target) => {
-    const allowList = ["_hrncustomredirect"];
-    return typeof target === "string" && target.startsWith("_") && !allowList.includes(target.toLowerCase());
-  };
-
-  document.addEventListener('click', e => {
+  // Intercept link clicks
+  document.addEventListener("click", (e) => {
     let el = e.target;
-    while(el && el !== document) {
-      if(el.tagName === "A" && el.href) {
-        const target = el.getAttribute('target')?.toLowerCase();
-        if(target && isBlockedTarget(target)) {
-          notify("Redirect geblokkeerd (verboden target)");
+    while (el && el !== document) {
+      if (el.tagName === "A" && el.href) {
+        const href = el.getAttribute("href");
+        const target = el.getAttribute("target")?.toLowerCase();
+        if (href && !href.startsWith("#")) {
+          showWarning(`Navigatie naar ${href} geblokkeerd`);
           e.preventDefault();
-          break;
+          return;
         }
       }
       el = el.parentNode;
     }
   }, true);
+
+  // Controleer op directe URL veranderingen elke 200ms
+  let currentHref = location.href;
+  setInterval(() => {
+    if (location.href !== currentHref) {
+      showWarning(`Redirect naar ${location.href} geblokkeerd`);
+      history.pushState(null, "", currentHref);
+    }
+  }, 200);
 })();
