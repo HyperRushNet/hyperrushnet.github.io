@@ -169,122 +169,126 @@
 
   recover();
 
-  (async () => {
-    const games = await fetch("https://hyperrushnet.github.io/assets/json/games.json").then(r => r.json());
-
-    const path = location.pathname.replace(/\/(index\.html)?$/, "").toLowerCase();
-    const game = games.find(g => g.link.toLowerCase().replace(/\/$/, "") === path);
-    if (!game) return;
-
-    const setTitle = () => document.title = game.name;
-    setTitle();
-
-    const observer = new MutationObserver(() => {
-      if (document.title !== game.name) setTitle();
-    });
-    observer.observe(document.querySelector('title') || document.head.appendChild(document.createElement('title')), { childList: true });
+  // Nieuwe redirect blokkering via URL check & reset
+  (() => {
+    let currentUrl = location.href;
 
     const showWarning = (msg) => {
       if (window.hrn?.notifications?.show) {
-        window.hrn.notifications.show(msg, "info", 3500);
+        window.hrn.notifications.show(msg, "error", 3500);
+      } else {
+        alert(msg);
       }
     };
 
-    const isBlockedTarget = (target) => {
-      const allowList = ["_hrncustomredirect"];
-      return typeof target === "string" && target.startsWith("_") && !allowList.includes(target.toLowerCase());
-    };
-
-    // Override window.open to block unwanted targets
-    const originalOpen = window.open;
-    window.open = function (url, target, ...args) {
-      if (target && isBlockedTarget(target)) {
-        showWarning(`Redirect blocked`);
-        return null;
+    function resetUrl() {
+      if (location.href !== currentUrl) {
+        showWarning("Redirect geblokkeerd!");
+        history.pushState(null, document.title, currentUrl);
       }
-      return originalOpen.call(window, url, target, ...args);
-    };
-
-    // Proxy to protect window.location from redirects
-    const originalLocation = window.location;
-    const locationProxy = new Proxy(originalLocation, {
-      set(target, prop, value) {
-        if (
-          prop === "href" ||
-          prop === "assign" ||
-          prop === "replace"
-        ) {
-          showWarning(`Redirect blocked via location.${prop}`);
-          return true; // block set
-        }
-        target[prop] = value;
-        return true;
-      },
-      get(target, prop) {
-        if (prop === "assign" || prop === "replace") {
-          return function(url) {
-            showWarning(`Redirect blocked via location.${prop}()`);
-          };
-        }
-        if (prop === "href") {
-          return target.href;
-        }
-        return target[prop];
-      },
-      has(target, prop) {
-        return prop in target;
-      },
-      ownKeys(target) {
-        return Reflect.ownKeys(target);
-      },
-      getOwnPropertyDescriptor(target, prop) {
-        return Object.getOwnPropertyDescriptor(target, prop);
-      },
-    });
-
-    try {
-      Object.defineProperty(window, "location", {
-        configurable: true,
-        enumerable: true,
-        get() { return locationProxy; },
-        set(url) {
-          showWarning(`Redirect blocked via location setter`);
-        }
-      });
-    } catch(e) {
-      // Fallback: can't override location, show warning on assignment
-      console.warn("Could not override window.location property:", e);
     }
 
-    // Also block direct location.assign and location.replace usage
-    window.location.assign = function(url) {
-      showWarning("Redirect blocked via location.assign()");
-    };
-    window.location.replace = function(url) {
-      showWarning("Redirect blocked via location.replace()");
-    };
+    setInterval(resetUrl, 100);
 
-    // Block link clicks with blocked targets
-    document.addEventListener(
-      "click",
-      (e) => {
-        let el = e.target;
-        while (el && el !== document) {
-          if (el.tagName === "A" && el.href) {
-            const target = el.getAttribute("target")?.toLowerCase();
-            if (target && isBlockedTarget(target)) {
-              showWarning(`Redirect blocked`);
-              e.preventDefault();
-              break;
-            }
-          }
-          el = el.parentNode;
-        }
-      },
-      true
-    );
+    window.addEventListener("popstate", () => {
+      if (location.href !== currentUrl) {
+        showWarning("Redirect geblokkeerd!");
+        history.pushState(null, document.title, currentUrl);
+      }
+    });
+
+    window.addEventListener("beforeunload", (e) => {
+      if (location.href !== currentUrl) {
+        showWarning("Redirect geblokkeerd!");
+        e.preventDefault();
+        e.returnValue = "";
+        return "";
+      }
+    });
   })();
 
+  // Originele redirect blokkades behouden
+  const isBlockedTarget = (target) => {
+    const allowList = ["_hrncustomredirect"];
+    return typeof target === "string" && target.startsWith("_") && !allowList.includes(target.toLowerCase());
+  };
+
+  const originalOpen = window.open;
+  window.open = function (url, target, ...args) {
+    if (target && isBlockedTarget(target)) {
+      if (window.hrn?.notifications?.show) {
+        window.hrn.notifications.show(`Redirect blocked`, "info", 3500);
+      } else {
+        alert("Redirect blocked");
+      }
+      return null;
+    }
+    return originalOpen.call(window, url, target, ...args);
+  };
+
+  location.assign = (url) => {
+    if (window.hrn?.notifications?.show) {
+      window.hrn.notifications.show("Redirect blocked", "info", 3500);
+    } else {
+      alert("Redirect blocked");
+    }
+  };
+  location.replace = (url) => {
+    if (window.hrn?.notifications?.show) {
+      window.hrn.notifications.show("Redirect blocked", "info", 3500);
+    } else {
+      alert("Redirect blocked");
+    }
+  };
+
+  const protectLocation = (obj, name) => {
+    try {
+      const desc = Object.getOwnPropertyDescriptor(obj, "location");
+      if (!desc || desc.configurable) {
+        Object.defineProperty(obj, "location", {
+          configurable: true,
+          enumerable: true,
+          get: () => window.location,
+          set: (url) => {
+            if (window.hrn?.notifications?.show) {
+              window.hrn.notifications.show(`${name}.location = ${url} blocked`, "info", 3500);
+            } else {
+              alert(`${name}.location = ${url} blocked`);
+            }
+          },
+        });
+      }
+    } catch {}
+  };
+
+  [window, top, parent].forEach((obj, i) =>
+    protectLocation(obj, i === 0 ? "window" : i === 1 ? "top" : "parent")
+  );
+
+  document.addEventListener(
+    "click",
+    (e) => {
+      let el = e.target;
+      while (el && el !== document) {
+        if (el.tagName === "A" && el.href) {
+          const target = el.getAttribute("target")?.toLowerCase();
+          if (target && isBlockedTarget(target)) {
+            if (window.hrn?.notifications?.show) {
+              window.hrn.notifications.show(`Redirect blocked`, "info", 3500);
+            } else {
+              alert("Redirect blocked");
+            }
+            e.preventDefault();
+            break;
+          }
+        }
+        el = el.parentNode;
+      }
+    },
+    true
+  );
+
+  // Favicon en console clear (origineel)
   function setFaviconBasedOnTheme() {
     const darkMode = window.matchMedia && window.matchMedia('(prefers-color-scheme: dark)').matches;
     const faviconURL = darkMode
