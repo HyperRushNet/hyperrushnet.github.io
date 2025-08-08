@@ -1,122 +1,169 @@
 (() => {
-  // Notificatie container
-  let container = document.createElement("div");
-  Object.assign(container.style, {
+  // Notification container in shadow DOM
+  let host = document.createElement("div");
+  Object.assign(host.style, {
+    all: "initial",
     position: "fixed",
-    top: "12px",
-    right: "12px",
+    top: "10px",
+    right: "10px",
     zIndex: 2147483647,
-    fontFamily: "sans-serif",
-    fontSize: "14px",
     pointerEvents: "none",
-    maxWidth: "300px",
   });
-  document.body.appendChild(container);
+  document.documentElement.appendChild(host);
+  const shadowRoot = host.attachShadow({ mode: "open" });
 
-  // Functie om notificatie te tonen
-  function showNotification(msg, duration = 3000) {
-    const notif = document.createElement("div");
-    notif.textContent = msg;
-    Object.assign(notif.style, {
-      background: "#fee2e2",
-      color: "#900",
-      padding: "8px 12px",
-      marginTop: "8px",
-      borderRadius: "5px",
-      boxShadow: "0 2px 6px rgba(0,0,0,0.2)",
-      pointerEvents: "auto",
-      userSelect: "none",
-    });
-    container.appendChild(notif);
-    setTimeout(() => {
-      notif.style.transition = "opacity 0.5s";
-      notif.style.opacity = "0";
-      setTimeout(() => notif.remove(), 500);
-    }, duration);
-  }
-
-  // Detecteer en blokkeer ongewenste redirects
-  function blockNavigation(msg) {
-    console.warn("Blocked navigation:", msg);
-    showNotification(`Navigatie geblokkeerd`);
-  }
-
-  // --- window.open overschrijven ---
-  const origOpen = window.open;
-  window.open = function (url, target, ...args) {
-    // Optioneel: alleen blokkeer target als het begint met underscore behalve _hrncustomredirect
-    if (target && target.startsWith("_") && target.toLowerCase() !== "_hrncustomredirect") {
-      blockNavigation(`window.open met target '${target}' geblokkeerd`);
-      return null;
+  const styleEl = document.createElement("style");
+  styleEl.textContent = `
+    .notif {
+      background: #fee2e2;
+      color: #900;
+      padding: 8px 14px;
+      margin-top: 8px;
+      border-radius: 5px;
+      box-shadow: 0 0 10px rgba(150, 0, 0, 0.7);
+      font-family: sans-serif;
+      font-size: 13px;
+      pointer-events: auto;
+      user-select: none;
+      max-width: 280px;
     }
-    return origOpen.call(window, url, target, ...args);
-  };
+  `;
+  shadowRoot.appendChild(styleEl);
 
-  // --- location.assign & replace overschrijven ---
-  ["assign", "replace"].forEach(fnName => {
-    const origFn = window.location[fnName];
-    window.location[fnName] = function (url) {
-      blockNavigation(`window.location.${fnName}(${url}) geblokkeerd`);
-    };
-  });
+  const notifBox = document.createElement("div");
+  shadowRoot.appendChild(notifBox);
 
-  // --- location setter overschrijven ---
-  try {
-    Object.defineProperty(window, "location", {
+  function showNotif(msg) {
+    const n = document.createElement("div");
+    n.className = "notif";
+    n.textContent = msg;
+    notifBox.appendChild(n);
+    setTimeout(() => {
+      n.style.transition = "opacity 0.6s";
+      n.style.opacity = "0";
+      setTimeout(() => n.remove(), 600);
+    }, 3000);
+  }
+
+  // Block function
+  function block(msg) {
+    console.warn("[NAV BLOCKER]", msg);
+    showNotif(msg);
+  }
+
+  // Overwrite window.open robustly
+  function overwriteOpen() {
+    const originalOpen = window.open;
+    Object.defineProperty(window, "open", {
       configurable: true,
       enumerable: true,
-      get: () => window.location,
-      set: (url) => {
-        blockNavigation(`window.location = ${url} geblokkeerd`);
+      writable: false,
+      value: function (url, target, ...args) {
+        if (target && target.startsWith("_") && target.toLowerCase() !== "_hrncustomredirect") {
+          block(`window.open('${url}', '${target}') geblokkeerd`);
+          return null;
+        }
+        return originalOpen.call(window, url, target, ...args);
       },
     });
-  } catch {}
+  }
 
-  // --- Link clicks onderscheppen ---
-  document.addEventListener("click", e => {
-    let el = e.target;
-    while (el && el !== document) {
-      if (el.tagName === "A" && el.href) {
-        const target = el.getAttribute("target")?.toLowerCase();
-        if (target && target.startsWith("_") && target !== "_hrncustomredirect") {
-          e.preventDefault();
-          e.stopImmediatePropagation();
-          blockNavigation(`Link met target '${target}' geblokkeerd`);
-          break;
-        }
-      }
-      el = el.parentNode;
+  // Overwrite window.location setters & methods
+  function overwriteLocation() {
+    const loc = window.location;
+
+    // location.assign
+    const origAssign = loc.assign.bind(loc);
+    loc.assign = function (url) {
+      block(`window.location.assign('${url}') geblokkeerd`);
+    };
+
+    // location.replace
+    const origReplace = loc.replace.bind(loc);
+    loc.replace = function (url) {
+      block(`window.location.replace('${url}') geblokkeerd`);
+    };
+
+    // setter for location (harder)
+    try {
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        enumerable: true,
+        get() {
+          return loc;
+        },
+        set(url) {
+          block(`window.location = '${url}' geblokkeerd`);
+        },
+      });
+    } catch (e) {
+      // fallback: browsers kunnen dit blokkeren
     }
-  }, true);
-
-  // --- Unity WebGL OpenURL patchen ---
-  function blockUnityOpenURL(url) {
-    blockNavigation(`Unity OpenURL poging naar: ${url} geblokkeerd`);
   }
 
-  if (window.unityInstance?.SendMessage) {
-    const origSendMessage = window.unityInstance.SendMessage;
-    window.unityInstance.SendMessage = function (go, method, param) {
-      if (method.toLowerCase() === "openurl") {
-        blockUnityOpenURL(param);
-        return;
+  // Intercept link clicks
+  function interceptClicks() {
+    document.addEventListener("click", e => {
+      let el = e.target;
+      while (el && el !== document) {
+        if (el.tagName === "A" && el.href) {
+          const target = el.getAttribute("target")?.toLowerCase();
+          if (target && target.startsWith("_") && target !== "_hrncustomredirect") {
+            e.preventDefault();
+            e.stopImmediatePropagation();
+            block(`Link met target '${target}' geblokkeerd`);
+            return;
+          }
+        }
+        el = el.parentNode;
       }
-      return origSendMessage.apply(this, arguments);
-    };
+    }, true);
   }
 
-  if (window.Module?.OpenURL) {
-    const origOpenURL = window.Module.OpenURL;
-    window.Module.OpenURL = function (url) {
-      blockUnityOpenURL(url);
-    };
+  // Patch Unity OpenURL methods if present
+  function patchUnity() {
+    try {
+      if (window.unityInstance && window.unityInstance.SendMessage) {
+        const origSendMessage = window.unityInstance.SendMessage.bind(window.unityInstance);
+        window.unityInstance.SendMessage = (go, method, param) => {
+          if (method.toLowerCase() === "openurl") {
+            block(`Unity SendMessage OpenURL poging naar '${param}' geblokkeerd`);
+            return;
+          }
+          return origSendMessage(go, method, param);
+        };
+      }
+      if (window.Module && window.Module.OpenURL) {
+        const origOpenURL = window.Module.OpenURL.bind(window.Module);
+        window.Module.OpenURL = (url) => {
+          block(`Unity Module.OpenURL poging naar '${url}' geblokkeerd`);
+        };
+      }
+    } catch {}
   }
 
-  // --- beforeunload event niet blokkeren om niet irritant te zijn ---
-  // Alleen een console.warn als gebruiker probeert te refreshen/verlaten.
-  window.addEventListener("beforeunload", (e) => {
-    console.warn("beforeunload event gedetecteerd, maar niet geblokkeerd.");
+  // Re-apply overrides aggressively
+  function watchdog() {
+    overwriteOpen();
+    overwriteLocation();
+    patchUnity();
+  }
+
+  // Initial setup
+  interceptClicks();
+  watchdog();
+
+  // Mutation observer to detect changes and reapply patches
+  const mo = new MutationObserver(() => {
+    watchdog();
   });
 
-  console.log("✅ Navigatie blokker actief, maar gameplay blijft werken.");
+  mo.observe(document.documentElement, { childList: true, subtree: true });
+
+  // Also check every 2s to re-apply overrides, if overwritten
+  setInterval(() => {
+    watchdog();
+  }, 2000);
+
+  console.log("✅ Navigation blocker active with persistent overwrite.");
 })();
