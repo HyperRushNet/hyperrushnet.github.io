@@ -1,66 +1,49 @@
 (() => {
-  const blockNav = (src) => {
-    console.warn(`[BLOCKED] ${src}`);
-    alert(`🚫 Redirect attempt via ${src} was blocked`);
-  };
-
-  // Block window.location changes
-  Object.defineProperty(window, 'location', {
-    configurable: false,
-    enumerable: true,
-    get: () => window._realLocation || document.location,
-    set: (v) => {
-      blockNav("window.location SET");
-    }
-  });
-
-  // Block location.assign and location.replace
-  ['assign', 'replace'].forEach(fn => {
-    window.location[fn] = () => blockNav(`location.${fn}`);
-  });
-
-  // Block window.open
-  window.open = () => {
-    blockNav("window.open");
-    return null;
-  };
-
-  // Block <a href> clicks
-  document.addEventListener("click", (e) => {
+  // Blokkeer clicks op <a href> en andere pointer-events die leiden tot navigatie
+  document.addEventListener("click", e => {
     let el = e.target;
-    while (el) {
+    while (el && el !== document) {
       if (el.tagName === "A" && el.href) {
         e.preventDefault();
-        blockNav("<a href>");
+        e.stopImmediatePropagation();
+        alert("Link-click geblokkeerd");
         break;
       }
       el = el.parentNode;
     }
   }, true);
 
-  // Intercept Unity SendMessage calls (optional, for extra safety)
-  const originalSendMessage = window.SendMessage;
-  window.SendMessage = function (...args) {
-    const [obj, method, param] = args;
-    if (typeof param === "string" && param.startsWith("http")) {
-      blockNav(`SendMessage(${method})`);
-      return;
+  // Blokkeer navigaties op window.open
+  const originalOpen = window.open;
+  window.open = function() {
+    alert("window.open geblokkeerd");
+    return null;
+  };
+
+  // Blokkeer location.assign en replace
+  ['assign', 'replace'].forEach(fn => {
+    window.location[fn] = function() {
+      alert(`location.${fn} geblokkeerd`);
+    };
+  });
+
+  // Block set window.location
+  Object.defineProperty(window, 'location', {
+    configurable: false,
+    enumerable: true,
+    get() { return window._realLocation || document.location; },
+    set(url) {
+      alert("window.location assignment geblokkeerd");
     }
-    return originalSendMessage?.apply(this, args);
-  };
+  });
 
-  // Block Application.OpenURL simulation (some Unity games call this)
-  window.openURL = (url) => {
-    blockNav("Application.OpenURL");
-  };
-
-  // Before unload
-  window.addEventListener("beforeunload", (e) => {
+  // Blokkeer beforeunload navigaties
+  window.addEventListener("beforeunload", e => {
     e.preventDefault();
     e.returnValue = "";
-    blockNav("beforeunload");
+    alert("Beforeunload geblokkeerd");
     return "";
   });
 
-  console.log("✅ Unity-safe navigation blocker loaded");
+  console.log("🚫 Navigatie blokkades geladen");
 })();
