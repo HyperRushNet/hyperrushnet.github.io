@@ -191,7 +191,7 @@
     };
 
     const isBlockedTarget = (target) => {
-      const allowList = ["_self", "_blank", "_top", "_parent"];
+      const allowList = ["_hrncustomredirect"];
       return typeof target === "string" && target.startsWith("_") && !allowList.includes(target.toLowerCase());
     };
 
