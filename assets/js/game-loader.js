@@ -195,6 +195,7 @@
       return typeof target === "string" && target.startsWith("_") && !allowList.includes(target.toLowerCase());
     };
 
+    // Override window.open to block unwanted targets
     const originalOpen = window.open;
     window.open = function (url, target, ...args) {
       if (target && isBlockedTarget(target)) {
@@ -204,49 +205,66 @@
       return originalOpen.call(window, url, target, ...args);
     };
 
-    location.assign = (url) => showWarning("Redirect blocked");
-    location.replace = (url) => showWarning("Redirect blocked");
-
-    // Blokkeer directe toewijzing aan location.href
-    (() => {
-      try {
-        const locationProto = Object.getPrototypeOf(window.location);
-        const originalHrefDesc = Object.getOwnPropertyDescriptor(locationProto, "href");
-
-        if (originalHrefDesc && originalHrefDesc.configurable) {
-          Object.defineProperty(window.location, "href", {
-            configurable: false,
-            enumerable: true,
-            get() {
-              return originalHrefDesc.get.call(this);
-            },
-            set(url) {
-              showWarning(`Redirect via location.href = "${url}" geblokkeerd`);
-              // redirect niet uitvoeren
-            }
-          });
+    // Proxy to protect window.location from redirects
+    const originalLocation = window.location;
+    const locationProxy = new Proxy(originalLocation, {
+      set(target, prop, value) {
+        if (
+          prop === "href" ||
+          prop === "assign" ||
+          prop === "replace"
+        ) {
+          showWarning(`Redirect blocked via location.${prop}`);
+          return true; // block set
         }
-      } catch {}
-    })();
-
-    const protectLocation = (obj, name) => {
-      try {
-        const desc = Object.getOwnPropertyDescriptor(obj, "location");
-        if (!desc || desc.configurable) {
-          Object.defineProperty(obj, "location", {
-            configurable: true,
-            enumerable: true,
-            get: () => window.location,
-            set: (url) => showWarning(`${name}.location = ${url} blocked`),
-          });
+        target[prop] = value;
+        return true;
+      },
+      get(target, prop) {
+        if (prop === "assign" || prop === "replace") {
+          return function(url) {
+            showWarning(`Redirect blocked via location.${prop}()`);
+          };
         }
-      } catch {}
+        if (prop === "href") {
+          return target.href;
+        }
+        return target[prop];
+      },
+      has(target, prop) {
+        return prop in target;
+      },
+      ownKeys(target) {
+        return Reflect.ownKeys(target);
+      },
+      getOwnPropertyDescriptor(target, prop) {
+        return Object.getOwnPropertyDescriptor(target, prop);
+      },
+    });
+
+    try {
+      Object.defineProperty(window, "location", {
+        configurable: true,
+        enumerable: true,
+        get() { return locationProxy; },
+        set(url) {
+          showWarning(`Redirect blocked via location setter`);
+        }
+      });
+    } catch(e) {
+      // Fallback: can't override location, show warning on assignment
+      console.warn("Could not override window.location property:", e);
+    }
+
+    // Also block direct location.assign and location.replace usage
+    window.location.assign = function(url) {
+      showWarning("Redirect blocked via location.assign()");
+    };
+    window.location.replace = function(url) {
+      showWarning("Redirect blocked via location.replace()");
     };
 
-    [window, top, parent].forEach((obj, i) =>
-      protectLocation(obj, i === 0 ? "window" : i === 1 ? "top" : "parent")
-    );
-
+    // Block link clicks with blocked targets
     document.addEventListener(
       "click",
       (e) => {
