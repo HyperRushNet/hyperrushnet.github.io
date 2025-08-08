@@ -190,22 +190,14 @@
       }
     };
 
-    const blockedTargets = [
-      "_top", "_parent", "_blank", "_self", "_new", "_search", "_media", "_content",
-      "_popup", "_external", "_help", "_window", "_main", "_home", "_download", "_iframe",
-      "_dialog", "_browser", "_redirect", "_login", "_register", "_logoff", "_exit",
-      "_start", "_end", "_print", "_view", "_edit", "_share", "_preview", "_run",
-      "_exec", "_forward", "_back", "_open", "_about", "_contact", "_support", "_close",
-      "_tab", "_page", "_lightbox", "_modal", "_child", "_parentframe", "_topframe", "_overlay",
-      "_portal", "_dash", "_menu", "_panel", "_win", "_float", "_tool", "_tray",
-      "_mediawindow", "_fullscreen", "_expand", "_collapse", "_gallery", "_zoom", "_profile",
-      "_settings", "_options", "_admin", "_control", "_dashboard", "_stats", "_sandbox",
-      "_test", "_dev", "_stage", "_live", "_prod", "_demo", "_example", "_case"
-    ];
+    const isBlockedTarget = (target) => {
+      const allowList = ["_self", "_blank", "_top", "_parent"];
+      return typeof target === "string" && target.startsWith("_") && !allowList.includes(target.toLowerCase());
+    };
 
     const originalOpen = window.open;
     window.open = function (url, target, ...args) {
-      if (target && blockedTargets.includes(target.toLowerCase())) {
+      if (target && isBlockedTarget(target)) {
         showWarning(`Redirect blocked`);
         return null;
       }
@@ -240,7 +232,7 @@
         while (el && el !== document) {
           if (el.tagName === "A" && el.href) {
             const target = el.getAttribute("target")?.toLowerCase();
-            if (target && blockedTargets.includes(target)) {
+            if (target && isBlockedTarget(target)) {
               showWarning(`Redirect blocked`);
               e.preventDefault();
               break;
@@ -273,14 +265,12 @@
     window.matchMedia('(prefers-color-scheme: dark)').addEventListener('change', setFaviconBasedOnTheme);
   }
 
-(() => {
-  const methods = ["log", "info", "warn", "error", "debug", "trace"];
-  for (const method of methods) {
-    console[method] = () => {
-      console.clear();
-    };
-  }
-})();
-
-
+  (() => {
+    const methods = ["log", "info", "warn", "error", "debug", "trace"];
+    for (const method of methods) {
+      console[method] = () => {
+        console.clear();
+      };
+    }
+  })();
 })();
