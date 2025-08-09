@@ -1,4 +1,3 @@
-<script>
 (function() {
   // Wacht tot Module en Module.fetch bestaan
   function waitForModuleFetch(maxTries = 50, interval = 100) {
@@ -40,4 +39,3 @@
     alert('Error bij hooken Module.fetch:\n' + err);
   });
 })();
-</script>
