@@ -1,46 +1,39 @@
 <script>
 (function() {
-  // Helper om redirect responses te herkennen
   function isRedirectStatus(status) {
     return status >= 300 && status < 400;
   }
 
-  // Overschrijf fetch
-  const originalFetch = window.fetch;
-  window.fetch = function(resource, init) {
-    return originalFetch(resource, init).then(response => {
-      if (isRedirectStatus(response.status)) {
-        console.warn('Redirect gedetecteerd en geblokkeerd via fetch:', response.url, 'status:', response.status);
-        // Hier kan je een aangepaste response teruggeven, bijvoorbeeld error of lege response
-        // We gooien nu een error om de redirect af te breken
-        return Promise.reject(new Error('Redirect geblokkeerd: ' + response.url));
-      }
-      return response;
-    });
-  };
+  // Wacht tot Module en Module.fetch beschikbaar zijn
+  function hookUnityFetch() {
+    if (typeof Module !== 'undefined' && Module['fetch']) {
+      const originalFetch = Module['fetch'];
 
-  // Overschrijf XMLHttpRequest
-  const originalOpen = XMLHttpRequest.prototype.open;
-  const originalSend = XMLHttpRequest.prototype.send;
+      Module['fetch'] = function(resource, options) {
+        options = options || {};
+        // Forceer redirect mode op 'manual' om redirects niet automatisch te volgen
+        options.redirect = 'manual';
 
-  XMLHttpRequest.prototype.open = function(method, url) {
-    this._url = url;  // sla url op voor later gebruik
-    originalOpen.apply(this, arguments);
-  };
+        return originalFetch(resource, options).then(response => {
+          if (isRedirectStatus(response.status) || response.type === 'opaqueredirect') {
+            console.warn('Redirect gedetecteerd en geblokkeerd via Unity fetch:', response.url, 'status:', response.status);
+            // Redirect blokkeren door een rejected promise terug te geven
+            return Promise.reject(new Error('Redirect geblokkeerd: ' + response.url));
+          }
+          return response;
+        }).catch(err => {
+          console.error('Fout in fetch hook:', err);
+          throw err;
+        });
+      };
 
-  XMLHttpRequest.prototype.send = function(body) {
-    this.addEventListener('readystatechange', function() {
-      if (this.readyState === 2) { // Headers ontvangen
-        if (isRedirectStatus(this.status)) {
-          console.warn('Redirect gedetecteerd en geblokkeerd via XHR:', this._url, 'status:', this.status);
-          // Hier kan je de request stoppen door abort te doen
-          this.abort();
-        }
-      }
-    });
-    originalSend.apply(this, arguments);
-  };
+      console.log('UnityLoader.js fetch functie succesvol gehooked voor redirect blokkering.');
+    } else {
+      // Module of Module.fetch nog niet beschikbaar? Probeer opnieuw over 100ms
+      setTimeout(hookUnityFetch, 100);
+    }
+  }
 
-  console.log('Web request redirect blocker geladen.');
+  hookUnityFetch();
 })();
 </script>
