@@ -35,7 +35,7 @@ body::before {
   background-image: url("/assets/images/background/1.webp");
   background-size: cover;
   background-position: center;
-  filter: brightness(0.2) blur(75px);
+  filter: brightness(0.2) blur(25px);
   z-index: -1;
   transform: scale(1.1);
   pointer-events: none;
