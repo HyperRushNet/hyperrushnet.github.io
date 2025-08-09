@@ -1,50 +1,45 @@
 (function() {
-  function isRedirectStatus(status) {
-    return status >= 300 && status < 400;
+  function blockNavigation(reason) {
+    alert('Pagina navigatie poging geblokkeerd:\n' + reason);
   }
 
-  // Patch fetch als die bestaat
-  if ('fetch' in window) {
-    const originalFetch = window.fetch;
-    window.fetch = function(resource, options) {
-      options = options || {};
-      options.redirect = 'manual'; // probeer redirects niet automatisch te volgen
+  // Override window.location assignment
+  const originalLocation = window.location;
 
-      return originalFetch(resource, options).then(response => {
-        if (isRedirectStatus(response.status) || response.type === 'opaqueredirect') {
-          alert('Redirect gedetecteerd via fetch:\n' + response.url + '\nStatus: ' + response.status);
-          // GEEN blokkering, gewoon doorgaan met response teruggeven
-        }
-        return response;
-      }).catch(err => {
-        alert('Fetch error: ' + err.message);
-        throw err;
-      });
-    };
-  } else {
-    alert('Fetch API niet beschikbaar in deze browser');
-  }
+  Object.defineProperty(window, 'location', {
+    configurable: false,
+    enumerable: true,
+    get() {
+      return originalLocation;
+    },
+    set(value) {
+      blockNavigation('window.location assignment: ' + value);
+      // Geen redirect uitvoeren
+    }
+  });
 
-  // Patch XMLHttpRequest blijft blokkeren, want dat is wat je vroeg
-  const originalOpen = XMLHttpRequest.prototype.open;
-  const originalSend = XMLHttpRequest.prototype.send;
-
-  XMLHttpRequest.prototype.open = function(method, url) {
-    this._url = url;
-    originalOpen.apply(this, arguments);
+  // Override location.assign()
+  const originalAssign = window.location.assign;
+  window.location.assign = function(url) {
+    blockNavigation('window.location.assign: ' + url);
+    // Geen redirect uitvoeren
   };
 
-  XMLHttpRequest.prototype.send = function(body) {
-    this.addEventListener('readystatechange', function() {
-      if (this.readyState === 2) { // headers ontvangen
-        if (isRedirectStatus(this.status)) {
-          alert('Redirect gedetecteerd en geblokkeerd via XMLHttpRequest:\n' + this._url + '\nStatus: ' + this.status);
-          this.abort();
-        }
-      }
-    });
-    originalSend.apply(this, arguments);
+  // Override location.replace()
+  const originalReplace = window.location.replace;
+  window.location.replace = function(url) {
+    blockNavigation('window.location.replace: ' + url);
+    // Geen redirect uitvoeren
   };
 
-  alert('Redirect detector actief: fetch detecteert, XMLHttpRequest blokkeert.');
+  // Override window.open (voor nieuwe tab navigaties)
+  const originalOpen = window.open;
+  window.open = function(url, name, specs) {
+    blockNavigation('window.open: ' + url);
+    // Kan hier eventueel origineel open aanroepen als je wilt toestaan:
+    // return originalOpen.call(window, url, name, specs);
+    return null; // blokkeren
+  };
+
+  alert('Pagina navigatie-blokkade actief (window.location + open overriden)');
 })();
