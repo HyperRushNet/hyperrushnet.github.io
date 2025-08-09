@@ -1,41 +1,50 @@
 (function() {
-  // Wacht tot Module en Module.fetch bestaan
-  function waitForModuleFetch(maxTries = 50, interval = 100) {
-    return new Promise((resolve, reject) => {
-      let tries = 0;
-      const timer = setInterval(() => {
-        tries++;
-        if (typeof Module !== 'undefined' && typeof Module.fetch === 'function') {
-          clearInterval(timer);
-          resolve(Module.fetch);
-        } else if (tries >= maxTries) {
-          clearInterval(timer);
-          reject('Module.fetch niet gevonden na wachten');
-        }
-      }, interval);
-    });
+  function isRedirectStatus(status) {
+    return status >= 300 && status < 400;
   }
 
-  // Hook de fetch functie
-  waitForModuleFetch().then(originalFetch => {
-    Module.fetch = function(resource, options) {
+  // Patch fetch als die bestaat
+  if ('fetch' in window) {
+    const originalFetch = window.fetch;
+    window.fetch = function(resource, options) {
       options = options || {};
-      options.redirect = 'manual'; // voorkom automatische redirect opvolging
+      options.redirect = 'manual'; // probeer redirects niet automatisch te volgen
 
       return originalFetch(resource, options).then(response => {
-        if ((response.status >= 300 && response.status < 400) || response.type === 'opaqueredirect') {
-          alert('Redirect gedetecteerd en geblokkeerd:\nURL: ' + response.url + '\nStatus: ' + response.status);
-          // Redirect blokkeren door error te gooien
+        if (isRedirectStatus(response.status) || response.type === 'opaqueredirect') {
+          alert('Redirect gedetecteerd en geblokkeerd via fetch:\n' + response.url + '\nStatus: ' + response.status);
           return Promise.reject(new Error('Redirect geblokkeerd: ' + response.url));
         }
         return response;
       }).catch(err => {
-        alert('Fetch hook error:\n' + err);
+        alert('Fetch error: ' + err.message);
         throw err;
       });
     };
-    alert('Module.fetch succesvol gehooked om redirects te blokkeren');
-  }).catch(err => {
-    alert('Error bij hooken Module.fetch:\n' + err);
-  });
+  } else {
+    alert('Fetch API niet beschikbaar in deze browser');
+  }
+
+  // Patch XMLHttpRequest
+  const originalOpen = XMLHttpRequest.prototype.open;
+  const originalSend = XMLHttpRequest.prototype.send;
+
+  XMLHttpRequest.prototype.open = function(method, url) {
+    this._url = url;
+    originalOpen.apply(this, arguments);
+  };
+
+  XMLHttpRequest.prototype.send = function(body) {
+    this.addEventListener('readystatechange', function() {
+      if (this.readyState === 2) { // headers ontvangen
+        if (isRedirectStatus(this.status)) {
+          alert('Redirect gedetecteerd en geblokkeerd via XMLHttpRequest:\n' + this._url + '\nStatus: ' + this.status);
+          this.abort();
+        }
+      }
+    });
+    originalSend.apply(this, arguments);
+  };
+
+  alert('Redirect detector actief voor fetch en XMLHttpRequest.');
 })();
