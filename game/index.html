@@ -85,7 +85,7 @@
 </head>
 <body>
   <div id="loader"><div></div></div>
-  <div id="redirect-block-notice" aria-live="polite" role="alert">Redirect block: ON</div>
+  <div id="redirect-block-notice" aria-live="polite" role="alert">Redirect block: ..</div>
   <script>
     (() => {
       const loader = document.getElementById('loader');
@@ -206,7 +206,7 @@
           injectScriptsIntoIframe(iframe);
           iframe.style.display = 'block';
           loader.style.display = 'none';
-          showNotice('Redirect block is active');
+          showNotice('Redirect block: ON');
         };
 
         iframe.onerror = () => {
