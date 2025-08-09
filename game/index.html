@@ -10,7 +10,7 @@
   <title>Loading - HyperRushNet</title>
   <script src="/assets/js/notranslate.min.js"></script>
   <style>
-    html,body{margin:0;height:100%;overflow:hidden;background:#fff;color:#000}
+    html,body{margin:0;height:100%;overflow:hidden;background:#fff;color:#000;position:relative;}
     iframe{width:100%;height:100%;border:none;display:none}
     #loader{
       position:fixed;top:0;left:0;width:100%;height:100%;
@@ -24,17 +24,47 @@
       border-radius:50%;
       animation:spin 0.8s linear infinite;
     }
+    #redirect-block-notice {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: rgba(0,0,0,0.75);
+      color: white;
+      padding: 6px 12px;
+      border-radius: 4px;
+      font-size: 12px;
+      font-family: Arial, sans-serif;
+      z-index: 10000;
+      opacity: 0;
+      transition: opacity 0.3s ease;
+      pointer-events: none;
+    }
+    #redirect-block-notice.show {
+      opacity: 1;
+      pointer-events: auto;
+    }
     @keyframes spin{to{transform:rotate(360deg)}}
     @media (prefers-color-scheme: dark){
       html,body{background:#121212;color:#fff}
+      #redirect-block-notice {
+        background: rgba(255,255,255,0.85);
+        color: #121212;
+      }
     }
   </style>
 </head>
 <body>
 <div id="loader"><div></div></div>
+<div id="redirect-block-notice">Redirect block is active</div>
 <script>
 const redirect = () => location.href = "/";
 let iframe, games;
+
+const showRedirectNotice = () => {
+  const notice = document.getElementById('redirect-block-notice');
+  notice.classList.add('show');
+  setTimeout(() => notice.classList.remove('show'), 3000);
+};
 
 const injectIntoIframe = () => {
   try {
@@ -117,6 +147,7 @@ const loadGame = async () => {
     injectIntoIframe();
     iframe.style.display = "block";
     document.getElementById("loader").style.display = "none";
+    showRedirectNotice();
   };
   iframe.onerror = () => redirect();
   document.body.appendChild(iframe);
