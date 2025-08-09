@@ -12,8 +12,8 @@
 
       return originalFetch(resource, options).then(response => {
         if (isRedirectStatus(response.status) || response.type === 'opaqueredirect') {
-          alert('Redirect gedetecteerd en geblokkeerd via fetch:\n' + response.url + '\nStatus: ' + response.status);
-          return Promise.reject(new Error('Redirect geblokkeerd: ' + response.url));
+          alert('Redirect gedetecteerd via fetch:\n' + response.url + '\nStatus: ' + response.status);
+          // GEEN blokkering, gewoon doorgaan met response teruggeven
         }
         return response;
       }).catch(err => {
@@ -25,7 +25,7 @@
     alert('Fetch API niet beschikbaar in deze browser');
   }
 
-  // Patch XMLHttpRequest
+  // Patch XMLHttpRequest blijft blokkeren, want dat is wat je vroeg
   const originalOpen = XMLHttpRequest.prototype.open;
   const originalSend = XMLHttpRequest.prototype.send;
 
@@ -46,5 +46,5 @@
     originalSend.apply(this, arguments);
   };
 
-  alert('Redirect detector actief voor fetch en XMLHttpRequest.');
+  alert('Redirect detector actief: fetch detecteert, XMLHttpRequest blokkeert.');
 })();
