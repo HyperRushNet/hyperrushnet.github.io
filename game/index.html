@@ -33,21 +33,43 @@
     }
     #redirect-block-notice {
       position: fixed;
-      top: 10px; right: 10px;
+      top: 10px;
+      right: 0;
       background: rgba(0, 0, 0, 0.75);
       color: white;
       padding: 6px 12px;
-      border-radius: 4px;
+      border-radius: 4px 0 0 4px;
       font-size: 12px;
-      opacity: 0;
+      opacity: 1;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transform: translateX(100%);
+      transition: none;
       z-index: 10000;
       user-select: none;
     }
     #redirect-block-notice.show {
-      opacity: 1;
+      animation: slideInRight 0.4s forwards, slideOutRight 0.4s forwards 2.6s;
       pointer-events: auto;
+    }
+    @keyframes slideInRight {
+      from {
+        transform: translateX(100%);
+        opacity: 0;
+      }
+      to {
+        transform: translateX(0);
+        opacity: 1;
+      }
+    }
+    @keyframes slideOutRight {
+      from {
+        transform: translateX(0);
+        opacity: 1;
+      }
+      to {
+        transform: translateX(100%);
+        opacity: 0;
+      }
     }
     @media (prefers-color-scheme: dark) {
       html, body {
@@ -71,26 +93,31 @@
       let iframe = null;
       let games = null;
 
-      // Show a temporary notification for n milliseconds
-      const showNotice = (msg, duration = 3000) => {
+      // Show the notification with slide-in/out animation
+      const showNotice = (msg) => {
         notice.textContent = msg;
+        // Remove & re-add class to retrigger animation
+        notice.classList.remove('show');
+        void notice.offsetWidth; // trigger reflow
         notice.classList.add('show');
-        setTimeout(() => notice.classList.remove('show'), duration);
       };
 
-      // Inject useful scripts into the iframe document
+      // Inject scripts into the iframe to control FPS, pause, logs etc.
       const injectScriptsIntoIframe = (iframe) => {
         try {
           const doc = iframe.contentDocument || iframe.contentWindow?.document;
           if (!doc || !doc.head) return;
+
+          const scripts = [];
 
           // Disable console logs inside iframe
           const disableLogsScript = doc.createElement('script');
           disableLogsScript.textContent = `
             console.log = console.debug = console.warn = console.error = () => {};
           `;
+          scripts.push(disableLogsScript);
 
-          // Cap FPS at ~60 (16ms frame time)
+          // Cap FPS at ~60
           const capFPSScript = doc.createElement('script');
           capFPSScript.textContent = `
             let last = 0;
@@ -104,6 +131,7 @@
             }
             requestAnimationFrame(loop);
           `;
+          scripts.push(capFPSScript);
 
           // Pause/resume game on tab visibility change
           const visibilityScript = doc.createElement('script');
@@ -116,30 +144,30 @@
               }
             });
           `;
+          scripts.push(visibilityScript);
 
-          // Add passive event listeners for better scrolling performance
+          // Passive event listeners fix for performance
           const passiveEventsScript = doc.createElement('script');
           passiveEventsScript.textContent = `
             ['touchstart', 'touchmove', 'wheel'].forEach(event => {
               window.addEventListener(event, () => {}, { passive: true });
             });
           `;
+          scripts.push(passiveEventsScript);
 
-          [disableLogsScript, capFPSScript, visibilityScript, passiveEventsScript].forEach(script => {
-            doc.head.appendChild(script);
-          });
+          scripts.forEach(s => doc.head.appendChild(s));
 
         } catch (error) {
           console.warn('Failed to inject scripts into iframe:', error);
         }
       };
 
-      // Redirect to home
+      // Redirect home fallback
       const redirectToHome = () => {
         window.location.href = '/';
       };
 
-      // Load the game based on URL hash
+      // Load the game from hash in URL
       const loadGame = async () => {
         const hash = window.location.hash.slice(1).split('/')[1];
         const gameNumber = parseInt(hash, 10);
