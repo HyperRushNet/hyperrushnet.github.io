@@ -265,11 +265,11 @@
 
     <main id="content" role="tabpanel">
         <div class="iframe-container">
-            <iframe id="tab-1" class="tab-iframe active" src="./page1.html" title="Profiel"></iframe>
-            <iframe id="tab-2" class="tab-iframe" src="./page2.html" title="Privacy"></iframe>
-            <iframe id="tab-3" class="tab-iframe" src="./page3.html" title="Taal"></iframe>
-            <iframe id="tab-4" class="tab-iframe" src="./page4.html" title="Systeem"></iframe>
-            <iframe id="tab-5" class="tab-iframe" src="./page5.html" title="Over"></iframe>
+            <iframe id="tab-1" class="tab-iframe" srcdoc="" title="Profiel"></iframe>
+            <iframe id="tab-2" class="tab-iframe" srcdoc="" title="Privacy"></iframe>
+            <iframe id="tab-3" class="tab-iframe" srcdoc="" title="Taal"></iframe>
+            <iframe id="tab-4" class="tab-iframe" srcdoc="" title="Systeem"></iframe>
+            <iframe id="tab-5" class="tab-iframe" srcdoc="" title="Over"></iframe>
         </div>
     </main>
 
@@ -284,8 +284,15 @@
             const progressBar = document.getElementById('progress-bar');
             const materialSymbolsLink = document.getElementById('material-symbols');
             const transitionDuration = 500;
+            const pageUrls = {
+                'tab-1': './page1.html',
+                'tab-2': './page2.html',
+                'tab-3': './page3.html',
+                'tab-4': './page4.html',
+                'tab-5': './page5.html'
+            };
 
-            let resourcesToLoadCount = iframes.length + 1;
+            let resourcesToLoadCount = iframes.length + 1; // iframes + 1 voor de iconen
             let resourcesLoadedCount = 0;
 
             function updateProgressBar() {
@@ -295,26 +302,44 @@
 
                 if (resourcesLoadedCount === resourcesToLoadCount) {
                     progressBar.style.width = '100%';
+                    // Laat de eerste tab zien zodra alles geladen is
+                    document.getElementById('tab-1').classList.add('active');
                     setTimeout(() => {
                         fullPageLoader.classList.add('hidden');
                     }, 500);
                 }
             }
 
-            // Gebruik een kleine vertraging om de event listeners te laten registeren
-            setTimeout(() => {
-                iframes.forEach(iframe => {
-                    iframe.addEventListener('load', () => {
+            // Functie om een pagina te fetchen en in een iframe te laden
+            function loadPageIntoIframe(iframeId, url) {
+                fetch(url)
+                    .then(response => response.text())
+                    .then(html => {
+                        const iframe = document.getElementById(iframeId);
+                        iframe.srcdoc = html;
+                        
+                        // Zodra de content in srcdoc staat, beschouwen we het als 'geladen'
+                        resourcesLoadedCount++;
+                        updateProgressBar();
+                    })
+                    .catch(error => {
+                        console.error(`Fout bij het laden van ${url}:`, error);
+                        // Tel de bron alsnog mee om de voortgangsbalk niet te laten stagneren
                         resourcesLoadedCount++;
                         updateProgressBar();
                     });
-                });
+            }
 
-                materialSymbolsLink.addEventListener('load', () => {
-                    resourcesLoadedCount++;
-                    updateProgressBar();
-                });
-            }, 100);
+            // Start het laden van alle pagina's en de iconen
+            Object.keys(pageUrls).forEach(iframeId => {
+                loadPageIntoIframe(iframeId, pageUrls[iframeId]);
+            });
+
+            // Luister naar de 'load' event van de stylesheet (Material Symbols)
+            materialSymbolsLink.addEventListener('load', () => {
+                resourcesLoadedCount++;
+                updateProgressBar();
+            });
 
             function showTab(btn) {
                 const targetTabId = btn.dataset.tab;
