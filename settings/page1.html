@@ -1,264 +1,200 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Instellingen</title>
-  <style>
-    :root {
-      /* Kleuren */
-      --text-color: #e0e0e0;
-      --card-bg: #0f0f0f;
-      --primary-color: #0af;
-      --secondary-color: #555;
-      --border-color: #444;
-      /* Spacing */
-      --spacing-xs: 0.5rem;
-      --spacing-sm: 0.75rem;
-      --spacing-md: 1rem;
-      --spacing-lg: 1.5rem;
-    }
-    /* Universele box-sizing */
-    *,
-    *::before,
-    *::after {
-      box-sizing: border-box;
-    }
-    body {
-      background-color: var(--card-bg);
-      color: var(--text-color);
-      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
-      /* Vaste padding rondom alles voor gegarandeerde marge */
-      padding: var(--spacing-lg); 
-      margin: 0; /* Zorgt dat er geen standaard marge is */
-      line-height: 1.5;
-      width: 100%;
-      height: 100%;
-      /* Voorkomt dat de iframe een scrollbalk krijgt */
-      overflow: hidden; 
-    }
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Meerdere Dynamische Switches</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f0f0f; /* Donkere achtergrond */
+            color: #e0e0e0; /* Lichte tekstkleur */
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
 
-    .controls-container {
-      width: 100%;
-      max-width: 350px; 
-      display: flex;
-      flex-direction: column;
-      gap: var(--spacing-sm);
-    }
-    .control-item {
-      display: flex;
-      align-items: center;
-      justify-content: space-between;
-      gap: var(--spacing-md);
-      padding: var(--spacing-xs) 0;
-    }
-    .control-item-label {
-      font-weight: 600;
-      font-size: 0.9rem;
-      white-space: nowrap;
-      flex-grow: 1;
-      cursor: pointer;
-    }
-    /* Switch Component */
-    .switch-wrapper {
-      display: flex;
-      align-items: center;
-      gap: var(--spacing-xs);
-    }
-    .switch-status {
-      font-size: 0.8rem;
-      font-weight: 600;
-      color: var(--secondary-color);
-      min-width: 30px;
-      text-align: right;
-      transition: color 0.3s;
-    }
-    .switch-input {
-      -webkit-appearance: none;
-      appearance: none;
-      width: 40px;
-      height: 22px;
-      background-color: var(--border-color);
-      border-radius: 11px;
-      position: relative;
-      cursor: pointer;
-      transition: background-color 0.3s;
-      flex-shrink: 0;
-    }
-    .switch-input::before {
-      content: "";
-      width: 18px;
-      height: 18px;
-      background-color: #fff;
-      border-radius: 50%;
-      position: absolute;
-      top: 2px;
-      left: 2px;
-      transition: transform 0.3s;
-    }
-    .switch-input:checked {
-      background-color: var(--primary-color);
-    }
-    .switch-input:checked::before {
-      transform: translateX(18px);
-    }
-    .switch-input:checked + .switch-status {
-      color: var(--primary-color);
-    }
-    /* Dropdown Component */
-    .dropdown {
-      position: relative;
-      flex-grow: 1;
-      width: auto;
-    }
-    .dropdown-button {
-      width: 100%;
-      background-color: var(--border-color);
-      color: var(--text-color);
-      padding: var(--spacing-xs) var(--spacing-sm);
-      border-radius: 4px;
-      cursor: pointer;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      font-size: 0.9rem;
-      font-weight: 500;
-      transition: background-color 0.2s;
-    }
-    .dropdown-button:hover {
-      background-color: var(--secondary-color);
-    }
-    .dropdown-button .arrow {
-      font-size: 0.75rem;
-      margin-left: var(--spacing-xs);
-      transition: transform 0.3s;
-    }
-    .dropdown.open .arrow {
-      transform: rotate(180deg);
-    }
-    .dropdown-menu {
-      position: absolute;
-      top: calc(100% + 5px);
-      left: 0;
-      right: 0;
-      background-color: var(--card-bg);
-      border-radius: 4px;
-      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
-      z-index: 10;
-      max-height: 150px;
-      overflow-y: auto;
-      opacity: 0;
-      pointer-events: none;
-      transition: opacity 0.3s;
-    }
-    .dropdown.open .dropdown-menu {
-      opacity: 1;
-      pointer-events: auto;
-    }
-    .dropdown-menu-item {
-      padding: var(--spacing-xs) var(--spacing-sm);
-      cursor: pointer;
-      font-size: 0.9rem;
-      transition: background-color 0.2s;
-    }
-    .dropdown-menu-item:hover {
-      background-color: var(--primary-color);
-      color: var(--card-bg);
-    }
-  </style>
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .switch-wrapper {
+            display: flex;
+            flex-direction: column;
+            gap: 20px; /* Ruimte tussen de switch-elementen */
+            padding: 10px 0;
+            border-bottom: 1px solid #333; /* Scheidingslijn tussen switches */
+        }
+        
+        .switch-wrapper:last-child {
+            border-bottom: none;
+        }
+
+        .switch-wrapper h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+
+        .switch-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+
+        .description {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            line-height: 1.4;
+        }
+        
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between; /* Label links, switch rechts */
+            font-size: 1.2rem;
+            width: 100%;
+        }
+
+        .switch-label-text {
+            cursor: pointer;
+        }
+
+        .switch-input {
+            display: none;
+        }
+
+        .switch-label {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            background-color: #555; /* Donkere kleur uit */
+            border-radius: 34px;
+            cursor: pointer;
+            transition: background-color 0.4s;
+            box-shadow: inset 0 0 5px rgba(0,0,0,0.4);
+        }
+
+        .switch-label::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 26px;
+            height: 26px;
+            background-color: #ccc; /* Lichte kleur knop */
+            border-radius: 50%;
+            transition: transform 0.4s;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+        }
+
+        .switch-input:checked + .switch-label {
+            background-color: #2196F3; /* Blauwe kleur aan */
+        }
+
+        .switch-input:checked + .switch-label::after {
+            transform: translateX(26px);
+            background-color: white;
+        }
+
+        /* Responsive design voor kleinere schermen */
+        @media (max-width: 600px) {
+            .switch-container {
+                font-size: 1rem;
+            }
+            
+            .switch-label {
+                width: 50px;
+                height: 28px;
+            }
+
+            .switch-label::after {
+                top: 3px;
+                left: 3px;
+                width: 22px;
+                height: 22px;
+            }
+
+            .switch-input:checked + .switch-label::after {
+                transform: translateX(22px);
+            }
+        }
+    </style>
 </head>
 <body>
-<div class="controls-container">
-  <div class="control-item">
-    <label for="switch1" class="control-item-label">Redirect Block</label>
-    <div class="switch-wrapper">
-      <input type="checkbox" id="switch1" class="switch-input" />
-      <div class="switch-status">OFF</div>
+
+    <div class="main-container">
+        <div id="switches-container">
+            </div>
     </div>
-  </div>
-  <div class="control-item">
-    <label for="dropdown1" class="control-item-label">Thema</label>
-    <div class="dropdown" id="dropdown1">
-      <div class="dropdown-button">
-        <span>Donker</span>
-        <span class="arrow">▼</span>
-      </div>
-      <div class="dropdown-menu">
-        <div class="dropdown-menu-item" data-value="dark">Donker</div>
-        <div class="dropdown-menu-item" data-value="light">Licht</div>
-        <div class="dropdown-menu-item" data-value="blue">Blauw</div>
-        <div class="dropdown-menu-item" data-value="green">Groen</div>
-      </div>
-    </div>
-  </div>
-  <div class="control-item">
-    <label for="switch2" class="control-item-label">Tracker Block</label>
-    <div class="switch-wrapper">
-      <input type="checkbox" id="switch2" class="switch-input" />
-      <div class="switch-status">OFF</div>
-    </div>
-  </div>
-  <div class="control-item">
-    <label for="dropdown2" class="control-item-label">Lettertype</label>
-    <div class="dropdown" id="dropdown2">
-      <div class="dropdown-button">
-        <span>Segoe UI</span>
-        <span class="arrow">▼</span>
-      </div>
-      <div class="dropdown-menu">
-        <div class="dropdown-menu-item" data-value="segoe">Segoe UI</div>
-        <div class="dropdown-menu-item" data-value="arial">Arial</div>
-        <div class="dropdown-menu-item" data-value="verdana">Verdana</div>
-        <div data-value="courier" class="dropdown-menu-item">Courier New</div>
-      </div>
-    </div>
-  </div>
-  <div class="control-item">
-    <label for="switch3" class="control-item-label">Cookie Block</label>
-    <div class="switch-wrapper">
-      <input type="checkbox" id="switch3" class="switch-input" />
-      <div class="switch-status">OFF</div>
-    </div>
-  </div>
-</div>
-<script>
-  // Script voor de switches
-  document.querySelectorAll('.switch-input').forEach(checkbox => {
-    const status = checkbox.nextElementSibling;
-    const updateStatus = () => {
-      status.textContent = checkbox.checked ? 'ON' : 'OFF';
-    };
-    checkbox.addEventListener('change', updateStatus);
-    updateStatus();
-  });
-  // Script voor de dropdowns
-  document.querySelectorAll('.dropdown').forEach(dropdown => {
-    const button = dropdown.querySelector('.dropdown-button');
-    const selectedText = button.querySelector('span');
-    const menu = dropdown.querySelector('.dropdown-menu');
-    const label = document.querySelector(`label[for="${dropdown.id}"]`);
-    button.addEventListener('click', (e) => {
-      e.stopPropagation();
-      dropdown.classList.toggle('open');
-    });
-    menu.querySelectorAll('.dropdown-menu-item').forEach(item => {
-      item.addEventListener('click', () => {
-        selectedText.textContent = item.textContent;
-        dropdown.classList.remove('open');
-      });
-    });
-    document.addEventListener('click', (e) => {
-      if (!dropdown.contains(e.target) && !label.contains(e.target)) {
-        dropdown.classList.remove('open');
-      }
-    });
-    document.addEventListener('keydown', (e) => {
-      if (e.key === 'Escape' && dropdown.classList.contains('open')) {
-        dropdown.classList.remove('open');
-        button.focus();
-      }
-    });
-  });
-</script>
+
+    <script>
+        // JSON-data voor de switches
+        const switchesData = [
+            {
+                id: 'redirectBlockSwitch',
+                label: 'Redirect Block',
+                description: 'Blokkeer ongewenste automatische doorverwijzingen van websites. Handig om te voorkomen dat je naar spam- of advertentiepagina\'s wordt gestuurd.'
+            },
+            {
+                id: 'adBlockSwitch',
+                label: 'Advertenties blokkeren',
+                description: 'Verberg de meeste online advertenties om je browse-ervaring te versnellen en te verbeteren.'
+            },
+            {
+                id: 'darkModeSwitch',
+                label: 'Donkere Modus',
+                description: 'Schakel een donkere modus in voor websites die dit ondersteunen, om je ogen te ontlasten bij weinig licht.'
+            },
+            {
+                id: 'scriptBlockSwitch',
+                label: 'Scripts blokkeren',
+                description: 'Blokkeer JavaScript-uitvoering op onbekende websites voor extra beveiliging.'
+            }
+        ];
+
+        const switchesContainer = document.getElementById('switches-container');
+
+        switchesData.forEach(switchItem => {
+            const wrapper = document.createElement('div');
+            wrapper.classList.add('switch-wrapper');
+
+            const group = document.createElement('div');
+            group.classList.add('switch-group');
+
+            const container = document.createElement('div');
+            container.classList.add('switch-container');
+
+            const labelText = document.createElement('label');
+            labelText.htmlFor = switchItem.id;
+            labelText.classList.add('switch-label-text');
+            labelText.textContent = switchItem.label;
+
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.id = switchItem.id;
+            input.classList.add('switch-input');
+
+            const switchLabel = document.createElement('label');
+            switchLabel.htmlFor = switchItem.id;
+            switchLabel.classList.add('switch-label');
+
+            const description = document.createElement('p');
+            description.classList.add('description');
+            description.textContent = switchItem.description;
+
+            container.appendChild(labelText);
+            container.appendChild(input);
+            container.appendChild(switchLabel);
+            
+            group.appendChild(container);
+            group.appendChild(description);
+
+            wrapper.appendChild(group);
+            switchesContainer.appendChild(wrapper);
+        });
+    </script>
 </body>
 </html>
