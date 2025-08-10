@@ -1,9 +1,10 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
     <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1" />
-    <title>Settings</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Instellingen</title>
+    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <style>
         /* Algemene stijlen */
         * {
@@ -12,12 +13,14 @@
             box-sizing: border-box;
             font-family: sans-serif;
         }
+
         html, body {
             height: 100%;
             background: #121212;
             color: #eee;
             display: flex;
             overflow: hidden;
+            font-size: 18px;
         }
 
         /* Sidebar stijlen */
@@ -29,12 +32,14 @@
             overflow-y: auto;
             padding: 20px 0;
             box-shadow: 2px 0 8px #000;
-            transition: width 0.3s ease-in-out;
+            transition: width 0.5s ease-in-out; /* Langere overgang */
+            z-index: 100;
         }
+
         #sidebar.collapsed {
             width: 70px;
-            overflow-x: hidden;
         }
+
         #sidebar button {
             all: unset;
             cursor: pointer;
@@ -45,46 +50,58 @@
             color: #ccc;
             border-left: 4px solid transparent;
             margin-bottom: 6px;
-            transition: 0.2s ease-in-out;
+            transition: background 0.2s ease-in-out, color 0.2s ease-in-out;
             white-space: nowrap;
             overflow: hidden;
-            max-width: 100%;
         }
+
+        #sidebar button:not(#toggleSidebarBtn) {
+            font-size: 1.1rem;
+        }
+
         #sidebar.collapsed button {
             padding: 14px 0;
             justify-content: center;
             gap: 0;
         }
+
         #sidebar button i {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
-            font-size: 1.3rem;
+            font-size: 1.5rem;
             width: 26px;
             text-align: center;
             user-select: none;
         }
+
         #sidebar.collapsed button i {
             width: 100%;
         }
+
         #sidebar button span {
             white-space: nowrap;
             user-select: none;
             transition: opacity 0.2s ease-in-out;
+            display: block;
         }
+
         #sidebar.collapsed button span {
             opacity: 0;
             pointer-events: none;
             width: 0;
         }
+
         #sidebar button:hover:not(.active) {
             background: #2a2a2a;
             color: #fff;
         }
+
         #sidebar button.active {
             color: #0af;
             border-left-color: #0af;
             background: #151515;
             font-weight: 600;
         }
+
         #sidebar button:focus {
             outline: none;
             box-shadow: none;
@@ -97,16 +114,19 @@
             overflow: hidden;
             position: relative;
             width: calc(100vw - 260px);
-            transition: width 0.3s ease-in-out;
+            transition: width 0.5s ease-in-out; /* Langere overgang */
         }
+
         #content.collapsed-sidebar {
             width: calc(100vw - 70px);
         }
+
         .iframe-container {
             position: relative;
             width: 100%;
             height: 100%;
         }
+
         .tab-iframe {
             position: absolute;
             top: 0;
@@ -116,8 +136,9 @@
             border: none;
             visibility: hidden;
             opacity: 0;
-            transition: opacity 0.5s ease-in-out, visibility 0.5s;
+            transition: opacity 0.5s ease-in-out; /* Langere overgang */
         }
+
         .tab-iframe.active {
             visibility: visible;
             opacity: 1;
@@ -132,42 +153,47 @@
             cursor: pointer;
             transition: color 0.12s;
             display: flex;
+            align-items: center;
         }
+
         #toggleSidebarBtn:hover {
             color: #0af;
         }
+
         #sidebar.collapsed #toggleSidebarBtn {
             padding: 14px 0;
             justify-content: center;
         }
+
         #sidebar.collapsed #toggleSidebarBtn span {
             width: 0;
         }
-        
+
         /* Media query voor kleine schermen */
         @media (max-width: 768px) {
             #sidebar {
-                width: 70px;
+                width: 70px !important;
             }
-            #sidebar.collapsed {
-                width: 70px;
-            }
+
             #sidebar button span {
                 opacity: 0;
                 pointer-events: none;
                 width: 0;
             }
+
             #content {
-                width: calc(100vw - 70px);
+                width: calc(100vw - 70px) !important;
             }
+
             #content.collapsed-sidebar {
-                width: calc(100vw - 70px);
+                width: calc(100vw - 70px) !important;
             }
+
             #toggleSidebarBtn {
                 display: none !important;
             }
         }
-        
+
         /* LAADANIMATIE STIJLEN */
         #full-page-loader {
             position: fixed;
@@ -180,13 +206,16 @@
             justify-content: center;
             align-items: center;
             z-index: 9999;
-            transition: opacity 0.5s ease-in-out;
             opacity: 1;
+            pointer-events: auto;
+            transition: opacity 0.5s ease-in-out; /* Langere overgang */
         }
+
         #full-page-loader.hidden {
             opacity: 0;
             pointer-events: none;
         }
+
         .loader {
             width: 50px;
             height: 50px;
@@ -195,8 +224,9 @@
             border-radius: 50%;
             display: inline-block;
             box-sizing: border-box;
-            animation: rotation 1s linear infinite;
+            animation: rotation 0.8s linear infinite;
         }
+
         @keyframes rotation {
             0% {
                 transform: rotate(0deg);
@@ -206,29 +236,28 @@
             }
         }
     </style>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
 </head>
 <body>
     <div id="full-page-loader">
         <span class="loader"></span>
     </div>
 
-    <aside id="sidebar" aria-label="Navigation">
-        <button class="active" onclick="showTab(this)" aria-selected="true" data-tab="tab-1"><i class="material-symbols-outlined">person</i><span>Profile</span></button>
+    <aside id="sidebar" aria-label="Navigatie">
+        <button class="active" onclick="showTab(this)" aria-selected="true" data-tab="tab-1"><i class="material-symbols-outlined">person</i><span>Profiel</span></button>
         <button onclick="showTab(this)" aria-selected="false" data-tab="tab-2"><i class="material-symbols-outlined">lock</i><span>Privacy</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-3"><i class="material-symbols-outlined">language</i><span>Language</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-4"><i class="material-symbols-outlined">computer</i><span>System</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-5"><i class="material-symbols-outlined">info</i><span>About</span></button>
-        <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Toggle sidebar"><i class="material-symbols-outlined">keyboard_double_arrow_left</i><span>Collapse</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-3"><i class="material-symbols-outlined">language</i><span>Taal</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-4"><i class="material-symbols-outlined">computer</i><span>Systeem</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-5"><i class="material-symbols-outlined">info</i><span>Over</span></button>
+        <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Zijbalk inklappen"><i class="material-symbols-outlined">keyboard_double_arrow_left</i><span>Inklappen</span></button>
     </aside>
 
     <main id="content" role="tabpanel">
         <div class="iframe-container">
-            <iframe id="tab-1" class="tab-iframe active" src="./page1.html" title="Profile"></iframe>
+            <iframe id="tab-1" class="tab-iframe active" src="./page1.html" title="Profiel"></iframe>
             <iframe id="tab-2" class="tab-iframe" src="./page2.html" title="Privacy"></iframe>
-            <iframe id="tab-3" class="tab-iframe" src="./page3.html" title="Language"></iframe>
-            <iframe id="tab-4" class="tab-iframe" src="./page4.html" title="System"></iframe>
-            <iframe id="tab-5" class="tab-iframe" src="./page5.html" title="About"></iframe>
+            <iframe id="tab-3" class="tab-iframe" src="./page3.html" title="Taal"></iframe>
+            <iframe id="tab-4" class="tab-iframe" src="./page4.html" title="Systeem"></iframe>
+            <iframe id="tab-5" class="tab-iframe" src="./page5.html" title="Over"></iframe>
         </div>
     </main>
 
@@ -240,16 +269,18 @@
         const iframes = document.querySelectorAll('.tab-iframe');
         const fullPageLoader = document.getElementById('full-page-loader');
 
-        const transitionDuration = 500; // 0.5 seconden
-        
-        // Laadt de eerste iframe en verbergt dan de loader
-        const initialIframe = document.getElementById('tab-1');
-        initialIframe.addEventListener('load', () => {
-            setTimeout(() => {
-                fullPageLoader.classList.add('hidden');
-            }, 500);
-        }, { once: true });
-        
+        let iframesLoadedCount = 0;
+        const totalIframes = iframes.length;
+
+        iframes.forEach(iframe => {
+            iframe.addEventListener('load', () => {
+                iframesLoadedCount++;
+                if (iframesLoadedCount === totalIframes) {
+                    fullPageLoader.classList.add('hidden');
+                }
+            });
+        });
+
         function showTab(btn) {
             const targetTabId = btn.dataset.tab;
             const currentActiveIframe = document.querySelector('.tab-iframe.active');
@@ -263,14 +294,13 @@
             });
             btn.classList.add('active');
             btn.setAttribute('aria-selected', 'true');
-            
-            // Fade-out van de huidige iframe
-            currentActiveIframe.classList.remove('active');
 
-            // Fade-in van de nieuwe iframe na de overgang
-            setTimeout(() => {
+            if (currentActiveIframe) {
+                currentActiveIframe.classList.remove('active');
+            }
+            if (newActiveIframe) {
                 newActiveIframe.classList.add('active');
-            }, transitionDuration);
+            }
         }
 
         function toggleSidebar() {
@@ -287,7 +317,7 @@
                 const icon = toggleBtn.querySelector('i');
                 const text = toggleBtn.querySelector('span');
                 icon.textContent = isCollapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
-                text.textContent = isCollapsed ? 'Expand' : 'Collapse';
+                text.textContent = isCollapsed ? 'Uitklappen' : 'Inklappen';
             }
         }
 
@@ -295,23 +325,14 @@
             if (window.innerWidth <= 768) {
                 sidebar.classList.add('collapsed');
                 content.classList.remove('collapsed-sidebar');
-            } else {
-                // Pas de sidebar-status alleen aan als de gebruiker niet op de knop heeft geklikt
-                // Ik ga ervan uit dat de standaard toestand is dat de sidebar niet ingeklapt is
-                if (!sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.remove('collapsed');
-                    content.classList.remove('collapsed-sidebar');
-                }
+            } else if (!sidebar.classList.contains('collapsed')) {
+                sidebar.classList.remove('collapsed');
+                content.classList.remove('collapsed-sidebar');
             }
             updateToggleButton();
         }
 
-        window.addEventListener('DOMContentLoaded', () => {
-             handleResize();
-             // Zorg ervoor dat de eerste iframe al in de DOM zit voordat de loader-logica wordt uitgevoerd.
-             // Dit is al het geval in de HTML, dus de code voor het laden van de eerste iframe werkt direct.
-        });
-
+        window.addEventListener('DOMContentLoaded', handleResize);
         window.addEventListener('resize', handleResize);
     </script>
 </body>
