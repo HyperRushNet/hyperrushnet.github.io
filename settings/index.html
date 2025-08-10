@@ -121,33 +121,49 @@
             width: calc(100vw - 70px);
         }
 
-        .iframe-container {
-            position: relative;
-            width: 100%;
-            height: 100%;
-            overflow: hidden;
-        }
-
-        .tab-iframe {
+        .tab-content {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
-            border: none;
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
         }
 
-        .tab-iframe.active {
+        .tab-content.active {
             visibility: visible;
             opacity: 1;
         }
 
-        .tab-iframe.fade-out {
+        .tab-content.fade-out {
             opacity: 0;
             visibility: visible;
+        }
+        
+        .tab-loader {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            display: none;
+            z-index: 10;
+        }
+        
+        .tab-loader::after {
+            content: "";
+            width: 30px;
+            height: 30px;
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #0af;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+        }
+
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
         }
 
         /* Sidebar toggle knop */
@@ -264,12 +280,12 @@
     </aside>
 
     <main id="content" role="tabpanel">
-        <div class="iframe-container">
-            <iframe id="tab-1" class="tab-iframe" srcdoc="" title="Profiel"></iframe>
-            <iframe id="tab-2" class="tab-iframe" srcdoc="" title="Privacy"></iframe>
-            <iframe id="tab-3" class="tab-iframe" srcdoc="" title="Taal"></iframe>
-            <iframe id="tab-4" class="tab-iframe" srcdoc="" title="Systeem"></iframe>
-            <iframe id="tab-5" class="tab-iframe" srcdoc="" title="Over"></iframe>
+        <div class="tab-content-container">
+            <div id="tab-1" class="tab-content"></div>
+            <div id="tab-2" class="tab-content"></div>
+            <div id="tab-3" class="tab-content"></div>
+            <div id="tab-4" class="tab-content"></div>
+            <div id="tab-5" class="tab-content"></div>
         </div>
     </main>
 
@@ -279,7 +295,7 @@
             const content = document.getElementById('content');
             const toggleBtn = document.getElementById('toggleSidebarBtn');
             const tabButtons = sidebar.querySelectorAll('button:not(#toggleSidebarBtn)');
-            const iframes = document.querySelectorAll('.tab-iframe');
+            const tabDivs = document.querySelectorAll('.tab-content');
             const fullPageLoader = document.getElementById('full-page-loader');
             const progressBar = document.getElementById('progress-bar');
             const materialSymbolsLink = document.getElementById('material-symbols');
@@ -292,8 +308,9 @@
                 'tab-5': './page5.html'
             };
 
-            let resourcesToLoadCount = iframes.length + 1; // iframes + 1 voor de iconen
+            let resourcesToLoadCount = tabDivs.length + 1; // divs + 1 voor de iconen
             let resourcesLoadedCount = 0;
+            let loadedContent = {}; // Cache voor de geladen content
 
             function updateProgressBar() {
                 const stepSize = 100 / resourcesToLoadCount;
@@ -303,36 +320,35 @@
                 if (resourcesLoadedCount === resourcesToLoadCount) {
                     progressBar.style.width = '100%';
                     // Laat de eerste tab zien zodra alles geladen is
-                    document.getElementById('tab-1').classList.add('active');
+                    const firstTab = document.getElementById('tab-1');
+                    if (firstTab && loadedContent['tab-1']) {
+                        firstTab.innerHTML = loadedContent['tab-1'];
+                        firstTab.classList.add('active');
+                    }
                     setTimeout(() => {
                         fullPageLoader.classList.add('hidden');
                     }, 500);
                 }
             }
 
-            // Functie om een pagina te fetchen en in een iframe te laden
-            function loadPageIntoIframe(iframeId, url) {
+            function loadPage(tabId, url) {
                 fetch(url)
                     .then(response => response.text())
                     .then(html => {
-                        const iframe = document.getElementById(iframeId);
-                        iframe.srcdoc = html;
-                        
-                        // Zodra de content in srcdoc staat, beschouwen we het als 'geladen'
+                        loadedContent[tabId] = html;
                         resourcesLoadedCount++;
                         updateProgressBar();
                     })
                     .catch(error => {
                         console.error(`Fout bij het laden van ${url}:`, error);
-                        // Tel de bron alsnog mee om de voortgangsbalk niet te laten stagneren
                         resourcesLoadedCount++;
                         updateProgressBar();
                     });
             }
 
             // Start het laden van alle pagina's en de iconen
-            Object.keys(pageUrls).forEach(iframeId => {
-                loadPageIntoIframe(iframeId, pageUrls[iframeId]);
+            Object.keys(pageUrls).forEach(tabId => {
+                loadPage(tabId, pageUrls[tabId]);
             });
 
             // Luister naar de 'load' event van de stylesheet (Material Symbols)
@@ -343,25 +359,30 @@
 
             function showTab(btn) {
                 const targetTabId = btn.dataset.tab;
-                const currentActiveIframe = document.querySelector('.tab-iframe.active');
-                const newActiveIframe = document.getElementById(targetTabId);
+                const currentActiveTab = document.querySelector('.tab-content.active');
+                const newActiveTab = document.getElementById(targetTabId);
             
-                if (currentActiveIframe === newActiveIframe) return;
+                if (currentActiveTab === newActiveTab) return;
             
-                if (currentActiveIframe) {
-                    currentActiveIframe.classList.remove('active');
-                    currentActiveIframe.classList.add('fade-out');
+                // Fade-out van de huidige tab
+                if (currentActiveTab) {
+                    currentActiveTab.classList.remove('active');
+                    currentActiveTab.classList.add('fade-out');
                 }
             
+                // Wacht tot de fade-out klaar is
                 setTimeout(() => {
-                    if (currentActiveIframe) {
-                        currentActiveIframe.classList.remove('fade-out');
+                    if (currentActiveTab) {
+                        currentActiveTab.classList.remove('fade-out');
                     }
                     
-                    if (newActiveIframe) {
-                        newActiveIframe.classList.add('active');
+                    // Update de content van de nieuwe tab en fade in
+                    if (newActiveTab) {
+                        newActiveTab.innerHTML = loadedContent[targetTabId];
+                        newActiveTab.classList.add('active');
                     }
             
+                    // Update de actieve knop in de sidebar
                     tabButtons.forEach(b => {
                         b.classList.remove('active');
                         b.setAttribute('aria-selected', 'false');
