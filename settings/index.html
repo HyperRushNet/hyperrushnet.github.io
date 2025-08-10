@@ -4,7 +4,8 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Instellingen</title>
-    <link id="material-symbols" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
+    <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
         /* Algemene stijlen */
         * {
@@ -65,15 +66,14 @@
             gap: 0;
         }
 
-        #sidebar button i {
-            font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 22;
+        #sidebar button ion-icon {
             font-size: 1.4rem;
             width: 24px;
             text-align: center;
             user-select: none;
         }
 
-        #sidebar.collapsed button i {
+        #sidebar.collapsed button ion-icon {
             width: 100%;
         }
 
@@ -271,12 +271,12 @@
     </div>
 
     <aside id="sidebar" aria-label="Navigatie">
-        <button class="active" onclick="showTab(this)" aria-selected="true" data-tab="tab-1"><i class="material-symbols-outlined">person</i><span>Profiel</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-2"><i class="material-symbols-outlined">lock</i><span>Privacy</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-3"><i class="material-symbols-outlined">language</i><span>Taal</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-4"><i class="material-symbols-outlined">computer</i><span>Systeem</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-5"><i class="material-symbols-outlined">info</i><span>Over</span></button>
-        <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Zijbalk inklappen"><i class="material-symbols-outlined">keyboard_double_arrow_left</i><span>Inklappen</span></button>
+        <button class="active" onclick="showTab(this)" aria-selected="true" data-tab="tab-1"><ion-icon name="person-outline"></ion-icon><span>Profiel</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-2"><ion-icon name="lock-closed-outline"></ion-icon><span>Privacy</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-3"><ion-icon name="language-outline"></ion-icon><span>Taal</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-4"><ion-icon name="desktop-outline"></ion-icon><span>Systeem</span></button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-5"><ion-icon name="information-circle-outline"></ion-icon><span>Over</span></button>
+        <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Zijbalk inklappen"><ion-icon name="chevron-back-outline"></ion-icon><span>Inklappen</span></button>
     </aside>
 
     <main id="content" role="tabpanel">
@@ -298,7 +298,12 @@
             const tabDivs = document.querySelectorAll('.tab-content');
             const fullPageLoader = document.getElementById('full-page-loader');
             const progressBar = document.getElementById('progress-bar');
-            const materialSymbolsLink = document.getElementById('material-symbols');
+            
+            // De Material Symbols link is verwijderd, dus de teller wordt aangepast
+            let resourcesToLoadCount = tabDivs.length; // Alleen de tab-divs worden geladen
+            let resourcesLoadedCount = 0;
+            let loadedContent = {}; // Cache voor de geladen content
+
             const transitionDuration = 500;
             const pageUrls = {
                 'tab-1': './page1.html',
@@ -307,10 +312,6 @@
                 'tab-4': './page4.html',
                 'tab-5': './page5.html'
             };
-
-            let resourcesToLoadCount = tabDivs.length + 1; // divs + 1 voor de iconen
-            let resourcesLoadedCount = 0;
-            let loadedContent = {}; // Cache voor de geladen content
 
             function updateProgressBar() {
                 const stepSize = 100 / resourcesToLoadCount;
@@ -346,15 +347,9 @@
                     });
             }
 
-            // Start het laden van alle pagina's en de iconen
+            // Start het laden van alle pagina's
             Object.keys(pageUrls).forEach(tabId => {
                 loadPage(tabId, pageUrls[tabId]);
-            });
-
-            // Luister naar de 'load' event van de stylesheet (Material Symbols)
-            materialSymbolsLink.addEventListener('load', () => {
-                resourcesLoadedCount++;
-                updateProgressBar();
             });
 
             function showTab(btn) {
@@ -404,10 +399,16 @@
             function updateToggleButton() {
                 if (window.innerWidth > 768) {
                     const isCollapsed = sidebar.classList.contains('collapsed');
-                    const icon = toggleBtn.querySelector('i');
+                    const icon = toggleBtn.querySelector('ion-icon');
                     const text = toggleBtn.querySelector('span');
-                    icon.textContent = isCollapsed ? 'keyboard_double_arrow_right' : 'keyboard_double_arrow_left';
-                    text.textContent = isCollapsed ? 'Uitklappen' : 'Inklappen';
+                    
+                    if (isCollapsed) {
+                        icon.setAttribute('name', 'chevron-forward-outline');
+                        text.textContent = 'Uitklappen';
+                    } else {
+                        icon.setAttribute('name', 'chevron-back-outline');
+                        text.textContent = 'Inklappen';
+                    }
                 }
             }
 
