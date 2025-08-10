@@ -121,49 +121,33 @@
             width: calc(100vw - 70px);
         }
 
-        .tab-content {
+        .iframe-container {
+            position: relative;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+        }
+
+        .tab-iframe {
             position: absolute;
             top: 0;
             left: 0;
             width: 100%;
             height: 100%;
+            border: none;
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.5s ease-in-out;
         }
 
-        .tab-content.active {
+        .tab-iframe.active {
             visibility: visible;
             opacity: 1;
         }
 
-        .tab-content.fade-out {
+        .tab-iframe.fade-out {
             opacity: 0;
             visibility: visible;
-        }
-        
-        .tab-loader {
-            position: absolute;
-            top: 50%;
-            left: 50%;
-            transform: translate(-50%, -50%);
-            display: none;
-            z-index: 10;
-        }
-        
-        .tab-loader::after {
-            content: "";
-            width: 30px;
-            height: 30px;
-            border: 4px solid #f3f3f3;
-            border-top: 4px solid #0af;
-            border-radius: 50%;
-            animation: spin 1s linear infinite;
-        }
-
-        @keyframes spin {
-            0% { transform: rotate(0deg); }
-            100% { transform: rotate(360deg); }
         }
 
         /* Sidebar toggle knop */
@@ -245,7 +229,7 @@
             color: #ccc;
             font-weight: 500;
         }
-        
+
         .progress-bar-container {
             width: 250px;
             height: 10px;
@@ -271,21 +255,33 @@
     </div>
 
     <aside id="sidebar" aria-label="Navigatie">
-        <button class="active" onclick="showTab(this)" aria-selected="true" data-tab="tab-1"><ion-icon name="person-outline"></ion-icon><span>Profiel</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-2"><ion-icon name="lock-closed-outline"></ion-icon><span>Privacy</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-3"><ion-icon name="language-outline"></ion-icon><span>Taal</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-4"><ion-icon name="desktop-outline"></ion-icon><span>Systeem</span></button>
-        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-5"><ion-icon name="information-circle-outline"></ion-icon><span>Over</span></button>
-        <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Zijbalk inklappen"><ion-icon name="chevron-back-outline"></ion-icon><span>Inklappen</span></button>
+        <button class="active" onclick="showTab(this)" aria-selected="true" data-tab="tab-1">
+            <ion-icon name="person"></ion-icon><span>Profiel</span>
+        </button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-2">
+            <ion-icon name="lock-closed"></ion-icon><span>Privacy</span>
+        </button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-3">
+            <ion-icon name="language"></ion-icon><span>Taal</span>
+        </button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-4">
+            <ion-icon name="desktop"></ion-icon><span>Systeem</span>
+        </button>
+        <button onclick="showTab(this)" aria-selected="false" data-tab="tab-5">
+            <ion-icon name="information-circle"></ion-icon><span>Over</span>
+        </button>
+        <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Zijbalk inklappen">
+            <ion-icon name="chevron-back-circle"></ion-icon><span>Inklappen</span>
+        </button>
     </aside>
 
     <main id="content" role="tabpanel">
-        <div class="tab-content-container">
-            <div id="tab-1" class="tab-content"></div>
-            <div id="tab-2" class="tab-content"></div>
-            <div id="tab-3" class="tab-content"></div>
-            <div id="tab-4" class="tab-content"></div>
-            <div id="tab-5" class="tab-content"></div>
+        <div class="iframe-container">
+            <iframe id="tab-1" class="tab-iframe active" src="./page1.html" title="Profiel"></iframe>
+            <iframe id="tab-2" class="tab-iframe" src="./page2.html" title="Privacy"></iframe>
+            <iframe id="tab-3" class="tab-iframe" src="./page3.html" title="Taal"></iframe>
+            <iframe id="tab-4" class="tab-iframe" src="./page4.html" title="Systeem"></iframe>
+            <iframe id="tab-5" class="tab-iframe" src="./page5.html" title="Over"></iframe>
         </div>
     </main>
 
@@ -295,23 +291,13 @@
             const content = document.getElementById('content');
             const toggleBtn = document.getElementById('toggleSidebarBtn');
             const tabButtons = sidebar.querySelectorAll('button:not(#toggleSidebarBtn)');
-            const tabDivs = document.querySelectorAll('.tab-content');
+            const iframes = document.querySelectorAll('.tab-iframe');
             const fullPageLoader = document.getElementById('full-page-loader');
             const progressBar = document.getElementById('progress-bar');
-            
-            // De Material Symbols link is verwijderd, dus de teller wordt aangepast
-            let resourcesToLoadCount = tabDivs.length; // Alleen de tab-divs worden geladen
-            let resourcesLoadedCount = 0;
-            let loadedContent = {}; // Cache voor de geladen content
-
             const transitionDuration = 500;
-            const pageUrls = {
-                'tab-1': './page1.html',
-                'tab-2': './page2.html',
-                'tab-3': './page3.html',
-                'tab-4': './page4.html',
-                'tab-5': './page5.html'
-            };
+
+            let resourcesToLoadCount = iframes.length;
+            let resourcesLoadedCount = 0;
 
             function updateProgressBar() {
                 const stepSize = 100 / resourcesToLoadCount;
@@ -320,71 +306,52 @@
 
                 if (resourcesLoadedCount === resourcesToLoadCount) {
                     progressBar.style.width = '100%';
-                    // Laat de eerste tab zien zodra alles geladen is
-                    const firstTab = document.getElementById('tab-1');
-                    if (firstTab && loadedContent['tab-1']) {
-                        firstTab.innerHTML = loadedContent['tab-1'];
-                        firstTab.classList.add('active');
-                    }
                     setTimeout(() => {
                         fullPageLoader.classList.add('hidden');
                     }, 500);
                 }
             }
 
-            function loadPage(tabId, url) {
-                fetch(url)
-                    .then(response => response.text())
-                    .then(html => {
-                        loadedContent[tabId] = html;
-                        resourcesLoadedCount++;
-                        updateProgressBar();
-                    })
-                    .catch(error => {
-                        console.error(`Fout bij het laden van ${url}:`, error);
-                        resourcesLoadedCount++;
-                        updateProgressBar();
-                    });
-            }
-
-            // Start het laden van alle pagina's
-            Object.keys(pageUrls).forEach(tabId => {
-                loadPage(tabId, pageUrls[tabId]);
+            // Luister naar de 'load' event van elk iframe
+            iframes.forEach(iframe => {
+                iframe.addEventListener('load', () => {
+                    resourcesLoadedCount++;
+                    updateProgressBar();
+                });
             });
+
+            // Omdat Ionicons via script geladen wordt, is een aparte 'load' event voor de iconen niet nodig.
+            // Ze zijn beschikbaar als de DOM geladen is.
+            // Dit is een verbetering ten opzichte van de Material Symbols link.
 
             function showTab(btn) {
                 const targetTabId = btn.dataset.tab;
-                const currentActiveTab = document.querySelector('.tab-content.active');
-                const newActiveTab = document.getElementById(targetTabId);
-            
-                if (currentActiveTab === newActiveTab) return;
-            
-                // Fade-out van de huidige tab
-                if (currentActiveTab) {
-                    currentActiveTab.classList.remove('active');
-                    currentActiveTab.classList.add('fade-out');
+                const currentActiveIframe = document.querySelector('.tab-iframe.active');
+                const newActiveIframe = document.getElementById(targetTabId);
+
+                if (currentActiveIframe === newActiveIframe) return;
+
+                if (currentActiveIframe) {
+                    currentActiveIframe.classList.remove('active');
+                    currentActiveIframe.classList.add('fade-out');
                 }
-            
-                // Wacht tot de fade-out klaar is
+
                 setTimeout(() => {
-                    if (currentActiveTab) {
-                        currentActiveTab.classList.remove('fade-out');
+                    if (currentActiveIframe) {
+                        currentActiveIframe.classList.remove('fade-out');
                     }
-                    
-                    // Update de content van de nieuwe tab en fade in
-                    if (newActiveTab) {
-                        newActiveTab.innerHTML = loadedContent[targetTabId];
-                        newActiveTab.classList.add('active');
+
+                    if (newActiveIframe) {
+                        newActiveIframe.classList.add('active');
                     }
-            
-                    // Update de actieve knop in de sidebar
+
                     tabButtons.forEach(b => {
                         b.classList.remove('active');
                         b.setAttribute('aria-selected', 'false');
                     });
                     btn.classList.add('active');
                     btn.setAttribute('aria-selected', 'true');
-            
+
                 }, transitionDuration);
             }
 
@@ -401,14 +368,8 @@
                     const isCollapsed = sidebar.classList.contains('collapsed');
                     const icon = toggleBtn.querySelector('ion-icon');
                     const text = toggleBtn.querySelector('span');
-                    
-                    if (isCollapsed) {
-                        icon.setAttribute('name', 'chevron-forward-outline');
-                        text.textContent = 'Uitklappen';
-                    } else {
-                        icon.setAttribute('name', 'chevron-back-outline');
-                        text.textContent = 'Inklappen';
-                    }
+                    icon.setAttribute('name', isCollapsed ? 'chevron-forward-circle' : 'chevron-back-circle');
+                    text.textContent = isCollapsed ? 'Uitklappen' : 'Inklappen';
                 }
             }
 
@@ -428,6 +389,16 @@
 
             window.showTab = showTab;
             window.toggleSidebar = toggleSidebar;
+
+            // Start laadproces na een korte vertraging om de DOM te laten renderen
+            setTimeout(() => {
+                // Trigger 'load' event voor de iframes handmatig als ze al geladen zijn
+                iframes.forEach(iframe => {
+                    if (iframe.contentWindow.document.readyState === 'complete') {
+                        iframe.dispatchEvent(new Event('load'));
+                    }
+                });
+            }, 100);
         });
     </script>
 </body>
