@@ -4,7 +4,7 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Settings</title>
-    <link href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
+    <link id="material-symbols" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <style>
         /* Algemene stijlen */
         * {
@@ -144,10 +144,10 @@
             visibility: visible;
             opacity: 1;
         }
-        
+
         .tab-iframe.fade-out {
             opacity: 0;
-            visibility: visible; /* Zorgt dat de fade-out zichtbaar is */
+            visibility: visible;
         }
 
         /* Sidebar toggle knop */
@@ -282,38 +282,37 @@
             const iframes = document.querySelectorAll('.tab-iframe');
             const fullPageLoader = document.getElementById('full-page-loader');
             const progressBar = document.getElementById('progress-bar');
-            const transitionDuration = 500; // 0.5s in milliseconden, voor consistentie
+            const materialSymbolsLink = document.getElementById('material-symbols'); // Nieuw element
+            const transitionDuration = 500;
 
-            let iframesLoadedCount = 0;
-            const totalIframes = iframes.length;
-
-            // Deze functie toont de loader met de voortgangsbalk
-            function showInitialLoader() {
-                fullPageLoader.classList.remove('hidden');
-                progressBar.style.width = '0%';
-            }
-
-            // Deze functie verbergt de loader
-            function hideLoader() {
-                fullPageLoader.classList.add('hidden');
-            }
+            let resourcesToLoadCount = iframes.length + 1; // iframes + 1 voor de iconen
+            let resourcesLoadedCount = 0;
 
             function updateProgressBar() {
-                const stepSize = 100 / totalIframes;
-                const progressWidth = stepSize * iframesLoadedCount;
+                const stepSize = 100 / resourcesToLoadCount;
+                const progressWidth = stepSize * resourcesLoadedCount;
                 progressBar.style.width = `${progressWidth}%`;
 
-                if (iframesLoadedCount === totalIframes) {
+                if (resourcesLoadedCount === resourcesToLoadCount) {
                     progressBar.style.width = '100%';
-                    setTimeout(hideLoader, 500); // Korte vertraging om de 100% te laten zien
+                    setTimeout(() => {
+                        fullPageLoader.classList.add('hidden');
+                    }, 500);
                 }
             }
 
+            // Luister naar de 'load' event van elk iframe
             iframes.forEach(iframe => {
                 iframe.addEventListener('load', () => {
-                    iframesLoadedCount++;
+                    resourcesLoadedCount++;
                     updateProgressBar();
                 });
+            });
+
+            // Luister naar de 'load' event van de stylesheet (Material Symbols)
+            materialSymbolsLink.addEventListener('load', () => {
+                resourcesLoadedCount++;
+                updateProgressBar();
             });
 
             function showTab(btn) {
@@ -323,24 +322,20 @@
             
                 if (currentActiveIframe === newActiveIframe) return;
             
-                // Start de fade-out van de huidige tab
                 if (currentActiveIframe) {
                     currentActiveIframe.classList.remove('active');
                     currentActiveIframe.classList.add('fade-out');
                 }
             
-                // Wacht tot de fade-out klaar is
                 setTimeout(() => {
                     if (currentActiveIframe) {
                         currentActiveIframe.classList.remove('fade-out');
                     }
                     
-                    // Activeer de nieuwe tab en start de fade-in
                     if (newActiveIframe) {
                         newActiveIframe.classList.add('active');
                     }
             
-                    // Update de actieve knop in de sidebar
                     tabButtons.forEach(b => {
                         b.classList.remove('active');
                         b.setAttribute('aria-selected', 'false');
