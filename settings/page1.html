@@ -2,277 +2,263 @@
 <html lang="nl">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Compactere labels bij switches & dropdowns</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Instellingen</title>
   <style>
-    html {
-      font-size: 16px; /* Base font size */
+    :root {
+      /* Kleuren */
+      --text-color: #e0e0e0;
+      --card-bg: #1f1f1f;
+      --primary-color: #0af;
+      --secondary-color: #555;
+      --border-color: #444;
+      /* Spacing */
+      --spacing-xs: 0.5rem;
+      --spacing-sm: 0.75rem;
+      --spacing-md: 1rem;
+      --spacing-lg: 1.5rem;
+    }
+    /* Universele box-sizing */
+    *,
+    *::before,
+    *::after {
+      box-sizing: border-box;
+    }
+    body {
+      background-color: var(--card-bg);
+      color: var(--text-color);
+      font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+      /* Vaste padding rondom alles voor gegarandeerde marge */
+      padding: var(--spacing-lg); 
+      margin: 0; /* Zorgt dat er geen standaard marge is */
+      line-height: 1.5;
+      width: 100%;
+      height: 100%;
+      /* Voorkomt dat de iframe een scrollbalk krijgt */
+      overflow: hidden; 
     }
 
-    body {
-      background-color: #121212;
-      color: #e0e0e0;
-      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-      padding: 1.5rem 2rem;
-      font-size: 1rem;
-    }
     .controls-container {
+      width: 100%;
+      max-width: 350px; 
       display: flex;
       flex-direction: column;
-      gap: 1rem;
-      max-width: 20rem;
-
+      gap: var(--spacing-sm);
     }
     .control-item {
       display: flex;
       align-items: center;
-      gap: 0.5rem;
+      justify-content: space-between;
+      gap: var(--spacing-md);
+      padding: var(--spacing-xs) 0;
     }
-    label {
-      user-select: none;
-      cursor: pointer;
+    .control-item-label {
       font-weight: 600;
-      letter-spacing: 0.02em;
-      color: #e0e0e0;
-      min-width: 6rem;
+      font-size: 0.9rem;
       white-space: nowrap;
-      font-size: 0.95rem;
+      flex-grow: 1;
+      cursor: pointer;
     }
-    /* Switch styling */
-    .switch {
-      width: 2.75rem;
-      height: 1.5rem;
+    /* Switch Component */
+    .switch-wrapper {
+      display: flex;
+      align-items: center;
+      gap: var(--spacing-xs);
+    }
+    .switch-status {
+      font-size: 0.8rem;
+      font-weight: 600;
+      color: var(--secondary-color);
+      min-width: 30px;
+      text-align: right;
+      transition: color 0.3s;
+    }
+    .switch-input {
       -webkit-appearance: none;
-      background-color: #333;
-      outline: none;
-      border-radius: 1.5rem;
+      appearance: none;
+      width: 40px;
+      height: 22px;
+      background-color: var(--border-color);
+      border-radius: 11px;
       position: relative;
       cursor: pointer;
-      transition: background-color 0.3s ease;
-      box-shadow: inset 0 0 0.25rem #0008;
+      transition: background-color 0.3s;
       flex-shrink: 0;
     }
-    .switch::before {
+    .switch-input::before {
       content: "";
-      position: absolute;
-      width: 1.25rem;
-      height: 1.25rem;
+      width: 18px;
+      height: 18px;
+      background-color: #fff;
       border-radius: 50%;
-      top: 0.125rem;
-      left: 0.125rem;
-      background: #ccc;
-      transition: left 0.3s ease, background-color 0.3s ease;
-      box-shadow: 0 0.125rem 0.25rem #0008;
+      position: absolute;
+      top: 2px;
+      left: 2px;
+      transition: transform 0.3s;
     }
-    .switch:checked {
-      background-color: #1db954;
-      box-shadow: inset 0 0 0.4rem #1db954cc;
+    .switch-input:checked {
+      background-color: var(--primary-color);
     }
-    .switch:checked::before {
-      left: 1.4rem;
-      background: #f0f0f0;
-      box-shadow: 0 0.125rem 0.4rem #1db954cc;
+    .switch-input:checked::before {
+      transform: translateX(18px);
     }
-    .status-text {
-      font-weight: 600;
-      font-size: 0.75rem;
-      width: 1.5rem;
-      text-align: center;
-      color: #888;
-      user-select: none;
-      transition: color 0.3s ease;
+    .switch-input:checked + .switch-status {
+      color: var(--primary-color);
     }
-    /* Dropdown styling */
-    .custom-dropdown {
+    /* Dropdown Component */
+    .dropdown {
       position: relative;
-      width: 9rem;
-      user-select: none;
-      font-size: 0.95rem;
+      flex-grow: 1;
+      width: auto;
     }
-    .dropdown-btn {
-      background-color: #333;
-      color: #e0e0e0;
-      padding: 0.5rem 0.75rem;
-      border-radius: 0.3rem;
+    .dropdown-button {
+      width: 100%;
+      background-color: var(--border-color);
+      color: var(--text-color);
+      padding: var(--spacing-xs) var(--spacing-sm);
+      border-radius: 4px;
       cursor: pointer;
-      font-weight: 600;
-      letter-spacing: 0.02em;
       display: flex;
       justify-content: space-between;
       align-items: center;
-      box-shadow: inset 0 0 0.25rem #0008;
-      transition: background-color 0.3s ease;
-      user-select: none;
-      min-width: 6.5rem;
+      font-size: 0.9rem;
+      font-weight: 500;
+      transition: background-color 0.2s;
     }
-    .dropdown-btn:hover {
-      background-color: #444;
+    .dropdown-button:hover {
+      background-color: var(--secondary-color);
     }
-    .dropdown-btn::after {
-      content: "▼";
-      font-size: 0.65rem;
-      color: #aaa;
-      margin-left: 0.5rem;
-      transition: transform 0.3s ease;
+    .dropdown-button .arrow {
+      font-size: 0.75rem;
+      margin-left: var(--spacing-xs);
+      transition: transform 0.3s;
     }
-    .custom-dropdown.open .dropdown-btn::after {
+    .dropdown.open .arrow {
       transform: rotate(180deg);
     }
     .dropdown-menu {
       position: absolute;
-      top: calc(100% + 0.3rem);
+      top: calc(100% + 5px);
       left: 0;
       right: 0;
-      background-color: #222;
-      border-radius: 0.3rem;
-      box-shadow: 0 0.1rem 0.5rem #0009;
-      max-height: 10rem;
+      background-color: var(--card-bg);
+      border-radius: 4px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.5);
+      z-index: 10;
+      max-height: 150px;
       overflow-y: auto;
-      z-index: 100;
       opacity: 0;
       pointer-events: none;
-      transition: opacity 0.3s ease;
+      transition: opacity 0.3s;
     }
-    .custom-dropdown.open .dropdown-menu {
+    .dropdown.open .dropdown-menu {
       opacity: 1;
       pointer-events: auto;
     }
-    .dropdown-menu div {
-      padding: 0.5rem 0.75rem;
+    .dropdown-menu-item {
+      padding: var(--spacing-xs) var(--spacing-sm);
       cursor: pointer;
-      transition: background-color 0.2s ease;
-      font-weight: 500;
+      font-size: 0.9rem;
+      transition: background-color 0.2s;
     }
-    .dropdown-menu div:hover {
-      background-color: #1db954;
-      color: #121212;
-    }
-
-    /* -------------------------- */
-    /* Media Query voor Mobiel */
-    /* -------------------------- */
-    @media (max-width: 600px) {
-      body {
-        padding: 1rem;
-      }
-      .controls-container {
-        gap: 0.75rem;
-        max-width: 100%;
-      }
-      .control-item {
-        flex-wrap: wrap;
-        justify-content: space-between;
-        gap: 0;
-      }
-      .control-item label {
-        min-width: 0;
-        flex-grow: 1;
-      }
-      .custom-dropdown {
-        flex-grow: 1;
-        width: auto;
-      }
-      .dropdown-btn {
-        width: 100%;
-        min-width: auto;
-      }
+    .dropdown-menu-item:hover {
+      background-color: var(--primary-color);
+      color: var(--card-bg);
     }
   </style>
 </head>
 <body>
-  <div class="controls-container">
-    <div class="control-item" data-type="switch">
-      <label for="sw1">Redirect Block</label>
-      <input type="checkbox" id="sw1" class="switch" />
-      <div class="status-text">OFF</div>
-    </div>
-    <div class="control-item" data-type="dropdown" tabindex="0">
-      <label for="dropdown1">Thema</label>
-      <div class="custom-dropdown" id="dropdown1">
-        <div class="dropdown-btn">Donker</div>
-        <div class="dropdown-menu">
-          <div data-value="dark">Donker</div>
-          <div data-value="light">Licht</div>
-          <div data-value="blue">Blauw</div>
-          <div data-value="green">Groen</div>
-        </div>
-      </div>
-    </div>
-    <div class="control-item" data-type="switch">
-      <label for="sw2">Tracker Block</label>
-      <input type="checkbox" id="sw2" class="switch" />
-      <div class="status-text">OFF</div>
-    </div>
-    <div class="control-item" data-type="dropdown" tabindex="0">
-      <label for="dropdown2">Lettertype</label>
-      <div class="custom-dropdown" id="dropdown2">
-        <div class="dropdown-btn">Segoe UI</div>
-        <div class="dropdown-menu">
-          <div data-value="segoe">Segoe UI</div>
-          <div data-value="arial">Arial</div>
-          <div data-value="verdana">Verdana</div>
-          <div data-value="courier">Courier New</div>
-        </div>
-      </div>
-    </div>
-    <div class="control-item" data-type="switch">
-      <label for="sw3">Cookie Block</label>
-      <input type="checkbox" id="sw3" class="switch" />
-      <div class="status-text">OFF</div>
+<div class="controls-container">
+  <div class="control-item">
+    <label for="switch1" class="control-item-label">Redirect Block</label>
+    <div class="switch-wrapper">
+      <input type="checkbox" id="switch1" class="switch-input" />
+      <div class="switch-status">OFF</div>
     </div>
   </div>
-  <script>
-    // Switch status ON/OFF updaten
-    document.querySelectorAll('.control-item[data-type="switch"]').forEach(item => {
-      const checkbox = item.querySelector('input[type="checkbox"]');
-      const statusText = item.querySelector('.status-text');
-
-      function update() {
-        if (checkbox.checked) {
-          statusText.textContent = 'ON';
-          statusText.style.color = '#1db954';
-        } else {
-          statusText.textContent = 'OFF';
-          statusText.style.color = '#888';
-        }
+  <div class="control-item">
+    <label for="dropdown1" class="control-item-label">Thema</label>
+    <div class="dropdown" id="dropdown1">
+      <div class="dropdown-button">
+        <span>Donker</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="dropdown-menu">
+        <div class="dropdown-menu-item" data-value="dark">Donker</div>
+        <div class="dropdown-menu-item" data-value="light">Licht</div>
+        <div class="dropdown-menu-item" data-value="blue">Blauw</div>
+        <div class="dropdown-menu-item" data-value="green">Groen</div>
+      </div>
+    </div>
+  </div>
+  <div class="control-item">
+    <label for="switch2" class="control-item-label">Tracker Block</label>
+    <div class="switch-wrapper">
+      <input type="checkbox" id="switch2" class="switch-input" />
+      <div class="switch-status">OFF</div>
+    </div>
+  </div>
+  <div class="control-item">
+    <label for="dropdown2" class="control-item-label">Lettertype</label>
+    <div class="dropdown" id="dropdown2">
+      <div class="dropdown-button">
+        <span>Segoe UI</span>
+        <span class="arrow">▼</span>
+      </div>
+      <div class="dropdown-menu">
+        <div class="dropdown-menu-item" data-value="segoe">Segoe UI</div>
+        <div class="dropdown-menu-item" data-value="arial">Arial</div>
+        <div class="dropdown-menu-item" data-value="verdana">Verdana</div>
+        <div data-value="courier" class="dropdown-menu-item">Courier New</div>
+      </div>
+    </div>
+  </div>
+  <div class="control-item">
+    <label for="switch3" class="control-item-label">Cookie Block</label>
+    <div class="switch-wrapper">
+      <input type="checkbox" id="switch3" class="switch-input" />
+      <div class="switch-status">OFF</div>
+    </div>
+  </div>
+</div>
+<script>
+  // Script voor de switches
+  document.querySelectorAll('.switch-input').forEach(checkbox => {
+    const status = checkbox.nextElementSibling;
+    const updateStatus = () => {
+      status.textContent = checkbox.checked ? 'ON' : 'OFF';
+    };
+    checkbox.addEventListener('change', updateStatus);
+    updateStatus();
+  });
+  // Script voor de dropdowns
+  document.querySelectorAll('.dropdown').forEach(dropdown => {
+    const button = dropdown.querySelector('.dropdown-button');
+    const selectedText = button.querySelector('span');
+    const menu = dropdown.querySelector('.dropdown-menu');
+    const label = document.querySelector(`label[for="${dropdown.id}"]`);
+    button.addEventListener('click', (e) => {
+      e.stopPropagation();
+      dropdown.classList.toggle('open');
+    });
+    menu.querySelectorAll('.dropdown-menu-item').forEach(item => {
+      item.addEventListener('click', () => {
+        selectedText.textContent = item.textContent;
+        dropdown.classList.remove('open');
+      });
+    });
+    document.addEventListener('click', (e) => {
+      if (!dropdown.contains(e.target) && !label.contains(e.target)) {
+        dropdown.classList.remove('open');
       }
-
-      checkbox.addEventListener('change', update);
-      update();
     });
-    // Dropdown open/sluit & selectie
-    document.querySelectorAll('.control-item[data-type="dropdown"]').forEach(item => {
-      const dropdown = item.querySelector('.custom-dropdown');
-      const btn = dropdown.querySelector('.dropdown-btn');
-      const menu = dropdown.querySelector('.dropdown-menu');
-      const options = menu.querySelectorAll('div');
-
-      btn.addEventListener('click', e => {
-        e.stopPropagation();
-        dropdown.classList.toggle('open');
-      });
-
-      options.forEach(option => {
-        option.addEventListener('click', () => {
-          btn.textContent = option.textContent;
-          dropdown.classList.remove('open');
-          // Hier kun je eventueel een event triggeren of waarde opslaan
-        });
-      });
-
-      document.addEventListener('click', e => {
-        if (!item.contains(e.target)) {
-          dropdown.classList.remove('open');
-        }
-      });
-
-      item.addEventListener('keydown', e => {
-        if (e.key === 'Escape') {
-          dropdown.classList.remove('open');
-          btn.focus();
-        }
-      });
+    document.addEventListener('keydown', (e) => {
+      if (e.key === 'Escape' && dropdown.classList.contains('open')) {
+        dropdown.classList.remove('open');
+        button.focus();
+      }
     });
-  </script>
+  });
+</script>
 </body>
 </html>
