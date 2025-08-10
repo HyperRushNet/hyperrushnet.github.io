@@ -1,275 +1,278 @@
 <!DOCTYPE html>
 <html lang="nl">
 <head>
-<meta charset="UTF-8" />
-<meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Compactere labels bij switches & dropdowns</title>
-<style>
-  body {
-    background-color: #121212;
-    color: #e0e0e0;
-    font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-    padding: 30px 40px;
-    font-size: 18px;
-  }
-
-  .controls-container {
-    display: flex;
-    flex-direction: column;
-    gap: 20px;
-    max-width: 400px;
-  }
-
-  .control-item {
-    display: flex;
-    align-items: center;
-    gap: 10px; /* minder ruimte */
-  }
-
-  label {
-    user-select: none;
-    cursor: pointer;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    color: #e0e0e0;
-    min-width: 110px; /* minder ruimte rechts */
-    white-space: nowrap;
-  }
-
-  /* Switch styling */
-
-  .switch {
-    width: 50px;
-    height: 28px;
-    -webkit-appearance: none;
-    background-color: #333;
-    outline: none;
-    border-radius: 28px;
-    position: relative;
-    cursor: pointer;
-    transition: background-color 0.3s ease;
-    box-shadow: inset 0 0 6px #0008;
-    flex-shrink: 0;
-  }
-
-  .switch::before {
-    content: "";
-    position: absolute;
-    width: 24px;
-    height: 24px;
-    border-radius: 50%;
-    top: 2px;
-    left: 2px;
-    background: #ccc;
-    transition: left 0.3s ease, background-color 0.3s ease;
-    box-shadow: 0 2px 4px #0008;
-  }
-
-  .switch:checked {
-    background-color: #1db954;
-    box-shadow: inset 0 0 8px #1db954cc;
-  }
-
-  .switch:checked::before {
-    left: 24px;
-    background: #f0f0f0;
-    box-shadow: 0 2px 8px #1db954cc;
-  }
-
-  .status-text {
-    font-weight: 600;
-    font-size: 14px;
-    width: 32px;
-    text-align: center;
-    color: #888;
-    user-select: none;
-    transition: color 0.3s ease;
-  }
-
-  /* Dropdown styling */
-
-  .custom-dropdown {
-    position: relative;
-    width: 180px;
-    user-select: none;
-  }
-
-  .dropdown-btn {
-    background-color: #333;
-    color: #e0e0e0;
-    padding: 10px 15px;
-    border-radius: 6px;
-    cursor: pointer;
-    font-weight: 600;
-    letter-spacing: 0.02em;
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    box-shadow: inset 0 0 6px #0008;
-    transition: background-color 0.3s ease;
-    user-select: none;
-    min-width: 120px;
-  }
-
-  .dropdown-btn:hover {
-    background-color: #444;
-  }
-
-  .dropdown-btn::after {
-    content: "▼";
-    font-size: 12px;
-    color: #aaa;
-    margin-left: 10px;
-    transition: transform 0.3s ease;
-  }
-
-  .custom-dropdown.open .dropdown-btn::after {
-    transform: rotate(180deg);
-  }
-
-  .dropdown-menu {
-    position: absolute;
-    top: calc(100% + 6px);
-    left: 0;
-    right: 0;
-    background-color: #222;
-    border-radius: 6px;
-    box-shadow: 0 2px 10px #0009;
-    max-height: 200px;
-    overflow-y: auto;
-    z-index: 100;
-    opacity: 0;
-    pointer-events: none;
-    transition: opacity 0.3s ease;
-  }
-
-  .custom-dropdown.open .dropdown-menu {
-    opacity: 1;
-    pointer-events: auto;
-  }
-
-  .dropdown-menu div {
-    padding: 10px 15px;
-    cursor: pointer;
-    transition: background-color 0.2s ease;
-    font-weight: 500;
-  }
-
-  .dropdown-menu div:hover {
-    background-color: #1db954;
-    color: #121212;
-  }
-</style>
-</head>
-<body>
-
-<div class="controls-container">
-
-  <!-- Switch -->
-  <div class="control-item" data-type="switch">
-    <input type="checkbox" id="sw1" class="switch" />
-    <label for="sw1">Redirect Block</label>
-    <div class="status-text">OFF</div>
-  </div>
-
-  <!-- Dropdown met label -->
-  <div class="control-item" data-type="dropdown" tabindex="0">
-    <label for="dropdown1">Thema</label>
-    <div class="custom-dropdown" id="dropdown1">
-      <div class="dropdown-btn">Donker</div>
-      <div class="dropdown-menu">
-        <div data-value="dark">Donker</div>
-        <div data-value="light">Licht</div>
-        <div data-value="blue">Blauw</div>
-        <div data-value="green">Groen</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Nog een switch -->
-  <div class="control-item" data-type="switch">
-    <input type="checkbox" id="sw2" class="switch" />
-    <label for="sw2">Tracker Block</label>
-    <div class="status-text">OFF</div>
-  </div>
-
-  <!-- Dropdown met label -->
-  <div class="control-item" data-type="dropdown" tabindex="0">
-    <label for="dropdown2">Lettertype</label>
-    <div class="custom-dropdown" id="dropdown2">
-      <div class="dropdown-btn">Segoe UI</div>
-      <div class="dropdown-menu">
-        <div data-value="segoe">Segoe UI</div>
-        <div data-value="arial">Arial</div>
-        <div data-value="verdana">Verdana</div>
-        <div data-value="courier">Courier New</div>
-      </div>
-    </div>
-  </div>
-
-  <!-- Nog een switch -->
-  <div class="control-item" data-type="switch">
-    <input type="checkbox" id="sw3" class="switch" />
-    <label for="sw3">Cookie Block</label>
-    <div class="status-text">OFF</div>
-  </div>
-
-</div>
-
-<script>
-  // Switch status ON/OFF updaten
-  document.querySelectorAll('.control-item[data-type="switch"]').forEach(item => {
-    const checkbox = item.querySelector('input[type="checkbox"]');
-    const statusText = item.querySelector('.status-text');
-
-    function update() {
-      if (checkbox.checked) {
-        statusText.textContent = 'ON';
-        statusText.style.color = '#1db954';
-      } else {
-        statusText.textContent = 'OFF';
-        statusText.style.color = '#888';
-      }
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Compactere labels bij switches & dropdowns</title>
+  <style>
+    html {
+      font-size: 16px; /* Base font size */
     }
 
-    checkbox.addEventListener('change', update);
-    update();
-  });
+    body {
+      background-color: #121212;
+      color: #e0e0e0;
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      padding: 1.5rem 2rem;
+      font-size: 1rem;
+    }
+    .controls-container {
+      display: flex;
+      flex-direction: column;
+      gap: 1rem;
+      max-width: 20rem;
 
-  // Dropdown open/sluit & selectie
-  document.querySelectorAll('.control-item[data-type="dropdown"]').forEach(item => {
-    const dropdown = item.querySelector('.custom-dropdown');
-    const btn = dropdown.querySelector('.dropdown-btn');
-    const menu = dropdown.querySelector('.dropdown-menu');
-    const options = menu.querySelectorAll('div');
+    }
+    .control-item {
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+    label {
+      user-select: none;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      color: #e0e0e0;
+      min-width: 6rem;
+      white-space: nowrap;
+      font-size: 0.95rem;
+    }
+    /* Switch styling */
+    .switch {
+      width: 2.75rem;
+      height: 1.5rem;
+      -webkit-appearance: none;
+      background-color: #333;
+      outline: none;
+      border-radius: 1.5rem;
+      position: relative;
+      cursor: pointer;
+      transition: background-color 0.3s ease;
+      box-shadow: inset 0 0 0.25rem #0008;
+      flex-shrink: 0;
+    }
+    .switch::before {
+      content: "";
+      position: absolute;
+      width: 1.25rem;
+      height: 1.25rem;
+      border-radius: 50%;
+      top: 0.125rem;
+      left: 0.125rem;
+      background: #ccc;
+      transition: left 0.3s ease, background-color 0.3s ease;
+      box-shadow: 0 0.125rem 0.25rem #0008;
+    }
+    .switch:checked {
+      background-color: #1db954;
+      box-shadow: inset 0 0 0.4rem #1db954cc;
+    }
+    .switch:checked::before {
+      left: 1.4rem;
+      background: #f0f0f0;
+      box-shadow: 0 0.125rem 0.4rem #1db954cc;
+    }
+    .status-text {
+      font-weight: 600;
+      font-size: 0.75rem;
+      width: 1.5rem;
+      text-align: center;
+      color: #888;
+      user-select: none;
+      transition: color 0.3s ease;
+    }
+    /* Dropdown styling */
+    .custom-dropdown {
+      position: relative;
+      width: 9rem;
+      user-select: none;
+      font-size: 0.95rem;
+    }
+    .dropdown-btn {
+      background-color: #333;
+      color: #e0e0e0;
+      padding: 0.5rem 0.75rem;
+      border-radius: 0.3rem;
+      cursor: pointer;
+      font-weight: 600;
+      letter-spacing: 0.02em;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      box-shadow: inset 0 0 0.25rem #0008;
+      transition: background-color 0.3s ease;
+      user-select: none;
+      min-width: 6.5rem;
+    }
+    .dropdown-btn:hover {
+      background-color: #444;
+    }
+    .dropdown-btn::after {
+      content: "▼";
+      font-size: 0.65rem;
+      color: #aaa;
+      margin-left: 0.5rem;
+      transition: transform 0.3s ease;
+    }
+    .custom-dropdown.open .dropdown-btn::after {
+      transform: rotate(180deg);
+    }
+    .dropdown-menu {
+      position: absolute;
+      top: calc(100% + 0.3rem);
+      left: 0;
+      right: 0;
+      background-color: #222;
+      border-radius: 0.3rem;
+      box-shadow: 0 0.1rem 0.5rem #0009;
+      max-height: 10rem;
+      overflow-y: auto;
+      z-index: 100;
+      opacity: 0;
+      pointer-events: none;
+      transition: opacity 0.3s ease;
+    }
+    .custom-dropdown.open .dropdown-menu {
+      opacity: 1;
+      pointer-events: auto;
+    }
+    .dropdown-menu div {
+      padding: 0.5rem 0.75rem;
+      cursor: pointer;
+      transition: background-color 0.2s ease;
+      font-weight: 500;
+    }
+    .dropdown-menu div:hover {
+      background-color: #1db954;
+      color: #121212;
+    }
 
-    btn.addEventListener('click', e => {
-      e.stopPropagation();
-      dropdown.classList.toggle('open');
+    /* -------------------------- */
+    /* Media Query voor Mobiel */
+    /* -------------------------- */
+    @media (max-width: 600px) {
+      body {
+        padding: 1rem;
+      }
+      .controls-container {
+        gap: 0.75rem;
+        max-width: 100%;
+      }
+      .control-item {
+        flex-wrap: wrap;
+        justify-content: space-between;
+        gap: 0;
+      }
+      .control-item label {
+        min-width: 0;
+        flex-grow: 1;
+      }
+      .custom-dropdown {
+        flex-grow: 1;
+        width: auto;
+      }
+      .dropdown-btn {
+        width: 100%;
+        min-width: auto;
+      }
+    }
+  </style>
+</head>
+<body>
+  <div class="controls-container">
+    <div class="control-item" data-type="switch">
+      <label for="sw1">Redirect Block</label>
+      <input type="checkbox" id="sw1" class="switch" />
+      <div class="status-text">OFF</div>
+    </div>
+    <div class="control-item" data-type="dropdown" tabindex="0">
+      <label for="dropdown1">Thema</label>
+      <div class="custom-dropdown" id="dropdown1">
+        <div class="dropdown-btn">Donker</div>
+        <div class="dropdown-menu">
+          <div data-value="dark">Donker</div>
+          <div data-value="light">Licht</div>
+          <div data-value="blue">Blauw</div>
+          <div data-value="green">Groen</div>
+        </div>
+      </div>
+    </div>
+    <div class="control-item" data-type="switch">
+      <label for="sw2">Tracker Block</label>
+      <input type="checkbox" id="sw2" class="switch" />
+      <div class="status-text">OFF</div>
+    </div>
+    <div class="control-item" data-type="dropdown" tabindex="0">
+      <label for="dropdown2">Lettertype</label>
+      <div class="custom-dropdown" id="dropdown2">
+        <div class="dropdown-btn">Segoe UI</div>
+        <div class="dropdown-menu">
+          <div data-value="segoe">Segoe UI</div>
+          <div data-value="arial">Arial</div>
+          <div data-value="verdana">Verdana</div>
+          <div data-value="courier">Courier New</div>
+        </div>
+      </div>
+    </div>
+    <div class="control-item" data-type="switch">
+      <label for="sw3">Cookie Block</label>
+      <input type="checkbox" id="sw3" class="switch" />
+      <div class="status-text">OFF</div>
+    </div>
+  </div>
+  <script>
+    // Switch status ON/OFF updaten
+    document.querySelectorAll('.control-item[data-type="switch"]').forEach(item => {
+      const checkbox = item.querySelector('input[type="checkbox"]');
+      const statusText = item.querySelector('.status-text');
+
+      function update() {
+        if (checkbox.checked) {
+          statusText.textContent = 'ON';
+          statusText.style.color = '#1db954';
+        } else {
+          statusText.textContent = 'OFF';
+          statusText.style.color = '#888';
+        }
+      }
+
+      checkbox.addEventListener('change', update);
+      update();
     });
+    // Dropdown open/sluit & selectie
+    document.querySelectorAll('.control-item[data-type="dropdown"]').forEach(item => {
+      const dropdown = item.querySelector('.custom-dropdown');
+      const btn = dropdown.querySelector('.dropdown-btn');
+      const menu = dropdown.querySelector('.dropdown-menu');
+      const options = menu.querySelectorAll('div');
 
-    options.forEach(option => {
-      option.addEventListener('click', () => {
-        btn.textContent = option.textContent;
-        dropdown.classList.remove('open');
-        // Hier kun je eventueel een event triggeren of waarde opslaan
+      btn.addEventListener('click', e => {
+        e.stopPropagation();
+        dropdown.classList.toggle('open');
+      });
+
+      options.forEach(option => {
+        option.addEventListener('click', () => {
+          btn.textContent = option.textContent;
+          dropdown.classList.remove('open');
+          // Hier kun je eventueel een event triggeren of waarde opslaan
+        });
+      });
+
+      document.addEventListener('click', e => {
+        if (!item.contains(e.target)) {
+          dropdown.classList.remove('open');
+        }
+      });
+
+      item.addEventListener('keydown', e => {
+        if (e.key === 'Escape') {
+          dropdown.classList.remove('open');
+          btn.focus();
+        }
       });
     });
-
-    document.addEventListener('click', e => {
-      if (!item.contains(e.target)) {
-        dropdown.classList.remove('open');
-      }
-    });
-
-    item.addEventListener('keydown', e => {
-      if (e.key === 'Escape') {
-        dropdown.classList.remove('open');
-        btn.focus();
-      }
-    });
-  });
-</script>
-
+  </script>
 </body>
 </html>
