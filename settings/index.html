@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Settings</title>
+    <title>Instellingen</title>
     <link id="material-symbols" href="https://fonts.googleapis.com/css2?family=Material+Symbols+Outlined" rel="stylesheet" />
     <style>
         /* Algemene stijlen */
@@ -282,10 +282,10 @@
             const iframes = document.querySelectorAll('.tab-iframe');
             const fullPageLoader = document.getElementById('full-page-loader');
             const progressBar = document.getElementById('progress-bar');
-            const materialSymbolsLink = document.getElementById('material-symbols'); // Nieuw element
+            const materialSymbolsLink = document.getElementById('material-symbols');
             const transitionDuration = 500;
 
-            let resourcesToLoadCount = iframes.length + 1; // iframes + 1 voor de iconen
+            let resourcesToLoadCount = iframes.length + 1;
             let resourcesLoadedCount = 0;
 
             function updateProgressBar() {
@@ -301,19 +301,20 @@
                 }
             }
 
-            // Luister naar de 'load' event van elk iframe
-            iframes.forEach(iframe => {
-                iframe.addEventListener('load', () => {
+            // Gebruik een kleine vertraging om de event listeners te laten registeren
+            setTimeout(() => {
+                iframes.forEach(iframe => {
+                    iframe.addEventListener('load', () => {
+                        resourcesLoadedCount++;
+                        updateProgressBar();
+                    });
+                });
+
+                materialSymbolsLink.addEventListener('load', () => {
                     resourcesLoadedCount++;
                     updateProgressBar();
                 });
-            });
-
-            // Luister naar de 'load' event van de stylesheet (Material Symbols)
-            materialSymbolsLink.addEventListener('load', () => {
-                resourcesLoadedCount++;
-                updateProgressBar();
-            });
+            }, 100);
 
             function showTab(btn) {
                 const targetTabId = btn.dataset.tab;
