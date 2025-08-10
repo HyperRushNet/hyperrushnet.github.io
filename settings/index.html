@@ -12,7 +12,6 @@
             box-sizing: border-box;
             font-family: sans-serif;
         }
-
         html, body {
             height: 100%;
             background: #121212;
@@ -32,12 +31,10 @@
             box-shadow: 2px 0 8px #000;
             transition: width 0.3s ease-in-out;
         }
-
         #sidebar.collapsed {
             width: 70px;
             overflow-x: hidden;
         }
-
         #sidebar button {
             all: unset;
             cursor: pointer;
@@ -53,13 +50,11 @@
             overflow: hidden;
             max-width: 100%;
         }
-
         #sidebar.collapsed button {
             padding: 14px 0;
             justify-content: center;
             gap: 0;
         }
-
         #sidebar button i {
             font-variation-settings: 'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24;
             font-size: 1.3rem;
@@ -67,35 +62,29 @@
             text-align: center;
             user-select: none;
         }
-        
         #sidebar.collapsed button i {
             width: 100%;
         }
-
         #sidebar button span {
             white-space: nowrap;
             user-select: none;
             transition: opacity 0.2s ease-in-out;
         }
-
         #sidebar.collapsed button span {
             opacity: 0;
             pointer-events: none;
             width: 0;
         }
-
         #sidebar button:hover:not(.active) {
             background: #2a2a2a;
             color: #fff;
         }
-
         #sidebar button.active {
             color: #0af;
             border-left-color: #0af;
             background: #151515;
             font-weight: 600;
         }
-
         #sidebar button:focus {
             outline: none;
             box-shadow: none;
@@ -110,17 +99,14 @@
             width: calc(100vw - 260px);
             transition: width 0.3s ease-in-out;
         }
-
         #content.collapsed-sidebar {
             width: calc(100vw - 70px);
         }
-
         .iframe-container {
             position: relative;
             width: 100%;
             height: 100%;
         }
-
         .tab-iframe {
             position: absolute;
             top: 0;
@@ -128,12 +114,10 @@
             width: 100%;
             height: 100%;
             border: none;
-            /* Nu wordt de overgang van opacity en visibility gecombineerd */
             visibility: hidden;
             opacity: 0;
             transition: opacity 0.5s ease-in-out, visibility 0.5s;
         }
-
         .tab-iframe.active {
             visibility: visible;
             opacity: 1;
@@ -149,16 +133,13 @@
             transition: color 0.12s;
             display: flex;
         }
-
         #toggleSidebarBtn:hover {
             color: #0af;
         }
-
         #sidebar.collapsed #toggleSidebarBtn {
             padding: 14px 0;
             justify-content: center;
         }
-
         #sidebar.collapsed #toggleSidebarBtn span {
             width: 0;
         }
@@ -202,12 +183,10 @@
             transition: opacity 0.5s ease-in-out;
             opacity: 1;
         }
-
         #full-page-loader.hidden {
             opacity: 0;
             pointer-events: none;
         }
-
         .loader {
             width: 50px;
             height: 50px;
@@ -218,7 +197,6 @@
             box-sizing: border-box;
             animation: rotation 1s linear infinite;
         }
-
         @keyframes rotation {
             0% {
                 transform: rotate(0deg);
@@ -262,27 +240,34 @@
         const iframes = document.querySelectorAll('.tab-iframe');
         const fullPageLoader = document.getElementById('full-page-loader');
 
-        let iframesLoadedCount = 0;
-        const totalIframes = iframes.length;
         const transitionDuration = 500; // 0.5 seconden
-
+        
+        // Laadt de eerste iframe en verbergt dan de loader
+        const initialIframe = document.getElementById('tab-1');
+        initialIframe.addEventListener('load', () => {
+            setTimeout(() => {
+                fullPageLoader.classList.add('hidden');
+            }, 500);
+        }, { once: true });
+        
         function showTab(btn) {
             const targetTabId = btn.dataset.tab;
             const currentActiveIframe = document.querySelector('.tab-iframe.active');
             const newActiveIframe = document.getElementById(targetTabId);
 
-            if (currentActiveIframe === newActiveIframe) return; // Doe niets als de actieve tab al geklikt is
+            if (currentActiveIframe === newActiveIframe) return;
 
-            // Stap 1: Activeer de overgang van de knoppen en fade-out de huidige iframe
             tabButtons.forEach(b => {
                 b.classList.remove('active');
                 b.setAttribute('aria-selected', 'false');
             });
             btn.classList.add('active');
             btn.setAttribute('aria-selected', 'true');
+            
+            // Fade-out van de huidige iframe
             currentActiveIframe.classList.remove('active');
 
-            // Stap 2: Na de fade-out animatie, fade-in de nieuwe iframe
+            // Fade-in van de nieuwe iframe na de overgang
             setTimeout(() => {
                 newActiveIframe.classList.add('active');
             }, transitionDuration);
@@ -311,25 +296,20 @@
                 sidebar.classList.add('collapsed');
                 content.classList.remove('collapsed-sidebar');
             } else {
-                sidebar.classList.remove('collapsed');
-                content.classList.remove('collapsed-sidebar');
+                // Pas de sidebar-status alleen aan als de gebruiker niet op de knop heeft geklikt
+                // Ik ga ervan uit dat de standaard toestand is dat de sidebar niet ingeklapt is
+                if (!sidebar.classList.contains('collapsed')) {
+                    sidebar.classList.remove('collapsed');
+                    content.classList.remove('collapsed-sidebar');
+                }
             }
             updateToggleButton();
         }
 
         window.addEventListener('DOMContentLoaded', () => {
              handleResize();
-
-             iframes.forEach(iframe => {
-                 iframe.addEventListener('load', () => {
-                     iframesLoadedCount++;
-                     if (iframesLoadedCount === totalIframes) {
-                         setTimeout(() => {
-                             fullPageLoader.classList.add('hidden');
-                         }, 500);
-                     }
-                 }, { once: true });
-             });
+             // Zorg ervoor dat de eerste iframe al in de DOM zit voordat de loader-logica wordt uitgevoerd.
+             // Dit is al het geval in de HTML, dus de code voor het laden van de eerste iframe werkt direct.
         });
 
         window.addEventListener('resize', handleResize);
