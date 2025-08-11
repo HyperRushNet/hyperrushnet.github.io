@@ -1,12 +1,12 @@
-let CACHE_NAME = 'v9';
+let CACHE_NAME = 'v10';
 const URLS_TO_CACHE = [
-    '/app/start-page.html',
-    '/app/round-500.png',
+    './start-page.html',
+    './round-500.png',
     '/assets/images/logo/white.png',
     '/assets/images/logo/black.png',
     '/assets/images/favicon/000000.png',
     '/assets/images/favicon/ffffff.png',
-    '/app/offline.html'
+    './offline.html'
 ];
 
 self.addEventListener('install', event => {
@@ -45,16 +45,15 @@ self.addEventListener('fetch', event => {
                     cache.put(event.request, response.clone());
                     return response;
                 } catch (err) {
-                    return caches.match(event.request) || caches.match('/app/offline.html');
+                    return caches.match(event.request) || caches.match('./offline.html');
                 }
             } else {
-                return caches.match(event.request) || caches.match('/app/offline.html');
+                return caches.match(event.request) || caches.match('./offline.html');
             }
         })()
     );
 });
 
-// Check alle bestanden in URLS_TO_CACHE en update indien verschillend
 async function updateAllCachedFiles() {
     console.log('[SW] Check alle gecachte bestanden...');
     const newCacheName = 'v' + Date.now();
