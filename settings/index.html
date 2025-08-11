@@ -282,7 +282,6 @@
             const iframes = document.querySelectorAll('.tab-iframe');
             const fullPageLoader = document.getElementById('full-page-loader');
             const progressBar = document.getElementById('progress-bar');
-            const transitionDuration = 500;
             let resizeInterval = null;
 
             let resourcesToLoadCount = iframes.length;
@@ -306,30 +305,49 @@
                     updateProgressBar();
                 });
             });
-
+            
+            // AANGEPASTE showTab FUNCTIE
+            let isTransitioning = false;
             function showTab(btn) {
+                if (isTransitioning) return;
+                isTransitioning = true;
+                
                 const targetTabId = btn.dataset.tab;
                 const currentActiveIframe = document.querySelector('.tab-iframe.active');
                 const newActiveIframe = document.getElementById(targetTabId);
-                if (currentActiveIframe === newActiveIframe) return;
+
+                if (currentActiveIframe === newActiveIframe) {
+                    isTransitioning = false;
+                    return;
+                }
+
                 if (currentActiveIframe) {
                     currentActiveIframe.classList.remove('active');
                     currentActiveIframe.classList.add('fade-out');
-                }
-                setTimeout(() => {
-                    if (currentActiveIframe) {
+
+                    currentActiveIframe.addEventListener('transitionend', function handler() {
                         currentActiveIframe.classList.remove('fade-out');
-                    }
+
+                        if (newActiveIframe) {
+                            newActiveIframe.classList.add('active');
+                        }
+                        isTransitioning = false;
+                        currentActiveIframe.removeEventListener('transitionend', handler);
+                    }, { once: true });
+
+                } else {
                     if (newActiveIframe) {
                         newActiveIframe.classList.add('active');
                     }
-                    tabButtons.forEach(b => {
-                        b.classList.remove('active');
-                        b.setAttribute('aria-selected', 'false');
-                    });
-                    btn.classList.add('active');
-                    btn.setAttribute('aria-selected', 'true');
-                }, transitionDuration);
+                    isTransitioning = false;
+                }
+
+                tabButtons.forEach(b => {
+                    b.classList.remove('active');
+                    b.setAttribute('aria-selected', 'false');
+                });
+                btn.classList.add('active');
+                btn.setAttribute('aria-selected', 'true');
             }
 
             function updateToggleButton() {
