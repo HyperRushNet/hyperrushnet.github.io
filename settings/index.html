@@ -1,13 +1,12 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Instellingen</title>
+    <title>Settings</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
-        /* Algemene stijlen */
         * {
             margin: 0;
             padding: 0;
@@ -24,7 +23,6 @@
             font-size: 16px;
         }
 
-        /* Sidebar stijlen */
         #sidebar {
             width: 260px;
             background: #1f1f1f;
@@ -107,14 +105,12 @@
             box-shadow: none;
         }
 
-        /* Content stijlen */
         #content {
             flex-grow: 1;
             background: #181818;
             overflow: hidden;
             position: relative;
             width: calc(100vw - 260px);
-            transition: width 0.5s ease-in-out;
         }
 
         #content.collapsed-sidebar {
@@ -150,7 +146,6 @@
             visibility: visible;
         }
 
-        /* Sidebar toggle knop */
         #toggleSidebarBtn {
             margin-top: auto;
             border-top: 1px solid #333;
@@ -175,7 +170,6 @@
             width: 0;
         }
 
-        /* Media query voor kleine schermen */
         @media (max-width: 768px) {
             #sidebar {
                 width: 70px !important;
@@ -200,7 +194,6 @@
             }
         }
 
-        /* LAADANIMATIE STIJLEN */
         #full-page-loader {
             position: fixed;
             top: 0;
@@ -248,40 +241,40 @@
 </head>
 <body>
     <div id="full-page-loader">
-        <div class="loading-text">Loading Settings...</div>
+        <div class="loading-text">Loading Game Settings...</div>
         <div class="progress-bar-container">
             <div id="progress-bar"></div>
         </div>
     </div>
 
-    <aside id="sidebar" aria-label="Navigatie">
+    <aside id="sidebar" aria-label="Navigation">
         <button class="active" onclick="showTab(this)" aria-selected="true" data-tab="tab-1">
-            <ion-icon name="person"></ion-icon><span>Profiel</span>
+            <ion-icon name="ban-outline"></ion-icon><span>Blocks</span>
         </button>
         <button onclick="showTab(this)" aria-selected="false" data-tab="tab-2">
-            <ion-icon name="lock-closed"></ion-icon><span>Privacy</span>
+            <ion-icon name="color-palette-outline"></ion-icon><span>Themes</span>
         </button>
         <button onclick="showTab(this)" aria-selected="false" data-tab="tab-3">
-            <ion-icon name="language"></ion-icon><span>Taal</span>
+            <ion-icon name="eye-off-outline"></ion-icon><span>Hide</span>
         </button>
         <button onclick="showTab(this)" aria-selected="false" data-tab="tab-4">
-            <ion-icon name="desktop"></ion-icon><span>Systeem</span>
+            <ion-icon name="desktop-outline"></ion-icon><span>Device</span>
         </button>
         <button onclick="showTab(this)" aria-selected="false" data-tab="tab-5">
-            <ion-icon name="information-circle"></ion-icon><span>Over</span>
+            <ion-icon name="information-circle-outline"></ion-icon><span>Info</span>
         </button>
-        <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Zijbalk inklappen">
-            <ion-icon name="chevron-back-circle"></ion-icon><span>Inklappen</span>
+        <button id="toggleSidebarBtn" onclick="toggleSidebar()" aria-label="Collapse sidebar">
+            <ion-icon name="chevron-back-circle-outline"></ion-icon><span>Collapse</span>
         </button>
     </aside>
 
     <main id="content" role="tabpanel">
         <div class="iframe-container">
-            <iframe id="tab-1" class="tab-iframe active" src="./page1.html" title="Profiel"></iframe>
-            <iframe id="tab-2" class="tab-iframe" src="./page2.html" title="Privacy"></iframe>
-            <iframe id="tab-3" class="tab-iframe" src="./page3.html" title="Taal"></iframe>
-            <iframe id="tab-4" class="tab-iframe" src="./page4.html" title="Systeem"></iframe>
-            <iframe id="tab-5" class="tab-iframe" src="./page5.html" title="Over"></iframe>
+            <iframe id="tab-1" class="tab-iframe active" src="./blocks.html" title="Blocks"></iframe>
+            <iframe id="tab-2" class="tab-iframe" src="./themes.html" title="Themes"></iframe>
+            <iframe id="tab-3" class="tab-iframe" src="./hide.html" title="Hide"></iframe>
+            <iframe id="tab-4" class="tab-iframe" src="./device.html" title="Device"></iframe>
+            <iframe id="tab-5" class="tab-iframe" src="./info.html" title="Info"></iframe>
         </div>
     </main>
 
@@ -295,6 +288,7 @@
             const fullPageLoader = document.getElementById('full-page-loader');
             const progressBar = document.getElementById('progress-bar');
             const transitionDuration = 500;
+            let resizeInterval = null;
 
             let resourcesToLoadCount = iframes.length;
             let resourcesLoadedCount = 0;
@@ -312,17 +306,12 @@
                 }
             }
 
-            // Luister naar de 'load' event van elk iframe
             iframes.forEach(iframe => {
                 iframe.addEventListener('load', () => {
                     resourcesLoadedCount++;
                     updateProgressBar();
                 });
             });
-
-            // Omdat Ionicons via script geladen wordt, is een aparte 'load' event voor de iconen niet nodig.
-            // Ze zijn beschikbaar als de DOM geladen is.
-            // Dit is een verbetering ten opzichte van de Material Symbols link.
 
             function showTab(btn) {
                 const targetTabId = btn.dataset.tab;
@@ -368,12 +357,33 @@
                     const isCollapsed = sidebar.classList.contains('collapsed');
                     const icon = toggleBtn.querySelector('ion-icon');
                     const text = toggleBtn.querySelector('span');
-                    icon.setAttribute('name', isCollapsed ? 'chevron-forward-circle' : 'chevron-back-circle');
-                    text.textContent = isCollapsed ? 'Uitklappen' : 'Inklappen';
+                    icon.setAttribute('name', isCollapsed ? 'chevron-forward-circle-outline' : 'chevron-back-circle-outline');
+                    text.textContent = isCollapsed ? 'Expand' : 'Collapse';
                 }
             }
 
+            function resizeIframe() {
+                const sidebarWidth = sidebar.offsetWidth;
+                const pageWidth = window.innerWidth;
+                const iframeWidth = pageWidth - sidebarWidth;
+                content.style.width = `${iframeWidth}px`;
+            }
+
             function handleResize() {
+                if (resizeInterval) {
+                    clearInterval(resizeInterval);
+                }
+
+                let timeElapsed = 0;
+                resizeInterval = setInterval(() => {
+                    resizeIframe();
+                    timeElapsed += 16;
+                    if (timeElapsed >= 3000) {
+                        clearInterval(resizeInterval);
+                        resizeInterval = null;
+                    }
+                }, 16);
+
                 if (window.innerWidth <= 768) {
                     sidebar.classList.add('collapsed');
                     content.classList.remove('collapsed-sidebar');
@@ -390,9 +400,7 @@
             window.showTab = showTab;
             window.toggleSidebar = toggleSidebar;
 
-            // Start laadproces na een korte vertraging om de DOM te laten renderen
             setTimeout(() => {
-                // Trigger 'load' event voor de iframes handmatig als ze al geladen zijn
                 iframes.forEach(iframe => {
                     if (iframe.contentWindow.document.readyState === 'complete') {
                         iframe.dispatchEvent(new Event('load'));
