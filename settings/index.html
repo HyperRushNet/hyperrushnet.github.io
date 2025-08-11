@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Settings</title>
+    <title>Game Settings</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
@@ -110,11 +110,6 @@
             background: #181818;
             overflow: hidden;
             position: relative;
-            width: calc(100vw - 260px);
-        }
-
-        #content.collapsed-sidebar {
-            width: calc(100vw - 70px);
         }
 
         .iframe-container {
@@ -297,7 +292,6 @@
                 const stepSize = 100 / resourcesToLoadCount;
                 const progressWidth = stepSize * resourcesLoadedCount;
                 progressBar.style.width = `${progressWidth}%`;
-
                 if (resourcesLoadedCount === resourcesToLoadCount) {
                     progressBar.style.width = '100%';
                     setTimeout(() => {
@@ -317,39 +311,25 @@
                 const targetTabId = btn.dataset.tab;
                 const currentActiveIframe = document.querySelector('.tab-iframe.active');
                 const newActiveIframe = document.getElementById(targetTabId);
-
                 if (currentActiveIframe === newActiveIframe) return;
-
                 if (currentActiveIframe) {
                     currentActiveIframe.classList.remove('active');
                     currentActiveIframe.classList.add('fade-out');
                 }
-
                 setTimeout(() => {
                     if (currentActiveIframe) {
                         currentActiveIframe.classList.remove('fade-out');
                     }
-
                     if (newActiveIframe) {
                         newActiveIframe.classList.add('active');
                     }
-
                     tabButtons.forEach(b => {
                         b.classList.remove('active');
                         b.setAttribute('aria-selected', 'false');
                     });
                     btn.classList.add('active');
                     btn.setAttribute('aria-selected', 'true');
-
                 }, transitionDuration);
-            }
-
-            function toggleSidebar() {
-                if (window.innerWidth > 768) {
-                    sidebar.classList.toggle('collapsed');
-                    content.classList.toggle('collapsed-sidebar');
-                    updateToggleButton();
-                }
             }
 
             function updateToggleButton() {
@@ -369,27 +349,34 @@
                 content.style.width = `${iframeWidth}px`;
             }
 
-            function handleResize() {
-                if (resizeInterval) {
-                    clearInterval(resizeInterval);
-                }
-
-                let timeElapsed = 0;
-                resizeInterval = setInterval(() => {
-                    resizeIframe();
-                    timeElapsed += 16;
-                    if (timeElapsed >= 3000) {
+            function toggleSidebar() {
+                if (window.innerWidth > 768) {
+                    sidebar.classList.toggle('collapsed');
+                    updateToggleButton();
+                    if (resizeInterval) {
                         clearInterval(resizeInterval);
-                        resizeInterval = null;
                     }
-                }, 16);
+                    let timeElapsed = 0;
+                    resizeInterval = setInterval(() => {
+                        resizeIframe();
+                        timeElapsed += 16;
+                        if (timeElapsed >= 1000) {
+                            clearInterval(resizeInterval);
+                            resizeInterval = null;
+                            const isCollapsed = sidebar.classList.contains('collapsed');
+                            content.style.width = `calc(100vw - ${isCollapsed ? '70px' : '260px'})`;
+                        }
+                    }, 16);
+                }
+            }
 
+            function handleResize() {
                 if (window.innerWidth <= 768) {
                     sidebar.classList.add('collapsed');
-                    content.classList.remove('collapsed-sidebar');
-                } else if (!sidebar.classList.contains('collapsed')) {
-                    sidebar.classList.remove('collapsed');
-                    content.classList.remove('collapsed-sidebar');
+                    content.style.width = 'calc(100vw - 70px)';
+                } else {
+                    const isCollapsed = sidebar.classList.contains('collapsed');
+                    content.style.width = `calc(100vw - ${isCollapsed ? '70px' : '260px'})`;
                 }
                 updateToggleButton();
             }
