@@ -1,14 +1,14 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Meerdere Dynamische Switches</title>
+    <title>Settings</title>
     <style>
         body {
             font-family: Arial, sans-serif;
-            background-color: #0f0f0f; /* Donkere achtergrond */
-            color: #e0e0e0; /* Lichte tekstkleur */
+            background-color: #0f0f0f;
+            color: #e0e0e0;
             margin: 0;
             padding: 20px;
             box-sizing: border-box;
@@ -19,40 +19,32 @@
             margin: 0 auto;
         }
 
-        .switch-wrapper {
-            display: flex;
-            flex-direction: column;
-            gap: 20px; /* Ruimte tussen de switch-elementen */
+        .switch-section {
             padding: 10px 0;
-            border-bottom: 1px solid #333; /* Scheidingslijn tussen switches */
+            border-bottom: 1px solid #333;
         }
-        
-        .switch-wrapper:last-child {
+
+        .switch-section:last-child {
             border-bottom: none;
         }
 
-        .switch-wrapper h2 {
+        .switch-section h2 {
             margin: 0;
             font-size: 1.5rem;
             color: #ffffff;
         }
 
-        .switch-group {
+        .switch-item {
             display: flex;
             flex-direction: column;
             gap: 5px;
+            margin-top: 15px;
         }
 
-        .description {
-            font-size: 0.9rem;
-            color: #a0a0a0;
-            line-height: 1.4;
-        }
-        
         .switch-container {
             display: flex;
             align-items: center;
-            justify-content: space-between; /* Label links, switch rechts */
+            justify-content: space-between;
             font-size: 1.2rem;
             width: 100%;
         }
@@ -70,11 +62,11 @@
             display: inline-block;
             width: 60px;
             height: 34px;
-            background-color: #555; /* Donkere kleur uit */
+            background-color: #555;
             border-radius: 34px;
             cursor: pointer;
             transition: background-color 0.4s;
-            box-shadow: inset 0 0 5px rgba(0,0,0,0.4);
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
         }
 
         .switch-label::after {
@@ -84,14 +76,14 @@
             left: 4px;
             width: 26px;
             height: 26px;
-            background-color: #ccc; /* Lichte kleur knop */
+            background-color: #ccc;
             border-radius: 50%;
             transition: transform 0.4s;
-            box-shadow: 0 2px 5px rgba(0,0,0,0.3);
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
         }
 
         .switch-input:checked + .switch-label {
-            background-color: #2196F3; /* Blauwe kleur aan */
+            background-color: #2196F3;
         }
 
         .switch-input:checked + .switch-label::after {
@@ -99,7 +91,12 @@
             background-color: white;
         }
 
-        /* Responsive design voor kleinere schermen */
+        .description {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            line-height: 1.4;
+        }
+        
         @media (max-width: 600px) {
             .switch-container {
                 font-size: 1rem;
@@ -126,43 +123,41 @@
 <body>
 
     <div class="main-container">
-        <div id="switches-container">
-            </div>
+        <div id="switches-container"></div>
     </div>
 
     <script>
-        // JSON-data voor de switches
         const switchesData = [
             {
                 id: 'redirectBlockSwitch',
                 label: 'Redirect Block',
-                description: 'Blokkeer ongewenste automatische doorverwijzingen van websites. Handig om te voorkomen dat je naar spam- of advertentiepagina\'s wordt gestuurd.'
+                description: 'Block unwanted automatic redirects from websites. Useful to prevent being sent to spam or ad pages.'
             },
             {
                 id: 'adBlockSwitch',
-                label: 'Advertenties blokkeren',
-                description: 'Verberg de meeste online advertenties om je browse-ervaring te versnellen en te verbeteren.'
+                label: 'Block Ads',
+                description: 'Hide most online advertisements to speed up and improve your Browse experience.'
             },
             {
                 id: 'darkModeSwitch',
-                label: 'Donkere Modus',
-                description: 'Schakel een donkere modus in voor websites die dit ondersteunen, om je ogen te ontlasten bij weinig licht.'
+                label: 'Dark Mode',
+                description: 'Enable a dark mode for websites that support it, to reduce eye strain in low light conditions.'
             },
             {
                 id: 'scriptBlockSwitch',
-                label: 'Scripts blokkeren',
-                description: 'Blokkeer JavaScript-uitvoering op onbekende websites voor extra beveiliging.'
+                label: 'Block Scripts',
+                description: 'Block JavaScript execution on unknown websites for enhanced security.'
             }
         ];
 
         const switchesContainer = document.getElementById('switches-container');
 
         switchesData.forEach(switchItem => {
-            const wrapper = document.createElement('div');
-            wrapper.classList.add('switch-wrapper');
+            const section = document.createElement('div');
+            section.classList.add('switch-section');
 
-            const group = document.createElement('div');
-            group.classList.add('switch-group');
+            const item = document.createElement('div');
+            item.classList.add('switch-item');
 
             const container = document.createElement('div');
             container.classList.add('switch-container');
@@ -189,11 +184,11 @@
             container.appendChild(input);
             container.appendChild(switchLabel);
             
-            group.appendChild(container);
-            group.appendChild(description);
+            item.appendChild(container);
+            item.appendChild(description);
 
-            wrapper.appendChild(group);
-            switchesContainer.appendChild(wrapper);
+            section.appendChild(item);
+            switchesContainer.appendChild(section);
         });
     </script>
 </body>
