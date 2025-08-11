@@ -13,7 +13,6 @@
             box-sizing: border-box;
             font-family: sans-serif;
         }
-
         html, body {
             height: 100%;
             background: #121212;
@@ -22,7 +21,6 @@
             overflow: hidden;
             font-size: 16px;
         }
-
         #sidebar {
             width: 260px;
             background: #1f1f1f;
@@ -34,11 +32,9 @@
             transition: width 0.5s ease-in-out;
             z-index: 100;
         }
-
         #sidebar.collapsed {
             width: 70px;
         }
-
         #sidebar button {
             all: unset;
             cursor: pointer;
@@ -53,72 +49,60 @@
             white-space: nowrap;
             overflow: hidden;
         }
-
         #sidebar button:not(#toggleSidebarBtn) {
             font-size: 1rem;
         }
-
         #sidebar.collapsed button {
             padding: 12px 0;
             justify-content: center;
             gap: 0;
         }
-
         #sidebar button ion-icon {
             font-size: 1.4rem;
             width: 24px;
             text-align: center;
             user-select: none;
         }
-
         #sidebar.collapsed button ion-icon {
             width: 100%;
         }
-
         #sidebar button span {
             white-space: nowrap;
             user-select: none;
             transition: opacity 0.2s ease-in-out;
             display: block;
         }
-
         #sidebar.collapsed button span {
             opacity: 0;
             pointer-events: none;
             width: 0;
         }
-
         #sidebar button:hover:not(.active) {
             background: #2a2a2a;
             color: #fff;
         }
-
         #sidebar button.active {
             color: #0af;
             border-left-color: #0af;
             background: #151515;
             font-weight: 600;
         }
-
         #sidebar button:focus {
             outline: none;
             box-shadow: none;
         }
-
         #content {
             flex-grow: 1;
             background: #181818;
             overflow: hidden;
             position: relative;
         }
-
         .iframe-container {
             position: relative;
             width: 100%;
             height: 100%;
             overflow: hidden;
         }
-
         .tab-iframe {
             position: absolute;
             top: 0;
@@ -128,19 +112,17 @@
             border: none;
             visibility: hidden;
             opacity: 0;
-            transition: opacity 0.5s ease-in-out;
+            transition: opacity 0.3s ease-in-out;
         }
-
         .tab-iframe.active {
             visibility: visible;
             opacity: 1;
         }
-
-        .tab-iframe.fade-out {
+        /* Nieuwe klasse om frames te behouden en niet te tonen */
+        .tab-iframe.cached {
+            visibility: hidden;
             opacity: 0;
-            visibility: visible;
         }
-
         #toggleSidebarBtn {
             margin-top: auto;
             border-top: 1px solid #333;
@@ -151,44 +133,35 @@
             display: flex;
             align-items: center;
         }
-
         #toggleSidebarBtn:hover {
             color: #0af;
         }
-
         #sidebar.collapsed #toggleSidebarBtn {
             padding: 12px 0;
             justify-content: center;
         }
-
         #sidebar.collapsed #toggleSidebarBtn span {
             width: 0;
         }
-
         @media (max-width: 768px) {
             #sidebar {
                 width: 70px !important;
             }
-
             #sidebar button span {
                 opacity: 0;
                 pointer-events: none;
                 width: 0;
             }
-
             #content {
                 width: calc(100vw - 70px) !important;
             }
-
             #content.collapsed-sidebar {
                 width: calc(100vw - 70px) !important;
             }
-
             #toggleSidebarBtn {
                 display: none !important;
             }
         }
-
         #full-page-loader {
             position: fixed;
             top: 0;
@@ -206,18 +179,15 @@
             flex-direction: column;
             gap: 15px;
         }
-
         #full-page-loader.hidden {
             opacity: 0;
             pointer-events: none;
         }
-
         .loading-text {
             font-size: 1em;
             color: #ccc;
             font-weight: 500;
         }
-
         .progress-bar-container {
             width: 250px;
             height: 10px;
@@ -225,7 +195,6 @@
             border-radius: 5px;
             overflow: hidden;
         }
-
         #progress-bar {
             height: 100%;
             width: 0%;
@@ -266,10 +235,10 @@
     <main id="content" role="tabpanel">
         <div class="iframe-container">
             <iframe id="tab-1" class="tab-iframe active" src="./blocks.html" title="Blocks"></iframe>
-            <iframe id="tab-2" class="tab-iframe" src="./themes.html" title="Themes"></iframe>
-            <iframe id="tab-3" class="tab-iframe" src="./hide.html" title="Hide"></iframe>
-            <iframe id="tab-4" class="tab-iframe" src="./device.html" title="Device"></iframe>
-            <iframe id="tab-5" class="tab-iframe" src="./info.html" title="Info"></iframe>
+            <iframe id="tab-2" class="tab-iframe cached" src="./themes.html" title="Themes"></iframe>
+            <iframe id="tab-3" class="tab-iframe cached" src="./hide.html" title="Hide"></iframe>
+            <iframe id="tab-4" class="tab-iframe cached" src="./device.html" title="Device"></iframe>
+            <iframe id="tab-5" class="tab-iframe cached" src="./info.html" title="Info"></iframe>
         </div>
     </main>
 
@@ -286,6 +255,7 @@
 
             let resourcesToLoadCount = iframes.length;
             let resourcesLoadedCount = 0;
+            let currentActiveTabId = 'tab-1';
 
             function updateProgressBar() {
                 const stepSize = 100 / resourcesToLoadCount;
@@ -306,48 +276,33 @@
                 });
             });
             
-            // AANGEPASTE showTab FUNCTIE
-            let isTransitioning = false;
             function showTab(btn) {
-                if (isTransitioning) return;
-                isTransitioning = true;
-                
                 const targetTabId = btn.dataset.tab;
-                const currentActiveIframe = document.querySelector('.tab-iframe.active');
+                if (targetTabId === currentActiveTabId) return;
+
+                const currentActiveIframe = document.getElementById(currentActiveTabId);
                 const newActiveIframe = document.getElementById(targetTabId);
 
-                if (currentActiveIframe === newActiveIframe) {
-                    isTransitioning = false;
-                    return;
-                }
-
+                // Verwijder 'active' en voeg 'cached' toe aan de huidige tab
                 if (currentActiveIframe) {
                     currentActiveIframe.classList.remove('active');
-                    currentActiveIframe.classList.add('fade-out');
-
-                    currentActiveIframe.addEventListener('transitionend', function handler() {
-                        currentActiveIframe.classList.remove('fade-out');
-
-                        if (newActiveIframe) {
-                            newActiveIframe.classList.add('active');
-                        }
-                        isTransitioning = false;
-                        currentActiveIframe.removeEventListener('transitionend', handler);
-                    }, { once: true });
-
-                } else {
-                    if (newActiveIframe) {
-                        newActiveIframe.classList.add('active');
-                    }
-                    isTransitioning = false;
+                    currentActiveIframe.classList.add('cached');
                 }
 
+                // Verwijder 'cached' en voeg 'active' toe aan de nieuwe tab
+                if (newActiveIframe) {
+                    newActiveIframe.classList.remove('cached');
+                    newActiveIframe.classList.add('active');
+                }
+
+                // Update de actieve knop en de status in het geheugen
                 tabButtons.forEach(b => {
                     b.classList.remove('active');
                     b.setAttribute('aria-selected', 'false');
                 });
                 btn.classList.add('active');
                 btn.setAttribute('aria-selected', 'true');
+                currentActiveTabId = targetTabId;
             }
 
             function updateToggleButton() {
@@ -401,7 +356,7 @@
 
             window.addEventListener('DOMContentLoaded', handleResize);
             window.addEventListener('resize', handleResize);
-
+            
             window.showTab = showTab;
             window.toggleSidebar = toggleSidebar;
 
