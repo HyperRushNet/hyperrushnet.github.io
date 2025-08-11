@@ -1,5 +1,195 @@
-<div>
-    <h2>Privacy-instellingen</h2>
-    <p>Beheer je privacy-opties.</p>
-    <label><input type="checkbox"> Gegevens delen</label>
-</div>
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Settings</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #0f0f0f;
+            color: #e0e0e0;
+            margin: 0;
+            padding: 20px;
+            box-sizing: border-box;
+        }
+
+        .main-container {
+            max-width: 800px;
+            margin: 0 auto;
+        }
+
+        .switch-section {
+            padding: 10px 0;
+            border-bottom: 1px solid #333;
+        }
+
+        .switch-section:last-child {
+            border-bottom: none;
+        }
+
+        .switch-section h2 {
+            margin: 0;
+            font-size: 1.5rem;
+            color: #ffffff;
+        }
+
+        .switch-item {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+            margin-top: 15px;
+        }
+
+        .switch-container {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 1.2rem;
+            width: 100%;
+        }
+
+        .switch-label-text {
+            cursor: pointer;
+        }
+
+        .switch-input {
+            display: none;
+        }
+
+        .switch-label {
+            position: relative;
+            display: inline-block;
+            width: 60px;
+            height: 34px;
+            background-color: #555;
+            border-radius: 34px;
+            cursor: pointer;
+            transition: background-color 0.4s;
+            box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.4);
+        }
+
+        .switch-label::after {
+            content: '';
+            position: absolute;
+            top: 4px;
+            left: 4px;
+            width: 26px;
+            height: 26px;
+            background-color: #ccc;
+            border-radius: 50%;
+            transition: transform 0.4s;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.3);
+        }
+
+        .switch-input:checked + .switch-label {
+            background-color: #2196F3;
+        }
+
+        .switch-input:checked + .switch-label::after {
+            transform: translateX(26px);
+            background-color: white;
+        }
+
+        .description {
+            font-size: 0.9rem;
+            color: #a0a0a0;
+            line-height: 1.4;
+        }
+        
+        @media (max-width: 600px) {
+            .switch-container {
+                font-size: 1rem;
+            }
+            
+            .switch-label {
+                width: 50px;
+                height: 28px;
+            }
+
+            .switch-label::after {
+                top: 3px;
+                left: 3px;
+                width: 22px;
+                height: 22px;
+            }
+
+            .switch-input:checked + .switch-label::after {
+                transform: translateX(22px);
+            }
+        }
+    </style>
+</head>
+<body>
+
+    <div class="main-container">
+        <div id="switches-container"></div>
+    </div>
+
+    <script>
+        const switchesData = [
+            {
+                id: 'redirectBlockSwitch',
+                label: 'Redirect Block',
+                description: 'Block unwanted automatic redirects from websites. Useful to prevent being sent to spam or ad pages.'
+            },
+            {
+                id: 'adBlockSwitch',
+                label: 'Block Ads',
+                description: 'Hide most online advertisements to speed up and improve your Browse experience.'
+            },
+            {
+                id: 'darkModeSwitch',
+                label: 'Dark Mode',
+                description: 'Enable a dark mode for websites that support it, to reduce eye strain in low light conditions.'
+            },
+            {
+                id: 'scriptBlockSwitch',
+                label: 'Block Scripts',
+                description: 'Block JavaScript execution on unknown websites for enhanced security.'
+            }
+        ];
+
+        const switchesContainer = document.getElementById('switches-container');
+
+        switchesData.forEach(switchItem => {
+            const section = document.createElement('div');
+            section.classList.add('switch-section');
+
+            const item = document.createElement('div');
+            item.classList.add('switch-item');
+
+            const container = document.createElement('div');
+            container.classList.add('switch-container');
+
+            const labelText = document.createElement('label');
+            labelText.htmlFor = switchItem.id;
+            labelText.classList.add('switch-label-text');
+            labelText.textContent = switchItem.label;
+
+            const input = document.createElement('input');
+            input.type = 'checkbox';
+            input.id = switchItem.id;
+            input.classList.add('switch-input');
+
+            const switchLabel = document.createElement('label');
+            switchLabel.htmlFor = switchItem.id;
+            switchLabel.classList.add('switch-label');
+
+            const description = document.createElement('p');
+            description.classList.add('description');
+            description.textContent = switchItem.description;
+
+            container.appendChild(labelText);
+            container.appendChild(input);
+            container.appendChild(switchLabel);
+            
+            item.appendChild(container);
+            item.appendChild(description);
+
+            section.appendChild(item);
+            switchesContainer.appendChild(section);
+        });
+    </script>
+</body>
+</html>
