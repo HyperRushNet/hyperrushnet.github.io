@@ -28,9 +28,9 @@
             border-bottom: none;
         }
 
-        .switch-section h2 {
+        .switch-section h1 {
             margin: 0;
-            font-size: 1.5rem;
+            font-size: 2rem;
             color: #ffffff;
         }
 
@@ -131,64 +131,98 @@
             {
                 id: 'redirectBlockSwitch',
                 label: 'Redirect Block',
-                description: 'Block unwanted automatic redirects from websites. Useful to prevent being sent to spam or ad pages.'
-            },
-            {
-                id: 'adBlockSwitch',
-                label: 'Block Ads',
-                description: 'Hide most online advertisements to speed up and improve your Browse experience.'
-            },
-            {
-                id: 'darkModeSwitch',
-                label: 'Dark Mode',
-                description: 'Enable a dark mode for websites that support it, to reduce eye strain in low light conditions.'
-            },
-            {
-                id: 'scriptBlockSwitch',
-                label: 'Block Scripts',
-                description: 'Block JavaScript execution on unknown websites for enhanced security.'
+                description: 'Stop games from automatically redirecting you or opening new websites.',
+                defaultActive: false
             }
         ];
 
         const switchesContainer = document.getElementById('switches-container');
+        const localStorageKey = 'userSettings';
 
-        switchesData.forEach(switchItem => {
-            const section = document.createElement('div');
-            section.classList.add('switch-section');
+        function loadSettings() {
+            try {
+                const savedSettings = JSON.parse(localStorage.getItem(localStorageKey)) || {};
+                const allSettings = {};
+                switchesData.forEach(switchItem => {
+                    allSettings[switchItem.id] = savedSettings.hasOwnProperty(switchItem.id) ? savedSettings[switchItem.id] : switchItem.defaultActive;
+                });
+                return allSettings;
+            } catch (e) {
+                console.error("Error loading settings from localStorage:", e);
+                const defaultSettings = {};
+                switchesData.forEach(switchItem => {
+                    defaultSettings[switchItem.id] = switchItem.defaultActive;
+                });
+                return defaultSettings;
+            }
+        }
 
-            const item = document.createElement('div');
-            item.classList.add('switch-item');
+        function saveSettings(settings) {
+            try {
+                localStorage.setItem(localStorageKey, JSON.stringify(settings));
+                console.log('Current settings saved to localStorage under key:', localStorageKey);
+                console.log(localStorage.getItem(localStorageKey));
+            } catch (e) {
+                console.error("Error saving settings to localStorage:", e);
+            }
+        }
 
-            const container = document.createElement('div');
-            container.classList.add('switch-container');
+        function renderSwitches() {
+            switchesContainer.innerHTML = '';
+            const currentSettings = loadSettings();
 
-            const labelText = document.createElement('label');
-            labelText.htmlFor = switchItem.id;
-            labelText.classList.add('switch-label-text');
-            labelText.textContent = switchItem.label;
+            switchesData.forEach(switchItem => {
+                const section = document.createElement('div');
+                section.classList.add('switch-section');
 
-            const input = document.createElement('input');
-            input.type = 'checkbox';
-            input.id = switchItem.id;
-            input.classList.add('switch-input');
+                const item = document.createElement('div');
+                item.classList.add('switch-item');
 
-            const switchLabel = document.createElement('label');
-            switchLabel.htmlFor = switchItem.id;
-            switchLabel.classList.add('switch-label');
+                const container = document.createElement('div');
+                container.classList.add('switch-container');
 
-            const description = document.createElement('p');
-            description.classList.add('description');
-            description.textContent = switchItem.description;
+                const labelText = document.createElement('label');
+                labelText.htmlFor = switchItem.id;
+                labelText.classList.add('switch-label-text');
+                labelText.textContent = switchItem.label;
 
-            container.appendChild(labelText);
-            container.appendChild(input);
-            container.appendChild(switchLabel);
-            
-            item.appendChild(container);
-            item.appendChild(description);
+                const input = document.createElement('input');
+                input.type = 'checkbox';
+                input.id = switchItem.id;
+                input.classList.add('switch-input');
+                
+                input.checked = currentSettings[switchItem.id];
 
-            section.appendChild(item);
-            switchesContainer.appendChild(section);
+                input.addEventListener('change', (event) => {
+                    const updatedSettings = loadSettings();
+                    updatedSettings[switchItem.id] = event.target.checked;
+                    saveSettings(updatedSettings);
+                    console.log('Settings after change:', loadSettings());
+                });
+
+                const switchLabel = document.createElement('label');
+                switchLabel.htmlFor = switchItem.id;
+                switchLabel.classList.add('switch-label');
+
+                const description = document.createElement('p');
+                description.classList.add('description');
+                description.textContent = switchItem.description;
+
+                container.appendChild(labelText);
+                container.appendChild(input);
+                container.appendChild(switchLabel);
+                
+                item.appendChild(container);
+                item.appendChild(description);
+
+                section.appendChild(item);
+                switchesContainer.appendChild(section);
+            });
+        }
+        
+        document.addEventListener('DOMContentLoaded', () => {
+            renderSwitches();
+            console.log('Initial settings:', loadSettings());
         });
     </script>
 </body>
