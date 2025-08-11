@@ -2,7 +2,7 @@
   "name": "HyperRush",
   "short_name": "HyperRush",
   "description": "The Official HyperRush App.",
-  "start_url": "/app/start-page.html",
+  "start_url": "./start-page.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
@@ -23,24 +23,28 @@
     {
       "name": "Homepage",
       "short_name": "Home",
-      "description": "Search trough all the games.",
+      "description": "Search through all the games.",
       "url": "/",
-      "icons": [{
-        "src": "./home-icon.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }]
+      "icons": [
+        {
+          "src": "./home-icon.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
     },
     {
       "name": "Settings",
       "short_name": "Settings",
       "description": "Change the look and feel of the HyperRush Game site.",
-      "url": "/settings.html",
-      "icons": [{
-        "src": "./settings-icon.png",
-        "sizes": "512x512",
-        "type": "image/png"
-      }]
+      "url": "/settings",
+      "icons": [
+        {
+          "src": "./settings-icon.png",
+          "sizes": "512x512",
+          "type": "image/png"
+        }
+      ]
     }
   ]
 }
