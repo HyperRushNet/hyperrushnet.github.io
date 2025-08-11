@@ -3,35 +3,53 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Platform Detectie</title>
+<title>Platform en Apparaat Detectie</title>
 </head>
 <body>
-  <h1>Platform Detectie</h1>
-  <p id="platform">Bezig met detecteren...</p>
+  <h1>Platform en Apparaat Detectie</h1>
+  <p id="info">Bezig met detecteren...</p>
 
   <script>
-    function detectPlatform() {
+    function detectInfo() {
       const ua = navigator.userAgent || navigator.vendor || window.opera;
-      const platformEl = document.getElementById('platform');
+      let platform = "Onbekend platform";
+      let deviceType = "Onbekend apparaat";
 
+      // Platform detectie
       if (/windows phone/i.test(ua)) {
-        return "Windows Phone";
+        platform = "Windows Phone";
       } else if (/android/i.test(ua)) {
-        return "Android";
+        platform = "Android";
       } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
-        return "iOS";
+        platform = "iOS";
       } else if (/Win/.test(navigator.platform)) {
-        return "Windows";
+        platform = "Windows";
       } else if (/Mac/.test(navigator.platform)) {
-        return "macOS";
+        platform = "macOS";
       } else if (/Linux/.test(navigator.platform)) {
-        return "Linux";
-      } else {
-        return "Onbekend platform";
+        platform = "Linux";
       }
+
+      // Apparaat type detectie
+      if (/(tablet|ipad|playbook|silk)|(android(?!.*mobi))/i.test(ua)) {
+        deviceType = "Tablet";
+      } else if (/(kindle)|(ipod)|(blackberry)/i.test(ua) || (/(android|webos|iphone)/i.test(ua) && /mobi/i.test(ua))) {
+        deviceType = "Mobiel";
+      } else if (/Win|Mac|Linux/.test(navigator.platform)) {
+        deviceType = "Desktop";
+      }
+      
+      // Specifieke apparaten
+      if (/ipad/i.test(ua)) {
+          deviceType = "iPad";
+      } else if (/iphone/i.test(ua)) {
+          deviceType = "iPhone";
+      }
+
+      return `Je platform is ${platform} en je apparaat is een ${deviceType}.`;
     }
 
-    document.getElementById('platform').textContent = "Je platform is: " + detectPlatform();
+    document.getElementById('info').textContent = detectInfo();
   </script>
 </body>
 </html>
