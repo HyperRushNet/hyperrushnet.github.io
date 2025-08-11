@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Platform Detectie</title>
+</head>
+<body>
+  <h1>Platform Detectie</h1>
+  <p id="platform">Bezig met detecteren...</p>
+
+  <script>
+    function detectPlatform() {
+      const ua = navigator.userAgent || navigator.vendor || window.opera;
+      const platformEl = document.getElementById('platform');
+
+      if (/windows phone/i.test(ua)) {
+        return "Windows Phone";
+      } else if (/android/i.test(ua)) {
+        return "Android";
+      } else if (/iPad|iPhone|iPod/.test(ua) && !window.MSStream) {
+        return "iOS";
+      } else if (/Win/.test(navigator.platform)) {
+        return "Windows";
+      } else if (/Mac/.test(navigator.platform)) {
+        return "macOS";
+      } else if (/Linux/.test(navigator.platform)) {
+        return "Linux";
+      } else {
+        return "Onbekend platform";
+      }
+    }
+
+    document.getElementById('platform').textContent = "Je platform is: " + detectPlatform();
+  </script>
+</body>
+</html>
