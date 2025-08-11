@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>Settings</title>
+    <title>Game Settings</title>
     <script type="module" src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.esm.js"></script>
     <script nomodule src="https://unpkg.com/ionicons@7.1.0/dist/ionicons/ionicons.js"></script>
     <style>
@@ -134,11 +134,6 @@
         .tab-iframe.active {
             visibility: visible;
             opacity: 1;
-        }
-
-        .tab-iframe.fade-out {
-            opacity: 0;
-            visibility: visible;
         }
 
         #toggleSidebarBtn {
@@ -282,11 +277,12 @@
             const iframes = document.querySelectorAll('.tab-iframe');
             const fullPageLoader = document.getElementById('full-page-loader');
             const progressBar = document.getElementById('progress-bar');
-            const transitionDuration = 500;
             let resizeInterval = null;
-            let isTransitioning = false;
+
             let resourcesToLoadCount = iframes.length;
             let resourcesLoadedCount = 0;
+            // Dit houdt de ID van de laatst actieve tab bij, jouw "eerste var".
+            let currentActiveTabId = 'tab-1';
 
             function updateProgressBar() {
                 const stepSize = 100 / resourcesToLoadCount;
@@ -308,42 +304,37 @@
             });
 
             function showTab(btn) {
+                // De ID van de nieuwe tab, jouw "tweede var".
                 const targetTabId = btn.dataset.tab;
-                const currentActiveIframe = document.querySelector('.tab-iframe.active');
-                const newActiveIframe = document.getElementById(targetTabId);
-
-                if (currentActiveIframe === newActiveIframe || isTransitioning) {
+                
+                // Voorkom actie als het dezelfde tab is
+                if (targetTabId === currentActiveTabId) {
                     return;
                 }
 
-                isTransitioning = true;
+                // Haal de DOM-elementen van de huidige en nieuwe iframes op
+                const currentActiveIframe = document.getElementById(currentActiveTabId);
+                const newActiveIframe = document.getElementById(targetTabId);
 
-                if (currentActiveIframe) {
-                    currentActiveIframe.classList.remove('active');
-                    currentActiveIframe.classList.add('fade-out');
-                    
-                    // Gebruik transitionend om te wachten tot de animatie van de oude tab klaar is
-                    currentActiveIframe.addEventListener('transitionend', function handler() {
-                        currentActiveIframe.classList.remove('fade-out');
-                        if (newActiveIframe) {
-                            newActiveIframe.classList.add('active');
-                        }
-                        isTransitioning = false;
-                        currentActiveIframe.removeEventListener('transitionend', handler);
-                    }, { once: true });
-                } else {
-                    if (newActiveIframe) {
-                        newActiveIframe.classList.add('active');
-                    }
-                    isTransitioning = false;
+                // Reset de actieve staat van alle iframes. Dit is de "reset" die je zocht.
+                iframes.forEach(iframe => {
+                    iframe.classList.remove('active');
+                    iframe.style.visibility = 'hidden';
+                });
+
+                // Maak de nieuwe tab onmiddellijk actief
+                if (newActiveIframe) {
+                    newActiveIframe.classList.add('active');
                 }
 
+                // Update de actieve knop en de variabele
                 tabButtons.forEach(b => {
                     b.classList.remove('active');
                     b.setAttribute('aria-selected', 'false');
                 });
                 btn.classList.add('active');
                 btn.setAttribute('aria-selected', 'true');
+                currentActiveTabId = targetTabId;
             }
 
             function updateToggleButton() {
