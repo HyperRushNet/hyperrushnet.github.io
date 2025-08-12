@@ -28,9 +28,7 @@
       border-radius: 50%;
       animation: spin 0.8s linear infinite;
     }
-    @keyframes spin {
-      to { transform: rotate(360deg); }
-    }
+    @keyframes spin { to { transform: rotate(360deg); } }
     #redirect-block-notice {
       position: fixed;
       top: 10px;
@@ -79,32 +77,29 @@
       let iframe = null;
       let games = null;
 
-      // Show the notification (only if enabled)
       const showNotice = (msg) => {
-        if (!redirectBlockEnabled) return;
         notice.textContent = msg;
         notice.classList.remove('show');
         void notice.offsetWidth;
         notice.classList.add('show');
       };
 
-      // Inject scripts into the iframe (only if enabled)
+      // Inject scripts into iframe (always FPS + pause/resume, only block logs if redirectBlockEnabled)
       const injectScriptsIntoIframe = (iframe) => {
-        if (!redirectBlockEnabled) return;
         try {
           const doc = iframe.contentDocument || iframe.contentWindow?.document;
           if (!doc || !doc.head) return;
 
           const scripts = [];
 
-          // Disable console logs inside iframe
-          const disableLogsScript = doc.createElement('script');
-          disableLogsScript.textContent = `
-            console.log = console.debug = console.warn = console.error = () => {};
-          `;
-          scripts.push(disableLogsScript);
+          if (redirectBlockEnabled) {
+            const disableLogsScript = doc.createElement('script');
+            disableLogsScript.textContent = `
+              console.log = console.debug = console.warn = console.error = () => {};
+            `;
+            scripts.push(disableLogsScript);
+          }
 
-          // Cap FPS at ~60
           const capFPSScript = doc.createElement('script');
           capFPSScript.textContent = `
             let last = 0;
@@ -120,7 +115,6 @@
           `;
           scripts.push(capFPSScript);
 
-          // Pause/resume game on tab visibility change
           const visibilityScript = doc.createElement('script');
           visibilityScript.textContent = `
             document.addEventListener('visibilitychange', () => {
@@ -133,7 +127,6 @@
           `;
           scripts.push(visibilityScript);
 
-          // Passive event listeners fix for performance
           const passiveEventsScript = doc.createElement('script');
           passiveEventsScript.textContent = `
             ['touchstart', 'touchmove', 'wheel'].forEach(event => {
@@ -143,7 +136,6 @@
           scripts.push(passiveEventsScript);
 
           scripts.forEach(s => doc.head.appendChild(s));
-
         } catch (error) {
           console.warn('Failed to inject scripts into iframe:', error);
         }
@@ -164,7 +156,6 @@
             const timeoutId = setTimeout(() => controller.abort(), 5000);
             const response = await fetch('/assets/json/games.json', { signal: controller.signal });
             clearTimeout(timeoutId);
-
             if (!response.ok) throw new Error('Failed to fetch games.json');
             games = await response.json();
           } catch (error) {
@@ -185,13 +176,17 @@
 
         iframe = document.createElement('iframe');
         iframe.src = game.link;
-        iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+
+        // Only apply sandbox if redirectBlockEnabled
+        if (redirectBlockEnabled) {
+          iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
+        }
 
         iframe.onload = () => {
           injectScriptsIntoIframe(iframe);
           iframe.style.display = 'block';
           loader.style.display = 'none';
-          showNotice('Redirect block: ON');
+          showNotice(`Redirect block: ${redirectBlockEnabled ? 'ON' : 'OFF'}`);
         };
 
         iframe.onerror = () => {
