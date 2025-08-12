@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Infinite Card Grid</title>
+<title>Fullscreen 45° Game Grid - Oneindige Scroll met Preload</title>
 <style>
   html, body {
     margin: 0; padding: 0; overflow: hidden; height: 100%; background: #111;
@@ -25,6 +25,8 @@
     flex-direction: column;
     gap: 4px;
     user-select: none;
+    opacity: 0;
+    transition: opacity 0.5s ease-in-out;
   }
   .row {
     display: flex;
@@ -32,7 +34,7 @@
     width: max-content;
   }
   .row.offset {
-    margin-left: calc((240px + 4px) / 2); /* halve card width + gap */
+    margin-left: calc((240px + 4px) / 2); /* halve card breedte + gap */
   }
   .card {
     flex: 0 0 240px;
@@ -51,7 +53,6 @@
     user-select: none;
   }
 
-  /* Oneindige scroll animatie van halve breedte */
   @keyframes scroll-left {
     0% {
       transform: translateX(0);
@@ -70,8 +71,19 @@
 <script>
 (async () => {
   const grid = document.getElementById('grid');
-
   const jsonUrl = 'https://hyperrushnet.github.io/assets/json/games.json';
+
+  // Functie om afbeeldingen te preloaden
+  function preloadImages(images) {
+    return Promise.all(
+      images.map(src => new Promise((resolve) => {
+        const img = new Image();
+        img.src = src;
+        img.onload = () => resolve();
+        img.onerror = () => resolve(); // Fout negeren, toch doorzetten
+      }))
+    );
+  }
 
   let games = [];
   try {
@@ -96,7 +108,7 @@
   const totalCardW = cardW + gap;
   const totalCardH = cardH + gap;
 
-  const cols = Math.ceil(effectiveW / totalCardW) + 2; 
+  const cols = Math.ceil(effectiveW / totalCardW) + 2;
   const rows = Math.ceil(effectiveH / totalCardH) + 2;
 
   function createCard(game) {
@@ -109,25 +121,42 @@
     return div;
   }
 
-  const animationDuration = 45; // seconden, pas hier de scroll snelheid aan
+  const scrollSpeedPxPerSec = 60; // Pixels per seconde scrollsnelheid
+
+  // Eerst preloaden we ALLE images van alle kaarten die we gaan gebruiken
+  const totalCards = rows * cols * 2; // 2 sets per rij
+  const imageUrls = [];
+  for (let i = 0; i < totalCards; i++) {
+    const g = games[i % games.length];
+    imageUrls.push('https://hyperrushnet.github.io' + g.img);
+  }
+  await preloadImages(imageUrls);
+
+  // Daarna pas tonen we grid
+  grid.style.opacity = '1';
 
   for (let r = 0; r < rows; r++) {
     const rowDiv = document.createElement('div');
     rowDiv.className = 'row';
-    if (r % 2 === 1) {
-      rowDiv.classList.add('offset');
-    }
+    if (r % 2 === 1) rowDiv.classList.add('offset');
+
     for (let set = 0; set < 2; set++) {
       for (let c = 0; c < cols; c++) {
         const game = games[(r * cols + c) % games.length];
         rowDiv.appendChild(createCard(game));
       }
     }
-    rowDiv.style.animation = `scroll-left ${animationDuration}s linear infinite`;
+
     grid.appendChild(rowDiv);
+
+    // Animatieduur berekenen op basis van helft van de rijbreedte (scroll gaat -50%)
+    requestAnimationFrame(() => {
+      const halfWidth = rowDiv.offsetWidth / 2;
+      const duration = halfWidth / scrollSpeedPxPerSec;
+      rowDiv.style.animation = `scroll-left ${duration}s linear infinite`;
+    });
   }
 
-  // Herlaad pagina bij resize om het grid aan te passen (optioneel)
   window.addEventListener('resize', () => location.reload());
 })();
 </script>
