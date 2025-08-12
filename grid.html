@@ -1,0 +1,135 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>Infinite Card Grid</title>
+<style>
+  html, body {
+    margin: 0; padding: 0; overflow: hidden; height: 100%; background: #111;
+    display: flex; justify-content: center; align-items: center;
+  }
+  #container {
+    position: relative;
+    width: 100vw;
+    height: 100vh;
+    overflow: hidden;
+  }
+  #grid {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform-origin: center center;
+    transform: translate(-50%, -50%) rotate(45deg);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+    user-select: none;
+  }
+  .row {
+    display: flex;
+    gap: 4px;
+    width: max-content;
+  }
+  .row.offset {
+    margin-left: calc((240px + 4px) / 2); /* halve card width + gap */
+  }
+  .card {
+    flex: 0 0 240px;
+    height: 180px;
+    background: #222;
+    border-radius: 6px;
+    overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.8);
+  }
+  .card img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+    pointer-events: none;
+    user-select: none;
+  }
+
+  /* Oneindige scroll animatie van halve breedte */
+  @keyframes scroll-left {
+    0% {
+      transform: translateX(0);
+    }
+    100% {
+      transform: translateX(calc(-50%));
+    }
+  }
+</style>
+</head>
+<body>
+  <div id="container">
+    <div id="grid"></div>
+  </div>
+
+<script>
+(async () => {
+  const grid = document.getElementById('grid');
+
+  const jsonUrl = 'https://hyperrushnet.github.io/assets/json/games.json';
+
+  let games = [];
+  try {
+    const resp = await fetch(jsonUrl);
+    if (!resp.ok) throw new Error("Kon JSON niet laden");
+    games = await resp.json();
+  } catch (e) {
+    alert("Fout bij laden JSON data: " + e.message);
+    return;
+  }
+  games = games.filter(g => g.img && g.img.length > 5);
+
+  const cardW = 240;
+  const cardH = 180;
+  const gap = 4;
+
+  const vw = window.innerWidth;
+  const vh = window.innerHeight;
+  const effectiveW = Math.ceil(vw * Math.SQRT2);
+  const effectiveH = Math.ceil(vh * Math.SQRT2);
+
+  const totalCardW = cardW + gap;
+  const totalCardH = cardH + gap;
+
+  const cols = Math.ceil(effectiveW / totalCardW) + 2; 
+  const rows = Math.ceil(effectiveH / totalCardH) + 2;
+
+  function createCard(game) {
+    const div = document.createElement('div');
+    div.className = 'card';
+    const img = document.createElement('img');
+    img.src = 'https://hyperrushnet.github.io' + game.img;
+    img.alt = game.name;
+    div.appendChild(img);
+    return div;
+  }
+
+  const animationDuration = 45; // seconden, pas hier de scroll snelheid aan
+
+  for (let r = 0; r < rows; r++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'row';
+    if (r % 2 === 1) {
+      rowDiv.classList.add('offset');
+    }
+    for (let set = 0; set < 2; set++) {
+      for (let c = 0; c < cols; c++) {
+        const game = games[(r * cols + c) % games.length];
+        rowDiv.appendChild(createCard(game));
+      }
+    }
+    rowDiv.style.animation = `scroll-left ${animationDuration}s linear infinite`;
+    grid.appendChild(rowDiv);
+  }
+
+  // Herlaad pagina bij resize om het grid aan te passen (optioneel)
+  window.addEventListener('resize', () => location.reload());
+})();
+</script>
+</body>
+</html>
