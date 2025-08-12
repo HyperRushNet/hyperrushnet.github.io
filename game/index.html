@@ -1,204 +1,246 @@
 <!DOCTYPE html>
-<html lang="en">
+<html lang="nl">
 <head>
-  <meta charset="UTF-8" /> 
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <link rel="icon" href="/assets/images/favicon/000000.png" media="(prefers-color-scheme: light)">
-  <link rel="icon" href="/assets/images/favicon/ffffff.png" media="(prefers-color-scheme: dark)">
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
   <title>Loading - HyperRushNet</title>
-  <script src="/assets/js/notranslate.min.js"></script>
   <style>
-    html, body {
-      margin: 0; height: 100%; overflow: hidden;
-      background: #fff; color: #000; position: relative;
-      font-family: Arial, sans-serif;
-    }
-    iframe {
-      width: 100%; height: 100%; border: none; display: none;
-    }
-    #loader {
-      position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-      display: flex; align-items: center; justify-content: center;
-      background: inherit; z-index: 9999;
-    }
-    #loader div {
-      width: 40px; height: 40px;
-      border: 4px solid currentColor;
-      border-top-color: transparent;
-      border-radius: 50%;
-      animation: spin 0.8s linear infinite;
-    }
-    @keyframes spin { to { transform: rotate(360deg); } }
+    html,body { height:100%; margin:0; font-family:Arial, sans-serif; background:#fff; color:#000; }
+    iframe { width:100%; height:100%; border:0; display:none; }
+    #loader { position:fixed; inset:0; display:flex; align-items:center; justify-content:center; z-index:9999; }
+    #loader div { width:40px; height:40px; border:4px solid currentColor; border-top-color:transparent; border-radius:50%; animation:spin .8s linear infinite; }
+    @keyframes spin { to { transform:rotate(360deg); } }
     #redirect-block-notice {
-      position: fixed;
-      top: 10px;
-      right: 0;
-      background: rgba(0, 0, 0, 0.75);
-      color: white;
-      padding: 6px 12px;
-      border-radius: 4px 0 0 4px;
-      font-size: 12px;
-      opacity: 1;
-      pointer-events: none;
-      transform: translateX(100%);
-      transition: none;
-      z-index: 10000;
-      user-select: none;
+      position:fixed; top:10px; right:0; transform:translateX(100%);
+      background:rgba(0,0,0,.75); color:white; padding:6px 12px; border-radius:4px 0 0 4px; z-index:10000; user-select:none;
     }
-    #redirect-block-notice.show {
-      animation: slideInRight 0.4s forwards, slideOutRight 0.4s forwards 2.6s;
-      pointer-events: auto;
-    }
-    @keyframes slideInRight {
-      from { transform: translateX(100%); opacity: 0; }
-      to { transform: translateX(0); opacity: 1; }
-    }
-    @keyframes slideOutRight {
-      from { transform: translateX(0); opacity: 1; }
-      to { transform: translateX(100%); opacity: 0; }
-    }
-    @media (prefers-color-scheme: dark) {
-      html, body { background: #121212; color: #fff; }
-      #redirect-block-notice {
-        background: rgba(255, 255, 255, 0.85);
-        color: #121212;
-      }
-    }
+    #redirect-block-notice.show { animation: slideIn 0.35s forwards, slideOut 0.35s forwards 2.6s; }
+    @keyframes slideIn { from { transform:translateX(100%); opacity:0 } to { transform:translateX(0); opacity:1 } }
+    @keyframes slideOut { from { transform:translateX(0); opacity:1 } to { transform:translateX(100%); opacity:0 } }
   </style>
 </head>
 <body>
   <div id="loader"><div></div></div>
-  <div id="redirect-block-notice" aria-live="polite" role="alert">Redirect block: ..</div>
+  <div id="redirect-block-notice" aria-live="polite" role="status"></div>
+
   <script>
-    (() => {
-      const redirectBlockEnabled = localStorage.getItem('redirectBlockSwitch') === 'true';
-      const loader = document.getElementById('loader');
-      const notice = document.getElementById('redirect-block-notice');
-      let iframe = null;
-      let games = null;
+    const SETTINGS_KEY = 'userSettings';
+    const loader = document.getElementById('loader');
+    const notice = document.getElementById('redirect-block-notice');
 
-      const showNotice = (msg) => {
-        notice.textContent = msg;
-        notice.classList.remove('show');
-        void notice.offsetWidth;
-        notice.classList.add('show');
-      };
+    let iframe = null;
+    let currentRedirectBlock = null; // boolean
+    let currentGame = null;          // game object { number, name, link }
+    let gamesData = null;
 
-      // Inject scripts into iframe (always FPS + pause/resume, only block logs if redirectBlockEnabled)
-      const injectScriptsIntoIframe = (iframe) => {
-        try {
-          const doc = iframe.contentDocument || iframe.contentWindow?.document;
-          if (!doc || !doc.head) return;
+    // Read settings safely
+    function readSettings() {
+      try {
+        const raw = localStorage.getItem(SETTINGS_KEY);
+        const parsed = raw ? JSON.parse(raw) : {};
+        return { redirectBlockSwitch: !!parsed.redirectBlockSwitch };
+      } catch (e) {
+        return { redirectBlockSwitch: false };
+      }
+    }
 
-          const scripts = [];
+    function showNotice(text) {
+      notice.textContent = text;
+      notice.classList.remove('show');
+      void notice.offsetWidth;
+      notice.classList.add('show');
+    }
 
-          if (redirectBlockEnabled) {
-            const disableLogsScript = doc.createElement('script');
-            disableLogsScript.textContent = `
-              console.log = console.debug = console.warn = console.error = () => {};
-            `;
-            scripts.push(disableLogsScript);
-          }
+    // Inject scripts that we always want (FPS cap, visibility, passive events).
+    // blockLogs boolean decides whether to override console.*.
+    function injectScriptsIntoIframe(ifr, blockLogs) {
+      try {
+        const doc = ifr.contentDocument || ifr.contentWindow?.document;
+        if (!doc || !doc.head) return;
 
-          const capFPSScript = doc.createElement('script');
-          capFPSScript.textContent = `
+        // Always: FPS cap
+        const fps = doc.createElement('script');
+        fps.textContent = `
+          (function(){
             let last = 0;
-            function loop(timestamp) {
-              if (timestamp - last > 16) {
-                if (window.__updateGame) window.__updateGame();
-                if (window.__renderGame) window.__renderGame();
-                last = timestamp;
+            function loop(ts){
+              if (!last || ts - last > 16) {
+                if (typeof window.__updateGame === 'function') try { window.__updateGame(); } catch(e){}
+                if (typeof window.__renderGame === 'function') try { window.__renderGame(); } catch(e){}
+                last = ts;
               }
               requestAnimationFrame(loop);
             }
             requestAnimationFrame(loop);
-          `;
-          scripts.push(capFPSScript);
+          })();
+        `;
+        doc.head.appendChild(fps);
 
-          const visibilityScript = doc.createElement('script');
-          visibilityScript.textContent = `
-            document.addEventListener('visibilitychange', () => {
-              if (document.hidden) {
-                if (window.__pauseGame) window.__pauseGame();
-              } else {
-                if (window.__resumeGame) window.__resumeGame();
-              }
-            });
-          `;
-          scripts.push(visibilityScript);
+        // Visibility pause/resume
+        const vis = doc.createElement('script');
+        vis.textContent = `
+          document.addEventListener('visibilitychange', () => {
+            if (document.hidden) { if (typeof window.__pauseGame === 'function') try { window.__pauseGame(); } catch(e){} }
+            else { if (typeof window.__resumeGame === 'function') try { window.__resumeGame(); } catch(e){} }
+          });
+        `;
+        doc.head.appendChild(vis);
 
-          const passiveEventsScript = doc.createElement('script');
-          passiveEventsScript.textContent = `
-            ['touchstart', 'touchmove', 'wheel'].forEach(event => {
-              window.addEventListener(event, () => {}, { passive: true });
-            });
-          `;
-          scripts.push(passiveEventsScript);
+        // Passive event listeners
+        const passive = doc.createElement('script');
+        passive.textContent = `
+          ['touchstart','touchmove','wheel'].forEach(ev => {
+            window.addEventListener(ev, () => {}, { passive: true });
+          });
+        `;
+        doc.head.appendChild(passive);
 
-          scripts.forEach(s => doc.head.appendChild(s));
-        } catch (error) {
-          console.warn('Failed to inject scripts into iframe:', error);
+        // Optionally disable console.* to reduce spam when redirect-block is ON
+        if (blockLogs) {
+          const disableLogs = doc.createElement('script');
+          disableLogs.textContent = `
+            (function(){
+              try {
+                console.log = console.debug = console.warn = console.error = function(){};
+              } catch(e){}
+            })();
+          `;
+          doc.head.appendChild(disableLogs);
         }
+      } catch (err) {
+        // Cross-origin frames may throw when trying to access doc; that's expected sometimes.
+        console.warn('injectScriptsIntoIframe:', err);
+      }
+    }
+
+    // Create iframe for the currentGame and redirectBlock mode.
+    function createIframeForGame(redirectBlock) {
+      // remove old
+      if (iframe) {
+        try { iframe.remove(); } catch(e) {}
+        iframe = null;
+      }
+
+      if (!currentGame) return;
+
+      const newIframe = document.createElement('iframe');
+      newIframe.src = currentGame.link;
+
+      // Sandbox policy:
+      // - When redirectBlock is TRUE we block top-level navigation (no allow-top-navigation).
+      // - When redirectBlock is FALSE we allow top navigation (allow-top-navigation) so the game can redirect.
+      // Both cases keep allow-scripts and allow-same-origin so the game can run normally.
+      const sandboxValue = redirectBlock
+        ? 'allow-scripts allow-same-origin'
+        : 'allow-scripts allow-same-origin allow-top-navigation';
+      newIframe.setAttribute('sandbox', sandboxValue);
+
+      newIframe.onload = () => {
+        // inject scripts (block logs only when redirectBlock === true)
+        injectScriptsIntoIframe(newIframe, !!redirectBlock);
+
+        // show iframe and hide loader
+        newIframe.style.display = 'block';
+        loader.style.display = 'none';
+        showNotice(`Redirect block: ${redirectBlock ? 'ON' : 'OFF'}`);
       };
 
-      const redirectToHome = () => {
-        window.location.href = '/';
+      newIframe.onerror = () => {
+        // If iframe failed to load (CSP/X-Frame-Options), redirect home
+        console.error('Iframe failed to load, redirecting home');
+        location.href = '/';
       };
 
-      const loadGame = async () => {
-        const hash = window.location.hash.slice(1).split('/')[1];
-        const gameNumber = parseInt(hash, 10);
-        if (!gameNumber || isNaN(gameNumber)) return redirectToHome();
+      document.body.appendChild(newIframe);
+      iframe = newIframe;
+      currentRedirectBlock = !!redirectBlock;
+    }
 
-        if (!games) {
-          try {
-            const controller = new AbortController();
-            const timeoutId = setTimeout(() => controller.abort(), 5000);
-            const response = await fetch('/assets/json/games.json', { signal: controller.signal });
-            clearTimeout(timeoutId);
-            if (!response.ok) throw new Error('Failed to fetch games.json');
-            games = await response.json();
-          } catch (error) {
-            console.error('Error loading games.json:', error);
-            return redirectToHome();
-          }
+    // load games.json (with timeout) and initialise
+    async function loadGamesJSON(timeoutMs = 5000) {
+      try {
+        const controller = new AbortController();
+        const id = setTimeout(() => controller.abort(), timeoutMs);
+        const res = await fetch('/assets/json/games.json', { signal: controller.signal });
+        clearTimeout(id);
+        if (!res.ok) throw new Error('games.json fetch failed');
+        return await res.json();
+      } catch (e) {
+        console.error('Failed to load games.json', e);
+        return null;
+      }
+    }
+
+    // public load game flow
+    async function loadGame() {
+      loader.style.display = 'flex';
+      const hash = window.location.hash.slice(1).split('/')[1];
+      const gameNumber = parseInt(hash, 10);
+      if (!gameNumber || isNaN(gameNumber)) return location.href = '/';
+
+      if (!gamesData) {
+        gamesData = await loadGamesJSON();
+        if (!gamesData) return location.href = '/';
+      }
+
+      currentGame = gamesData.find(g => Number(g.number) === Number(gameNumber));
+      if (!currentGame) return location.href = '/';
+
+      // initial settings
+      const settings = readSettings();
+      createIframeForGame(!!settings.redirectBlockSwitch);
+    }
+
+    // handle external setting change (storage event or custom event)
+    function handleSettingsChange(newSettings) {
+      const redirectBlock = !!(newSettings && newSettings.redirectBlockSwitch);
+      // if different from current, recreate iframe to ensure sandbox takes effect
+      if (currentRedirectBlock === null) {
+        // not initialised yet, just store
+        currentRedirectBlock = redirectBlock;
+        return;
+      }
+      if (redirectBlock !== currentRedirectBlock) {
+        // show notice quickly, then recreate iframe (keeps same src)
+        showNotice(`Redirect block: ${redirectBlock ? 'ON' : 'OFF'}`);
+        // recreate iframe (loader visible while reloading)
+        loader.style.display = 'flex';
+        createIframeForGame(redirectBlock);
+      } else {
+        // only update notice
+        showNotice(`Redirect block: ${redirectBlock ? 'ON' : 'OFF'}`);
+      }
+    }
+
+    // Listen to storage changes from other tabs
+    window.addEventListener('storage', (e) => {
+      if (e.key === SETTINGS_KEY) {
+        try {
+          const parsed = e.newValue ? JSON.parse(e.newValue) : {};
+          handleSettingsChange(parsed);
+        } catch (_) {
+          handleSettingsChange({ redirectBlockSwitch: false });
         }
+      }
+    });
 
-        const game = games.find(g => g.number === gameNumber);
-        if (!game) return redirectToHome();
+    // Listen to custom event in same tab
+    window.addEventListener('userSettingsChanged', (e) => {
+      if (e?.detail) handleSettingsChange(e.detail);
+    });
 
-        document.title = `${game.name} - HyperRush`;
-
-        if (iframe) {
-          iframe.remove();
-          iframe = null;
-        }
-
-        iframe = document.createElement('iframe');
-        iframe.src = game.link;
-
-        // Only apply sandbox if redirectBlockEnabled
-        if (redirectBlockEnabled) {
-          iframe.setAttribute('sandbox', 'allow-scripts allow-same-origin');
-        }
-
-        iframe.onload = () => {
-          injectScriptsIntoIframe(iframe);
-          iframe.style.display = 'block';
-          loader.style.display = 'none';
-          showNotice(`Redirect block: ${redirectBlockEnabled ? 'ON' : 'OFF'}`);
-        };
-
-        iframe.onerror = () => {
-          redirectToHome();
-        };
-
-        document.body.appendChild(iframe);
-      };
-
-      window.addEventListener('hashchange', loadGame);
+    // react to hash changes (load new game)
+    window.addEventListener('hashchange', () => {
+      // Clean up and re-run
+      if (iframe) { try { iframe.remove(); } catch(e){} iframe = null; }
+      // reload games if needed
       loadGame();
-    })();
+    });
+
+    // initial
+    document.addEventListener('DOMContentLoaded', () => {
+      loadGame();
+    });
   </script>
 </body>
 </html>
