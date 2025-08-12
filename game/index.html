@@ -52,30 +52,15 @@
       pointer-events: auto;
     }
     @keyframes slideInRight {
-      from {
-        transform: translateX(100%);
-        opacity: 0;
-      }
-      to {
-        transform: translateX(0);
-        opacity: 1;
-      }
+      from { transform: translateX(100%); opacity: 0; }
+      to { transform: translateX(0); opacity: 1; }
     }
     @keyframes slideOutRight {
-      from {
-        transform: translateX(0);
-        opacity: 1;
-      }
-      to {
-        transform: translateX(100%);
-        opacity: 0;
-      }
+      from { transform: translateX(0); opacity: 1; }
+      to { transform: translateX(100%); opacity: 0; }
     }
     @media (prefers-color-scheme: dark) {
-      html, body {
-        background: #121212;
-        color: #fff;
-      }
+      html, body { background: #121212; color: #fff; }
       #redirect-block-notice {
         background: rgba(255, 255, 255, 0.85);
         color: #121212;
@@ -88,22 +73,24 @@
   <div id="redirect-block-notice" aria-live="polite" role="alert">Redirect block: ..</div>
   <script>
     (() => {
+      const redirectBlockEnabled = localStorage.getItem('redirectBlockSwitch') === 'true';
       const loader = document.getElementById('loader');
       const notice = document.getElementById('redirect-block-notice');
       let iframe = null;
       let games = null;
 
-      // Show the notification with slide-in/out animation
+      // Show the notification (only if enabled)
       const showNotice = (msg) => {
+        if (!redirectBlockEnabled) return;
         notice.textContent = msg;
-        // Remove & re-add class to retrigger animation
         notice.classList.remove('show');
-        void notice.offsetWidth; // trigger reflow
+        void notice.offsetWidth;
         notice.classList.add('show');
       };
 
-      // Inject scripts into the iframe to control FPS, pause, logs etc.
+      // Inject scripts into the iframe (only if enabled)
       const injectScriptsIntoIframe = (iframe) => {
+        if (!redirectBlockEnabled) return;
         try {
           const doc = iframe.contentDocument || iframe.contentWindow?.document;
           if (!doc || !doc.head) return;
@@ -162,12 +149,10 @@
         }
       };
 
-      // Redirect home fallback
       const redirectToHome = () => {
         window.location.href = '/';
       };
 
-      // Load the game from hash in URL
       const loadGame = async () => {
         const hash = window.location.hash.slice(1).split('/')[1];
         const gameNumber = parseInt(hash, 10);
@@ -217,8 +202,6 @@
       };
 
       window.addEventListener('hashchange', loadGame);
-
-      // Initial load
       loadGame();
     })();
   </script>
