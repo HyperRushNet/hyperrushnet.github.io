@@ -2,19 +2,21 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>Decide</title>
 <script>
-document.addEventListener('DOMContentLoaded', () => {
-    const online = navigator.onLine;
-
-    if (online) {
-        // Als online, redirect naar splash.html
-        window.location.href = './splash.html';
-    } else {
-        // Als offline, redirect naar offline.html
-        window.location.href = './offline.html';
+    // SW registreren, niet wachten
+    if ('serviceWorker' in navigator) {
+        navigator.serviceWorker.register('/app/mobile/samsung/service-worker.js')
+            .catch(e => console.warn('SW registratie faalde', e));
     }
-});
+
+    // Direct redirect
+    const go = navigator.onLine
+        ? '/app/mobile/samsung/splash.html'
+        : '/app/mobile/samsung/offline.html';
+
+    window.location.replace(go);
 </script>
 </head>
 <body>
