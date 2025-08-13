@@ -9,7 +9,7 @@ const URLS_TO_CACHE = [
     '/assets/images/favicon/ffffff.png'
 ];
 
-// Install event: cache belangrijke bestanden
+// Install: cache decide & offline
 self.addEventListener('install', event => {
     self.skipWaiting();
     event.waitUntil(
@@ -19,35 +19,28 @@ self.addEventListener('install', event => {
     );
 });
 
-// Activate event: oude caches verwijderen
+// Activate: oude caches verwijderen
 self.addEventListener('activate', event => {
     self.clients.claim();
     event.waitUntil(
-        caches.keys().then(keys => {
-            return Promise.all(keys.map(key => {
-                if (key !== CACHE_NAME) return caches.delete(key);
-            }));
-        })
+        caches.keys().then(keys =>
+            Promise.all(keys.map(key => key !== CACHE_NAME ? caches.delete(key) : null))
+        )
     );
 });
 
-// Fetch event: serveer uit cache of network, fallback offline.html
+// Fetch: serveer cached decide/offline, splash altijd network
 self.addEventListener('fetch', event => {
-    event.respondWith(
-        (async () => {
-            try {
-                // Splash.html niet cachen
-                if (event.request.url.includes('splash.html')) {
-                    return fetch(event.request);
-                }
+    const reqURL = new URL(event.request.url);
 
-                const response = await fetch(event.request, { cache: 'no-store' });
-                const cache = await caches.open(CACHE_NAME);
-                cache.put(event.request, response.clone());
-                return response;
-            } catch (err) {
-                return caches.match(event.request) || caches.match('./offline.html');
-            }
-        })()
+    if (reqURL.pathname.includes('splash.html')) {
+        return event.respondWith(fetch(event.request)); // splash nooit cache
+    }
+
+    event.respondWith(
+        caches.match(event.request).then(cached => {
+            if (cached) return cached;
+            return fetch(event.request).catch(() => caches.match('/app/mobile/samsung/offline.html'));
+        })
     );
 });
