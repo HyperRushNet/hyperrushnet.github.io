@@ -2,24 +2,42 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
+<title>Offline</title>
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Decide</title>
-<script>
-    // SW registreren, niet wachten
-    if ('serviceWorker' in navigator) {
-        navigator.serviceWorker.register('/app/mobile/samsung/service-worker.js')
-            .catch(e => console.warn('SW registratie faalde', e));
-    }
-
-    // Direct redirect
-    const go = navigator.onLine
-        ? '/app/mobile/samsung/splash.html'
-        : '/app/mobile/samsung/offline.html';
-
-    window.location.replace(go);
-</script>
+<style>
+  *{margin:0;padding:0;box-sizing:border-box;font-family:Arial,sans-serif}
+  html,body{height:100%;width:100vw;overflow:hidden}
+  body{display:flex;flex-direction:column;justify-content:center;align-items:center;color:#fff;text-align:center;padding:20px;position:relative;background:linear-gradient(135deg,#0a0f3d,#3046d6,#0b2248)}
+  body::after{content:"";position:fixed;inset:0;background:rgba(0,0,0,.6);z-index:-1}
+  h1{font-size:28px;margin-bottom:10px}
+  p{font-size:16px;opacity:.85}
+  .offline-message { display: none; }
+</style>
 </head>
 <body>
-<p>Controleer internetverbinding...</p>
+  <div class="offline-message">
+    <h1>You are offline</h1>
+    <p>Your internet connection is down.</p>
+    <p>Please check it and try again.</p>
+  </div>
+
+<script>
+  function updateStatus() {
+    if (navigator.onLine) {
+      // Online → direct redirect naar start-page.html
+      window.location.href = './start-page.html';
+    } else {
+      // Offline → toon offline boodschap
+      document.querySelector('.offline-message').style.display = "block";
+    }
+  }
+
+  // Initial check
+  updateStatus();
+
+  // Realtime luisteren naar statusveranderingen
+  window.addEventListener('online', updateStatus);
+  window.addEventListener('offline', updateStatus);
+</script>
 </body>
 </html>
