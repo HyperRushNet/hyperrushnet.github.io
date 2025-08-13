@@ -1,65 +1,40 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fullscreen 45° Game Grid - Oneindige Scroll met Preload</title>
+<title>Fullscreen 45° Game Grid - Infinite Seamless Scroll</title>
 <style>
   html, body {
-    margin: 0; padding: 0; overflow: hidden; height: 100%; background: #111;
-    display: flex; justify-content: center; align-items: center;
+    margin: 0; padding: 0; overflow: hidden; height: 100%;
+    background: #111; display: flex; justify-content: center; align-items: center;
   }
   #container {
     position: relative;
-    width: 100vw;
-    height: 100vh;
+    width: 100vw; height: 100vh;
     overflow: hidden;
   }
   #grid {
     position: absolute;
-    top: 50%;
-    left: 50%;
-    transform-origin: center center;
+    top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(45deg);
-    display: flex;
-    flex-direction: column;
-    gap: 4px;
-    user-select: none;
-    opacity: 0;
-    transition: opacity 0.5s ease-in-out;
+    display: flex; flex-direction: column;
+    gap: 4px; user-select: none; opacity: 0;
+    transition: opacity 0.4s ease-in-out;
   }
   .row {
-    display: flex;
-    gap: 4px;
     width: max-content;
-  }
-  .row.offset {
-    margin-left: calc((240px + 4px) / 2); /* halve card breedte + gap */
-  }
-  .card {
-    flex: 0 0 240px;
     height: 180px;
-    background: #222;
-    border-radius: 6px;
-    overflow: hidden;
-    box-shadow: 0 4px 8px rgba(0,0,0,0.8);
+    background-repeat: repeat-x;
+    background-position: 0 0;
+    background-size: auto 100%;
+    animation: scroll-left var(--duration) linear infinite;
   }
-  .card img {
-    width: 100%;
-    height: 100%;
-    object-fit: cover;
-    display: block;
-    pointer-events: none;
-    user-select: none;
-  }
+  .row.offset { margin-left: calc((240px + 4px) / 2); }
 
   @keyframes scroll-left {
-    0% {
-      transform: translateX(0);
-    }
-    100% {
-      transform: translateX(calc(-50%));
-    }
+    0% { background-position: 0 0; }
+    100% { background-position: var(--scroll-distance) 0; }
   }
 </style>
 </head>
@@ -73,90 +48,77 @@
   const grid = document.getElementById('grid');
   const jsonUrl = 'https://hyperrushnet.github.io/assets/json/games.json';
 
-  // Functie om afbeeldingen te preloaden
-  function preloadImages(images) {
-    return Promise.all(
-      images.map(src => new Promise((resolve) => {
-        const img = new Image();
-        img.src = src;
-        img.onload = () => resolve();
-        img.onerror = () => resolve(); // Fout negeren, toch doorzetten
-      }))
-    );
-  }
-
-  let games = [];
-  try {
-    const resp = await fetch(jsonUrl);
-    if (!resp.ok) throw new Error("Kon JSON niet laden");
-    games = await resp.json();
-  } catch (e) {
-    alert("Fout bij laden JSON data: " + e.message);
-    return;
-  }
-  games = games.filter(g => g.img && g.img.length > 5);
-
   const cardW = 240;
   const cardH = 180;
   const gap = 4;
+  const scrollSpeed = 60; // px/sec
+
+  // Load JSON
+  let games = [];
+  try {
+    const resp = await fetch(jsonUrl);
+    if (!resp.ok) throw new Error("Failed to load JSON");
+    games = (await resp.json()).filter(g => g.img && g.img.length > 5);
+  } catch (e) {
+    alert("Error loading JSON: " + e.message);
+    return;
+  }
 
   const vw = window.innerWidth;
   const vh = window.innerHeight;
   const effectiveW = Math.ceil(vw * Math.SQRT2);
   const effectiveH = Math.ceil(vh * Math.SQRT2);
-
   const totalCardW = cardW + gap;
   const totalCardH = cardH + gap;
+  const cols = Math.ceil(effectiveW / totalCardW) + 1;
+  const rows = Math.ceil(effectiveH / totalCardH) + 1;
 
-  const cols = Math.ceil(effectiveW / totalCardW) + 2;
-  const rows = Math.ceil(effectiveH / totalCardH) + 2;
-
-  function createCard(game) {
-    const div = document.createElement('div');
-    div.className = 'card';
-    const img = document.createElement('img');
-    img.src = 'https://hyperrushnet.github.io' + game.img;
-    img.alt = game.name;
-    div.appendChild(img);
-    return div;
-  }
-
-  const scrollSpeedPxPerSec = 60; // Pixels per seconde scrollsnelheid
-
-  // Eerst preloaden we ALLE images van alle kaarten die we gaan gebruiken
-  const totalCards = rows * cols * 2; // 2 sets per rij
-  const imageUrls = [];
-  for (let i = 0; i < totalCards; i++) {
-    const g = games[i % games.length];
-    imageUrls.push('https://hyperrushnet.github.io' + g.img);
-  }
-  await preloadImages(imageUrls);
-
-  // Daarna pas tonen we grid
-  grid.style.opacity = '1';
-
-  for (let r = 0; r < rows; r++) {
-    const rowDiv = document.createElement('div');
-    rowDiv.className = 'row';
-    if (r % 2 === 1) rowDiv.classList.add('offset');
-
-    for (let set = 0; set < 2; set++) {
-      for (let c = 0; c < cols; c++) {
-        const game = games[(r * cols + c) % games.length];
-        rowDiv.appendChild(createCard(game));
-      }
-    }
-
-    grid.appendChild(rowDiv);
-
-    // Animatieduur berekenen op basis van helft van de rijbreedte (scroll gaat -50%)
-    requestAnimationFrame(() => {
-      const halfWidth = rowDiv.offsetWidth / 2;
-      const duration = halfWidth / scrollSpeedPxPerSec;
-      rowDiv.style.animation = `scroll-left ${duration}s linear infinite`;
+  // Preload all images
+  function preloadImage(src) {
+    return new Promise(res => {
+      const img = new Image();
+      img.src = src;
+      img.onload = img.onerror = () => res(img);
     });
   }
 
+  // Create one sprite (canvas) for a single row
+  async function createRowTexture(startIndex) {
+    const canvas = document.createElement('canvas');
+    canvas.width = cols * totalCardW;
+    canvas.height = cardH;
+
+    const ctx = canvas.getContext('2d');
+    ctx.fillStyle = "#222";
+    ctx.fillRect(0, 0, canvas.width, canvas.height);
+
+    for (let c = 0; c < cols; c++) {
+      const game = games[(startIndex + c) % games.length];
+      const img = await preloadImage('https://hyperrushnet.github.io' + game.img);
+      ctx.drawImage(img, c * totalCardW, 0, cardW, cardH);
+    }
+    return canvas.toDataURL();
+  }
+
+  // Build all rows
+  for (let r = 0; r < rows; r++) {
+    const rowDiv = document.createElement('div');
+    rowDiv.className = 'row';
+    if (r % 2) rowDiv.classList.add('offset');
+
+    const rowTexture = await createRowTexture(r * cols);
+    rowDiv.style.backgroundImage = `url(${rowTexture})`;
+
+    // Set animation properties
+    const scrollDistance = -cols * totalCardW + "px";
+    const duration = (cols * totalCardW) / scrollSpeed;
+    rowDiv.style.setProperty('--scroll-distance', scrollDistance);
+    rowDiv.style.setProperty('--duration', duration + 's');
+
+    grid.appendChild(rowDiv);
+  }
+
+  grid.style.opacity = '1';
   window.addEventListener('resize', () => location.reload());
 })();
 </script>
