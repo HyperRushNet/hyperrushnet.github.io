@@ -12,8 +12,8 @@
   "dir": "ltr",
 "icons": [
   {
-    "src": "./app-icon-square-1000.png",
-    "sizes": "1000x1000",
+    "src": "./app-icon-square-500.png",
+    "sizes": "500x500",
     "type": "image/png",
     "purpose": "any maskable"
   },
