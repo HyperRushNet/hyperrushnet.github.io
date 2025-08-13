@@ -1,0 +1,32 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>HyperRush</title>
+
+    <!-- PWA Manifest -->
+    <link rel="manifest" href="./manifest.json">
+
+    <!-- Theme color voor mobiele browsers -->
+    <meta name="theme-color" content="#000000">
+
+    <!-- Icon voor oudere browsers -->
+    <link rel="icon" type="image/png" href="./app-icon-square-500.png">
+</head>
+<body>
+    <h1>Welcome to HyperRush</h1>
+    <p>Your offline-first game portal.</p>
+
+    <script>
+        // Service Worker registratie
+        if ('serviceWorker' in navigator) {
+            window.addEventListener('load', () => {
+                navigator.serviceWorker.register('./service-worker.js')
+                    .then(reg => console.log('[SW] Registered:', reg.scope))
+                    .catch(err => console.error('[SW] Registration failed:', err));
+            });
+        }
+    </script>
+</body>
+</html>
