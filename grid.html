@@ -8,6 +8,13 @@
         body {
             margin: 0;
             overflow: hidden;
+            transform: rotate(45deg) scale(1.5); /* Draait 45 graden en zoomt in met factor 1.5 */
+            transform-origin: center center; /* Rotatie en zoom vanuit het midden */
+            width: 100vw;
+            height: 100vh;
+            display: flex;
+            justify-content: center;
+            align-items: center;
         }
         .container {
             width: 100%;
@@ -20,7 +27,7 @@
             height: 1500px;
             background-image: url('https://hyperrushnet.github.io/assets/images/background/game-grid.webp');
             background-repeat: repeat-x; /* Herhaalt de afbeelding horizontaal */
-            animation: scroll 10s linear infinite; /* 20 seconden per cyclus, pas aan voor snelheid */
+            animation: scroll 10s linear infinite; /* 10 seconden per cyclus */
         }
         @keyframes scroll {
             0% {
