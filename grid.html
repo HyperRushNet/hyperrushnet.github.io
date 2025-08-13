@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8" />
 <meta name="viewport" content="width=device-width, initial-scale=1" />
-<title>Fullscreen 45° Game Grid - Infinite Seamless Scroll (Canvas + Proxy)</title>
+<title>Fullscreen 45° Game Grid - Infinite Seamless Scroll</title>
 <style>
   html, body {
     margin: 0; padding: 0; overflow: hidden; height: 100%;
@@ -15,103 +15,60 @@
   #grid {
     position: absolute; top: 50%; left: 50%;
     transform: translate(-50%, -50%) rotate(45deg);
-    display: flex; flex-direction: column; gap: 4px;
-    user-select: none; opacity: 0; transition: opacity 0.35s ease-in-out;
+    display: flex; flex-direction: column; gap: 4px; opacity: 0;
+    transition: opacity 0.4s ease-in-out;
   }
   .row {
-    height: 180px;
-    background-repeat: repeat-x;
-    background-position: 0 0;
-    background-size: auto 100%;
-    will-change: background-position;
+    display: flex; gap: 4px; width: max-content;
     animation: scroll-left var(--duration) linear infinite;
   }
   .row.offset { margin-left: calc((240px + 4px) / 2); }
-  @keyframes scroll-left {
-    0%   { background-position: 0 0; }
-    100% { background-position: var(--scroll-distance) 0; }
+  .card {
+    flex: 0 0 240px; height: 180px;
+    background: #222; border-radius: 6px; overflow: hidden;
+    box-shadow: 0 4px 8px rgba(0,0,0,0.8);
   }
-  @media (prefers-reduced-motion: reduce) {
-    .row { animation: none; }
+  .card img {
+    width: 100%; height: 100%; object-fit: cover;
+    display: block; pointer-events: none;
+  }
+  @keyframes scroll-left {
+    0% { transform: translateX(0); }
+    100% { transform: translateX(var(--scroll-distance)); }
   }
 </style>
 </head>
 <body>
   <div id="container">
-    <div id="grid" aria-hidden="true"></div>
+    <div id="grid"></div>
   </div>
 
 <script>
 (async () => {
   const grid = document.getElementById('grid');
-  const dataUrl = 'https://hyperrushnet.github.io/assets/json/games.json';
+  const jsonUrl = 'https://hyperrushnet.github.io/assets/json/games.json';
 
   const CARD_W = 240;
   const CARD_H = 180;
   const GAP = 4;
-  const SPEED_PX_PER_SEC = 60;
-
-  const proxify = (url) =>
-    `https://api.codetabs.com/v1/proxy?quest=${encodeURIComponent(url)}`;
+  const SPEED_PX_PER_SEC = 60; // px/sec scroll speed
 
   let games = [];
-  try {
-    const resp = await fetch(dataUrl, { cache: 'no-store' });
-    if (!resp.ok) throw new Error('Failed to load JSON');
-    games = (await resp.json()).filter(g => g.img && g.img.length > 5);
-  } catch (err) {
-    console.error(err);
-    alert('Error loading game list.');
-    return;
+
+  async function loadGames() {
+    const resp = await fetch(jsonUrl);
+    if (!resp.ok) throw new Error("Failed to load JSON");
+    const data = await resp.json();
+    return data.filter(g => g.img && g.img.length > 5);
   }
 
-  function loadImageCors(url) {
-    return new Promise((resolve, reject) => {
-      const img = new Image();
-      img.crossOrigin = 'anonymous';
-      img.src = proxify(url);
-      img.onload = () => resolve(img);
-      img.onerror = () => reject(new Error('Failed to load image: ' + url));
-    });
-  }
-
-  function roundedRectPath(ctx, x, y, w, h, r) {
-    const rr = Math.min(r, w / 2, h / 2);
-    ctx.beginPath();
-    ctx.moveTo(x + rr, y);
-    ctx.arcTo(x + w, y,     x + w, y + h, rr);
-    ctx.arcTo(x + w, y + h, x,     y + h, rr);
-    ctx.arcTo(x,     y + h, x,     y,     rr);
-    ctx.arcTo(x,     y,     x + w, y,     rr);
-    ctx.closePath();
-  }
-
-  function roundedImage(ctx, img, x, y, w, h, r = 6) {
-    ctx.save();
-    roundedRectPath(ctx, x, y, w, h, r);
-    ctx.clip();
-    ctx.drawImage(img, x, y, w, h);
-    ctx.restore();
-  }
-
-  async function createRowSprite(startIndex, cols) {
-    const width = cols * (CARD_W + GAP);
-    const canvas = document.createElement('canvas');
-    canvas.width = width;
-    canvas.height = CARD_H;
-
-    const ctx = canvas.getContext('2d', { alpha: false });
-    ctx.fillStyle = '#111';
-    ctx.fillRect(0, 0, canvas.width, canvas.height);
-
-    for (let c = 0; c < cols; c++) {
-      const g = games[(startIndex + c) % games.length];
-      const img = await loadImageCors('https://hyperrushnet.github.io' + g.img);
-      ctx.fillStyle = '#222';
-      ctx.fillRect(c * (CARD_W + GAP), 0, CARD_W, CARD_H);
-      roundedImage(ctx, img, c * (CARD_W + GAP), 0, CARD_W, CARD_H, 6);
-    }
-    return canvas.toDataURL('image/png');
+  function createCard(game) {
+    const card = document.createElement('div');
+    card.className = 'card';
+    const img = document.createElement('img');
+    img.src = 'https://hyperrushnet.github.io' + game.img;
+    card.appendChild(img);
+    return card;
   }
 
   async function buildGrid() {
@@ -124,36 +81,41 @@
     const totalCardW = CARD_W + GAP;
     const totalCardH = CARD_H + GAP;
     const cols = Math.ceil(effectiveW / totalCardW) + 1;
-    const rows = Math.ceil(effectiveH / totalCardH) + 1;
+
+    const visibleRows = Math.ceil(effectiveH / totalCardH);
+    const rows = visibleRows + 6; // +3 above, +3 below
 
     for (let r = 0; r < rows; r++) {
       const rowDiv = document.createElement('div');
       rowDiv.className = 'row';
       if (r % 2) rowDiv.classList.add('offset');
 
-      const spriteUrl = await createRowSprite(r * cols, cols);
-      rowDiv.style.backgroundImage = `url(${spriteUrl})`;
+      // 2 copies for perfect seamless loop
+      for (let copy = 0; copy < 2; copy++) {
+        for (let c = 0; c < cols; c++) {
+          const game = games[(r * cols + c) % games.length];
+          rowDiv.appendChild(createCard(game));
+        }
+      }
 
       const singleSetWidth = cols * totalCardW;
       const duration = singleSetWidth / SPEED_PX_PER_SEC;
       rowDiv.style.setProperty('--scroll-distance', `-${singleSetWidth}px`);
       rowDiv.style.setProperty('--duration', `${duration}s`);
-      rowDiv.style.width = singleSetWidth + 'px';
+      rowDiv.style.width = singleSetWidth * 2 + 'px';
 
       grid.appendChild(rowDiv);
     }
     grid.style.opacity = '1';
   }
 
+  games = await loadGames();
   await buildGrid();
 
-  // Debounced resize handler
   let resizeTimeout;
   window.addEventListener('resize', () => {
     clearTimeout(resizeTimeout);
-    resizeTimeout = setTimeout(() => {
-      buildGrid();
-    }, 200);
+    resizeTimeout = setTimeout(buildGrid, 200);
   });
 })();
 </script>
