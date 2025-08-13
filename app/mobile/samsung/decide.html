@@ -1,0 +1,23 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Decide</title>
+<script>
+document.addEventListener('DOMContentLoaded', () => {
+    const online = navigator.onLine;
+
+    if (online) {
+        // Als online, redirect naar splash.html
+        window.location.href = './splash.html';
+    } else {
+        // Als offline, redirect naar offline.html
+        window.location.href = './offline.html';
+    }
+});
+</script>
+</head>
+<body>
+<p>Controleer internetverbinding...</p>
+</body>
+</html>
