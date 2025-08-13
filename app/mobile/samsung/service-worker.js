@@ -9,38 +9,44 @@ const URLS_TO_CACHE = [
     '/assets/images/favicon/ffffff.png'
 ];
 
-// Install: cache decide & offline
+// Install
 self.addEventListener('install', event => {
     self.skipWaiting();
     event.waitUntil(
         caches.open(CACHE_NAME)
             .then(cache => cache.addAll(URLS_TO_CACHE))
-            .catch(err => console.error('[SW] Caching fout:', err))
     );
 });
 
-// Activate: oude caches verwijderen
+// Activate
 self.addEventListener('activate', event => {
     self.clients.claim();
     event.waitUntil(
-        caches.keys().then(keys =>
-            Promise.all(keys.map(key => key !== CACHE_NAME ? caches.delete(key) : null))
-        )
+        caches.keys().then(keys => Promise.all(
+            keys.map(key => key !== CACHE_NAME ? caches.delete(key) : null)
+        ))
     );
 });
 
-// Fetch: serveer cached decide/offline, splash altijd network
+// Fetch
 self.addEventListener('fetch', event => {
-    const reqURL = new URL(event.request.url);
-
-    if (reqURL.pathname.includes('splash.html')) {
-        return event.respondWith(fetch(event.request)); // splash nooit cache
+    // Als request splash.html, fetch network direct, geen caching
+    if (event.request.url.includes('splash.html')) {
+        event.respondWith(fetch(event.request));
+        return;
     }
 
+    // Anders: probeer cache first, fallback offline
     event.respondWith(
         caches.match(event.request).then(cached => {
             if (cached) return cached;
-            return fetch(event.request).catch(() => caches.match('/app/mobile/samsung/offline.html'));
+            return fetch(event.request)
+                .then(resp => {
+                    // async cache, blokkeer response niet
+                    caches.open(CACHE_NAME).then(cache => cache.put(event.request, resp.clone()));
+                    return resp;
+                })
+                .catch(() => caches.match('/app/mobile/samsung/offline.html'));
         })
     );
 });
