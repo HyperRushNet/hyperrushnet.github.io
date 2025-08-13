@@ -114,10 +114,40 @@
     color:#eee;
     box-shadow:0 0 18px rgba(255,255,255,0.6);
   }
+  /* Loader overlay */
+  #loader {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100%;
+    height:100%;
+    background:black;
+    display:flex;
+    justify-content:center;
+    align-items:center;
+    z-index:9999;
+    transition:opacity 0.6s ease, visibility 0.6s ease;
+  }
+  #loader.hidden {
+    opacity:0;
+    visibility:hidden;
+  }
+  .spinner {
+    width:50px;
+    height:50px;
+    border:5px solid rgba(255,255,255,0.2);
+    border-top-color:#fff;
+    border-radius:50%;
+    animation:spin 1s linear infinite;
+  }
+  @keyframes spin {
+    to {transform:rotate(360deg);}
+  }
 </style>
 </head>
 <body>
-  <iframe src="/assets/templates/game-grid.html" class="bg-frame"></iframe>
+  <div id="loader"><div class="spinner"></div></div>
+  <iframe src="/assets/templates/game-grid.html" class="bg-frame" id="gameFrame"></iframe>
   <div class="center-content">
     <img src="/assets/images/logo/white.png" alt="HyperRush Logo" class="logo" />
     <div class="title-container">
@@ -146,6 +176,13 @@
   }
   window.addEventListener('load',fitText);
   window.addEventListener('resize',fitText);
+
+  // Loader fade-out on iframe load
+  const iframe = document.getElementById('gameFrame');
+  const loader = document.getElementById('loader');
+  iframe.addEventListener('load', () => {
+    loader.classList.add('hidden');
+  });
 </script>
 </body>
 </html>
