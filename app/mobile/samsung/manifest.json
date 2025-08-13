@@ -15,13 +15,13 @@
     "src": "./app-icon-square-500.png",
     "sizes": "500x500",
     "type": "image/png",
-    "purpose": "any maskable"
+    "purpose": "any"
   },
   {
     "src": "./app-icon-square-1000.png",
     "sizes": "1000x1000",
     "type": "image/png",
-    "purpose": "any maskable"
+    "purpose": "maskable"
   }
 ],
 
