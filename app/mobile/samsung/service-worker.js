@@ -1,8 +1,8 @@
 const CACHE_NAME = 'v11';
 const URLS_TO_CACHE = [
-    './decide.html',
-    './offline.html',
-    './round-500.png',
+    '/app/mobile/samsung/decide.html',
+    '/app/mobile/samsung/offline.html',
+    '/app/mobile/samsung/round-500.png',
     '/assets/images/logo/white.png',
     '/assets/images/logo/black.png',
     '/assets/images/favicon/000000.png',
