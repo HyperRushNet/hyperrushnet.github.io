@@ -2,7 +2,7 @@
   "name": "HyperRush",
   "short_name": "HyperRush",
   "description": "The Official HyperRush App.",
-  "start_url": "./start-page.html",
+  "start_url": "./decide.html",
   "scope": "/",
   "display": "standalone",
   "orientation": "any",
