@@ -3,7 +3,7 @@
   "short_name": "HyperRush",
   "description": "The Official HyperRush App.",
   "start_url": "./start-page.html",
-  "scope": "./",
+  "scope": "/",
   "display": "standalone",
   "orientation": "any",
   "theme_color": "#000000",
