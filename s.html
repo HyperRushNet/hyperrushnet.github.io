@@ -6,123 +6,116 @@
 <title>HyperRush Games</title>
 <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@400;600;700&display=swap" rel="stylesheet" />
 <style>
-  * {
-    box-sizing: border-box;
-    margin: 0;
-    padding: 0;
+  * {box-sizing:border-box;margin:0;padding:0;}
+  html,body {
+    height:100%;
+    font-family:'Poppins',sans-serif;
+    overflow:hidden;
+    display:flex;
+    flex-direction:column;
+    justify-content:space-between;
+    max-width:450px;
+    margin:0 auto;
+    padding:1.5rem;
+    position:relative;
+    z-index:1;
   }
-  html, body {
-    height: 100%;
-    font-family: 'Poppins', sans-serif;
-    background-image: linear-gradient(to top, #03011f, #181269);
-    color: #fff;
-    overflow: hidden;
-    display: flex;
-    flex-direction: column;
-    justify-content: space-between;
-    max-width: 450px;
-    margin: 0 auto;
-    padding: 1.5rem;
+  iframe.bg-frame {
+    position:fixed;
+    top:0;
+    left:0;
+    width:100vw;
+    height:100vh;
+    border:none;
+    z-index:0;
   }
   .center-content {
-    flex-grow: 1;
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-    text-align: center;
-    padding: 0 1rem;
-    gap: 1rem;
-    position: relative;
-    z-index: 1;
+    flex-grow:1;
+    display:flex;
+    flex-direction:column;
+    justify-content:center;
+    align-items:center;
+    text-align:center;
+    padding:0 1rem;
+    gap:1rem;
+    position:relative;
+    z-index:1;
+    color:#fff;
+    text-shadow:0 0 8px rgba(0,0,0,0.6);
   }
-  .logo {
-    width: 120px;
-    filter: none; /* geen effect */
-    /* geen animatie */
-  }
+  .logo {width:120px;}
   .title-container {
-    display: flex;
-    align-items: center;
-    gap: 1rem;
-    width: 100%;
-    max-width: 300px;
+    display:flex;
+    align-items:center;
+    gap:1rem;
+    width:100%;
+    max-width:300px;
   }
   .title-container .line {
-    flex-grow: 1;
-    height: 2px;
-    background: #fff;
-    opacity: 0.25;
-    border-radius: 2px;
-    box-shadow: 0 0 6px rgba(255,255,255,0.15);
+    flex-grow:1;
+    height:2px;
+    background:#fff;
+    opacity:0.25;
+    border-radius:2px;
+    box-shadow:0 0 6px rgba(255,255,255,0.15);
   }
   h1 {
-    font-size: 2rem;
-    font-weight: 700;
-    color: #fff;
-    white-space: nowrap;
-    text-shadow: 0 0 8px rgba(255,255,255,0.3);
-    margin: 0;
+    font-size:2rem;
+    font-weight:700;
+    white-space:nowrap;
+    margin:0;
   }
   #desc {
-    font-size: 1rem;
-    color: rgba(255,255,255,0.9);
-    max-width: 300px;
-    line-height: 1.3;
-    text-shadow: 0 0 4px rgba(0,0,0,0.3);
+    font-size:1rem;
+    max-width:300px;
+    line-height:1.3;
   }
   .subtext {
-    font-size: 0.9rem;
-    color: rgba(255,255,255,0.6);
-    font-style: italic;
-    text-shadow: 0 0 3px rgba(0,0,0,0.2);
+    font-size:0.9rem;
+    color:rgba(255,255,255,0.8);
+    font-style:italic;
   }
-  .bottom-button {
-    width: 100%;
-    margin-top: 2rem;
-    z-index: 1;
-  }
+  .bottom-button {width:100%;margin-top:2rem;z-index:1;}
   .continue-button {
-    display: block;
-    width: 100%;
-    padding: 1rem 0;
-    background: transparent;
-    border: 2px solid #fff;
-    color: #fff;
-    border-radius: 0.6rem;
-    font-weight: 600;
-    font-size: 1.2rem;
-    text-align: center;
-    text-decoration: none;
-    transition: background 0.3s ease, color 0.3s ease, box-shadow 0.3s ease;
-    box-shadow: 0 0 12px rgba(255,255,255,0.3);
-    position: relative;
-    overflow: hidden;
+    display:block;
+    width:100%;
+    padding:1rem 0;
+    background:rgba(0,0,0,0.4);
+    border:2px solid #fff;
+    color:#fff;
+    border-radius:0.6rem;
+    font-weight:600;
+    font-size:1.2rem;
+    text-align:center;
+    text-decoration:none;
+    transition:0.3s;
+    position:relative;
+    overflow:hidden;
+    backdrop-filter:blur(4px);
   }
   .continue-button::before {
-    content: '';
-    position: absolute;
-    top: 0;
-    left: -100%;
-    width: 100%;
-    height: 100%;
-    background: linear-gradient(120deg, rgba(255,255,255,0.15), rgba(255,255,255,0.4), rgba(255,255,255,0.15));
-    transform: skewX(-20deg);
-    transition: all 0.5s ease;
-    pointer-events: none;
+    content:'';
+    position:absolute;
+    top:0;
+    left:-100%;
+    width:100%;
+    height:100%;
+    background:linear-gradient(120deg,rgba(255,255,255,0.15),rgba(255,255,255,0.4),rgba(255,255,255,0.15));
+    transform:skewX(-20deg);
+    transition:all 0.5s ease;
+    pointer-events:none;
   }
-  .continue-button:hover::before {
-    left: 100%;
-  }
+  .continue-button:hover::before {left:100%;}
   .continue-button:hover {
-    background: rgba(255,255,255,0.12);
-    border-color: #eee;
-    color: #eee;
-    box-shadow: 0 0 18px rgba(255,255,255,0.6);
+    background:rgba(255,255,255,0.12);
+    border-color:#eee;
+    color:#eee;
+    box-shadow:0 0 18px rgba(255,255,255,0.6);
   }
 </style>
 </head>
 <body>
+  <iframe src="https://hyperrushnet.github.io/grid" class="bg-frame"></iframe>
   <div class="center-content">
     <img src="https://hyperrushnet.github.io/assets/images/logo/white.png" alt="HyperRush Logo" class="logo" />
     <div class="title-container">
@@ -137,22 +130,20 @@
     <a href="#" class="continue-button">Continue</a>
   </div>
 <script>
-  const desc = document.getElementById('desc');
-  const maxLines = 2;
-  const lineHeight = parseFloat(getComputedStyle(desc).lineHeight);
-  const maxHeight = maxLines * lineHeight;
-
-  function fitText() {
-    desc.style.fontSize = '1rem'; // reset
-    let fontSize = parseFloat(getComputedStyle(desc).fontSize);
-    while (desc.scrollHeight > maxHeight && fontSize > 10) {
-      fontSize -= 0.5;
-      desc.style.fontSize = fontSize + 'px';
+  const desc=document.getElementById('desc');
+  const maxLines=2;
+  const lineHeight=parseFloat(getComputedStyle(desc).lineHeight);
+  const maxHeight=maxLines*lineHeight;
+  function fitText(){
+    desc.style.fontSize='1rem';
+    let fontSize=parseFloat(getComputedStyle(desc).fontSize);
+    while(desc.scrollHeight>maxHeight && fontSize>10){
+      fontSize-=0.5;
+      desc.style.fontSize=fontSize+'px';
     }
   }
-
-  window.addEventListener('load', fitText);
-  window.addEventListener('resize', fitText);
+  window.addEventListener('load',fitText);
+  window.addEventListener('resize',fitText);
 </script>
 </body>
 </html>
