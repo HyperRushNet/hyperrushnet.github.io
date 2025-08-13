@@ -1,47 +1,96 @@
 <!DOCTYPE html>
-<html lang="nl">
+<html lang="en">
 <head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Scrollende Gamecards</title>
-    <style>
-        body {
-            margin: 0;
-            overflow: hidden;
-            transform: rotate(45deg) scale(1.5); /* Draait 45 graden en zoomt in met factor 1.5 */
-            transform-origin: center center; /* Rotatie en zoom vanuit het midden */
-            width: 100vw;
-            height: 100vh;
-            display: flex;
-            justify-content: center;
-            align-items: center;
-        }
-        .container {
-            width: 100%;
-            height: 100vh; /* Volledige hoogte van het scherm */
-            overflow: hidden;
-            position: relative;
-        }
-        .scrolling-image {
-            width: 4000px; /* Twee keer de breedte van de afbeelding voor naadloze herhaling */
-            height: 1500px;
-            background-image: url('https://hyperrushnet.github.io/assets/images/background/game-grid.webp');
-            background-repeat: repeat-x; /* Herhaalt de afbeelding horizontaal */
-            animation: scroll 10s linear infinite; /* 10 seconden per cyclus */
-        }
-        @keyframes scroll {
-            0% {
-                transform: translateX(0);
-            }
-            100% {
-                transform: translateX(-2000px); /* Verschuift exact één afbeelding-breedte */
-            }
-        }
-    </style>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>Scrolling Game Background</title>
+<style>
+  html, body {
+    margin: 0;
+    overflow: hidden;
+    touch-action: none;
+  }
+  body {
+    background: black;
+    transform: scale(4) rotate(45deg);
+    transform-origin: center center;
+  }
+  canvas {
+    display: block;
+    width: 100vw;
+    height: 100vh;
+    position: relative;
+    z-index: 1;
+  }
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.2);
+    pointer-events: none;
+    z-index: 2;
+  }
+</style>
 </head>
 <body>
-    <div class="container">
-        <div class="scrolling-image"></div>
-    </div>
+<canvas id="gameCanvas"></canvas>
+<div class="overlay"></div>
+
+<script>
+const canvas = document.getElementById('gameCanvas');
+const ctx = canvas.getContext('2d');
+
+let cw = canvas.width = window.innerWidth;
+let ch = canvas.height = window.innerHeight;
+
+const img = new Image();
+img.src = 'https://hyperrushnet.github.io/assets/images/background/game-grid.webp';
+
+let scrollX = 0;
+const speed = 1.5;
+
+img.onload = () => requestAnimationFrame(draw);
+
+function draw() {
+  ctx.clearRect(0, 0, cw, ch);
+
+  const imgRatio = img.width / img.height;
+  const canvasRatio = cw / ch;
+
+  let drawW, drawH;
+  const imgScale = 0.6;
+
+  if (canvasRatio > imgRatio) {
+    drawW = cw * imgScale;
+    drawH = drawW / imgRatio;
+  } else {
+    drawH = ch * imgScale;
+    drawW = drawH * imgRatio;
+  }
+
+  const startX = Math.floor(scrollX / drawW) - 1;
+  const endX = Math.ceil((scrollX + cw) / drawW) + 1;
+  const startY = 0;
+  const endY = Math.ceil(ch / drawH) + 1;
+
+  for (let i = startX; i < endX; i++) {
+    for (let j = startY; j < endY; j++) {
+      const x = i * drawW - (scrollX % drawW);
+      const y = j * drawH;
+      ctx.drawImage(img, x, y, drawW, drawH);
+    }
+  }
+
+  scrollX += speed;
+  requestAnimationFrame(draw);
+}
+
+window.addEventListener('resize', () => {
+  cw = canvas.width = window.innerWidth;
+  ch = canvas.height = window.innerHeight;
+});
+</script>
 </body>
 </html>
