@@ -21,7 +21,7 @@
     "src": "./app-icon-square-1000.png",
     "sizes": "1000x1000",
     "type": "image/png",
-    "purpose": "maskable"
+    "purpose": "any"
   }
 ],
 
