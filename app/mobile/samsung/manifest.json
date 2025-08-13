@@ -10,14 +10,21 @@
   "background_color": "#000000",
   "lang": "en",
   "dir": "ltr",
-  "icons": [
-    {
-      "src": "./app-icon-square-500.png",
-      "sizes": "500x500",
-      "type": "image/png",
-      "purpose": "any maskable"
-    }
-  ],
+"icons": [
+  {
+    "src": "./app-icon-square-1000.png",
+    "sizes": "1000x1000",
+    "type": "image/png",
+    "purpose": "any maskable"
+  },
+  {
+    "src": "./app-icon-square-1000.png",
+    "sizes": "1000x1000",
+    "type": "image/png",
+    "purpose": "any maskable"
+  }
+],
+
   "shortcuts": [
     {
       "name": "Homepage",
