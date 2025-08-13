@@ -1,4 +1,4 @@
-const CACHE_NAME = 'v12';
+const CACHE_NAME = 'v13';
 const URLS_TO_CACHE = [
     '/app/mobile/samsung/decide.html',
     '/app/mobile/samsung/splash.html',
