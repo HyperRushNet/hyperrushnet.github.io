@@ -29,7 +29,12 @@
     height:100vh;
     border:none;
     z-index:0;
-    opacity:1; /* direct zichtbaar na load */
+  }
+  .overlay-black {
+    position:fixed;
+    inset:0;
+    background:rgba(0,0,0,0.6); /* 0.6 black overlay */
+    z-index:0;
     pointer-events:none;
   }
   .center-content {
@@ -42,7 +47,7 @@
     padding:0 1rem;
     gap:1rem;
     position:relative;
-    z-index:2;
+    z-index:1;
     color:#fff;
     text-shadow:0 0 8px rgba(0,0,0,0.6);
   }
@@ -62,23 +67,10 @@
     border-radius:2px;
     box-shadow:0 0 6px rgba(255,255,255,0.15);
   }
-  h1 {
-    font-size:2rem;
-    font-weight:700;
-    white-space:nowrap;
-    margin:0;
-  }
-  #desc {
-    font-size:1rem;
-    max-width:300px;
-    line-height:1.3;
-  }
-  .subtext {
-    font-size:0.9rem;
-    color:rgba(255,255,255,0.8);
-    font-style:italic;
-  }
-  .bottom-button {width:100%;margin-top:2rem;z-index:2;}
+  h1 {font-size:2rem;font-weight:700;white-space:nowrap;margin:0;}
+  #desc {font-size:1rem;max-width:300px;line-height:1.3;}
+  .subtext {font-size:0.9rem;color:rgba(255,255,255,0.8);font-style:italic;}
+  .bottom-button {width:100%;margin-top:2rem;z-index:1;}
   .continue-button {
     display:block;
     width:100%;
@@ -94,7 +86,7 @@
     transition:0.3s;
     position:relative;
     overflow:hidden;
-    max-width: 325px;
+    max-width: 325px
   }
   .continue-button::before {
     content:'';
@@ -129,26 +121,21 @@
     z-index:9999;
     transition:opacity 0.6s ease, visibility 0.6s ease;
   }
-  #loader.hidden {
-    opacity:0;
-    visibility:hidden;
-  }
+  #loader.hidden {opacity:0;visibility:hidden;}
   .spinner {
-    width:50px;
-    height:50px;
+    width:50px;height:50px;
     border:5px solid rgba(255,255,255,0.2);
     border-top-color:#fff;
     border-radius:50%;
     animation:spin 1s linear infinite;
   }
-  @keyframes spin {
-    to {transform:rotate(360deg);}
-  }
+  @keyframes spin {to {transform:rotate(360deg);}}
 </style>
 </head>
 <body>
   <div id="loader"><div class="spinner"></div></div>
   <iframe src="/assets/templates/game-grid.html" class="bg-frame" id="gameFrame"></iframe>
+  <div class="overlay-black"></div>
   <div class="center-content">
     <img src="/assets/images/logo/white.png" alt="HyperRush Logo" class="logo" />
     <div class="title-container">
@@ -160,40 +147,30 @@
     <p class="subtext">Tap continue to dive in!</p>
   </div>
   <div class="bottom-button">
-    <a href="#" class="continue-button" id="continueBtn">Continue</a>
+    <a href="#" class="continue-button">Continue</a>
   </div>
 <script>
-  const desc=document.getElementById('desc');
-  const maxLines=2;
-  const lineHeight=parseFloat(getComputedStyle(desc).lineHeight);
-  const maxHeight=maxLines*lineHeight;
-  function fitText(){
-    desc.style.fontSize='1rem';
-    let fontSize=parseFloat(getComputedStyle(desc).fontSize);
-    while(desc.scrollHeight>maxHeight && fontSize>10){
-      fontSize-=0.5;
-      desc.style.fontSize=fontSize+'px';
-    }
+const desc=document.getElementById('desc');
+const maxLines=2;
+const lineHeight=parseFloat(getComputedStyle(desc).lineHeight);
+const maxHeight=maxLines*lineHeight;
+function fitText(){
+  desc.style.fontSize='1rem';
+  let fontSize=parseFloat(getComputedStyle(desc).fontSize);
+  while(desc.scrollHeight>maxHeight && fontSize>10){
+    fontSize-=0.5;
+    desc.style.fontSize=fontSize+'px';
   }
-  window.addEventListener('load',fitText);
-  window.addEventListener('resize',fitText);
+}
+window.addEventListener('load',fitText);
+window.addEventListener('resize',fitText);
 
-  const iframe = document.getElementById('gameFrame');
-  const loader = document.getElementById('loader');
-  const continueBtn = document.getElementById('continueBtn');
-
-  // Loader fade-out op iframe load
-  iframe.addEventListener('load', () => {
-    loader.classList.add('hidden');
-  });
-
-  // Continue button activeert iframe interactie
-  continueBtn.addEventListener('click', e => {
-    e.preventDefault();
-    iframe.style.pointerEvents='auto';
-    document.querySelector('.center-content').style.display='none';
-    continueBtn.style.display='none';
-  });
+// Loader fade-out on iframe load
+const iframe = document.getElementById('gameFrame');
+const loader = document.getElementById('loader');
+iframe.addEventListener('load', () => {
+  loader.classList.add('hidden');
+});
 </script>
 </body>
 </html>
