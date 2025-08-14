@@ -37,6 +37,9 @@ function resize() {
 resize();
 addEventListener('resize', resize, {passive:true});
 
+// ⚡ Signaal naar ouder: iframe kan getoond worden
+window.parent.postMessage('iframe-ready', '*');
+
 const img = new Image();
 img.src = 'https://hyperrushnet.github.io/assets/images/background/game-grid.webp';
 img.decoding = "async";
@@ -45,6 +48,10 @@ let bitmap = null;
 let scrollX = 0;
 const speed = 1.5, tileSizePx = 300, zoomFactor = 10.0;
 let drawW, drawH, cols, rows;
+
+// Optionele low-res placeholder alvast tonen
+ctx.fillStyle = '#111';
+ctx.fillRect(0, 0, cw, ch);
 
 img.decode().then(() => createImageBitmap(img)).then(bmp => {
   bitmap = bmp;
@@ -57,6 +64,7 @@ img.decode().then(() => createImageBitmap(img)).then(bmp => {
 });
 
 function draw() {
+  if (!bitmap) return requestAnimationFrame(draw);
   ctx.clearRect(0, 0, cw, ch);
   scrollX = (scrollX + speed) % drawW;
 
