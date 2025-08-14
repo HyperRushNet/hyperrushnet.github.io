@@ -2,17 +2,13 @@
 <html lang="en">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport"
-      content="width=device-width,
-               initial-scale=1.0,
-               minimum-scale=1.0,
-               maximum-scale=1.0,
-               user-scalable=no">
+<meta name="viewport" content="width=device-width,initial-scale=1.0,user-scalable=no">
 <title>Game Grid Background</title>
 <style>
-  html, body {margin:0;overflow:hidden;background:black;touch-action:none}
-  canvas {display:block;width:100vw;height:100vh}
-  .overlay {position:fixed;inset:0;background:rgba(0,0,0,0.1);pointer-events:none}
+  html, body {margin:0;overflow:hidden;background:black;touch-action:none;}
+  canvas {display:block;width:100vw;height:100vh;opacity:0;transition:opacity 1.5s ease;}
+  canvas.visible {opacity:1;}
+  .overlay {position:fixed;inset:0;background:rgba(0,0,0,0.1);pointer-events:none;}
 </style>
 </head>
 <body>
@@ -21,61 +17,56 @@
 <script>
 const canvas = document.getElementById('gameCanvas');
 const ctx = canvas.getContext('2d');
-let cw = 0, ch = 0, dpr = 1;
+let cw=0,ch=0,dpr=1;
 
-function resize() {
-  dpr = window.devicePixelRatio || 1;
-  const cssW = innerWidth, cssH = innerHeight;
-  canvas.width = Math.round(cssW * dpr);
-  canvas.height = Math.round(cssH * dpr);
-  canvas.style.width = cssW + 'px';
-  canvas.style.height = cssH + 'px';
-  ctx.setTransform(dpr, 0, 0, dpr, 0, 0);
-  cw = cssW;
-  ch = cssH;
+function resize(){
+  dpr=window.devicePixelRatio||1;
+  const cssW=innerWidth, cssH=innerHeight;
+  canvas.width=Math.round(cssW*dpr);
+  canvas.height=Math.round(cssH*dpr);
+  canvas.style.width=cssW+'px';
+  canvas.style.height=cssH+'px';
+  ctx.setTransform(dpr,0,0,dpr,0,0);
+  cw=cssW;
+  ch=cssH;
 }
 resize();
-addEventListener('resize', resize, {passive:true});
-
-// ⚡ Signaal naar ouder: iframe kan getoond worden
-window.parent.postMessage('iframe-ready', '*');
+addEventListener('resize',resize,{passive:true});
 
 const img = new Image();
-img.src = 'https://hyperrushnet.github.io/assets/images/background/game-grid.webp';
-img.decoding = "async";
+img.src='/assets/images/background/game-grid.webp';
+img.decoding="async";
 
-let bitmap = null;
-let scrollX = 0;
-const speed = 1.5, tileSizePx = 300, zoomFactor = 10.0;
-let drawW, drawH, cols, rows;
+let bitmap=null,scrollX=0;
+const speed=1.5, tileSizePx=300, zoomFactor=10.0;
+let drawW,drawH,cols,rows;
 
-// Optionele low-res placeholder alvast tonen
-ctx.fillStyle = '#111';
-ctx.fillRect(0, 0, cw, ch);
-
-img.decode().then(() => createImageBitmap(img)).then(bmp => {
-  bitmap = bmp;
-  const imgRatio = bmp.width / bmp.height;
-  drawW = Math.round(tileSizePx * zoomFactor);
-  drawH = Math.round(drawW / imgRatio);
-  cols = Math.ceil(cw / drawW) + 3;
-  rows = Math.ceil(ch / drawH) + 3;
+img.decode().then(()=>createImageBitmap(img)).then(bmp=>{
+  bitmap=bmp;
+  const imgRatio=bmp.width/bmp.height;
+  drawW=Math.round(tileSizePx*zoomFactor);
+  drawH=Math.round(drawW/imgRatio);
+  cols=Math.ceil(cw/drawW)+3;
+  rows=Math.ceil(ch/drawH)+3;
+  
+  // fade-in canvas
+  canvas.classList.add('visible');
+  
   requestAnimationFrame(draw);
 });
 
-function draw() {
-  if (!bitmap) return requestAnimationFrame(draw);
-  ctx.clearRect(0, 0, cw, ch);
-  scrollX = (scrollX + speed) % drawW;
+function draw(){
+  ctx.clearRect(0,0,cw,ch);
+  scrollX=(scrollX+speed)%drawW;
 
   ctx.save();
-  ctx.translate(cw / 2, ch / 2);
-  ctx.rotate(Math.PI / 4);
-  ctx.translate(-cw / 2, -ch / 2);
+  ctx.translate(cw/2,ch/2);
+  ctx.rotate(Math.PI/4);
+  ctx.translate(-cw/2,-ch/2);
 
-  for (let j = -1; j < rows; j++) {
-    for (let i = -1; i < cols; i++) {
-      ctx.drawImage(bitmap, -scrollX + i * drawW, j * drawH, drawW, drawH);
+  for(let j=-1;j<rows;j++){
+    for(let i=-1;i<cols;i++){
+      ctx.drawImage(bitmap,-scrollX+i*drawW,j*drawH,drawW,drawH);
     }
   }
 
