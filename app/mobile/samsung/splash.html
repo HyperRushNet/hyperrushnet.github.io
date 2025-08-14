@@ -29,7 +29,8 @@
     height:100vh;
     border:none;
     z-index:0;
-    opacity:0.5; 
+    opacity:1; /* direct zichtbaar na load */
+    pointer-events:none;
   }
   .center-content {
     flex-grow:1;
@@ -41,7 +42,7 @@
     padding:0 1rem;
     gap:1rem;
     position:relative;
-    z-index:1;
+    z-index:2;
     color:#fff;
     text-shadow:0 0 8px rgba(0,0,0,0.6);
   }
@@ -77,7 +78,7 @@
     color:rgba(255,255,255,0.8);
     font-style:italic;
   }
-  .bottom-button {width:100%;margin-top:2rem;z-index:1;}
+  .bottom-button {width:100%;margin-top:2rem;z-index:2;}
   .continue-button {
     display:block;
     width:100%;
@@ -93,7 +94,7 @@
     transition:0.3s;
     position:relative;
     overflow:hidden;
-    max-width: 325px
+    max-width: 325px;
   }
   .continue-button::before {
     content:'';
@@ -159,7 +160,7 @@
     <p class="subtext">Tap continue to dive in!</p>
   </div>
   <div class="bottom-button">
-    <a href="#" class="continue-button">Continue</a>
+    <a href="#" class="continue-button" id="continueBtn">Continue</a>
   </div>
 <script>
   const desc=document.getElementById('desc');
@@ -177,11 +178,21 @@
   window.addEventListener('load',fitText);
   window.addEventListener('resize',fitText);
 
-  // Loader fade-out on iframe load
   const iframe = document.getElementById('gameFrame');
   const loader = document.getElementById('loader');
+  const continueBtn = document.getElementById('continueBtn');
+
+  // Loader fade-out op iframe load
   iframe.addEventListener('load', () => {
     loader.classList.add('hidden');
+  });
+
+  // Continue button activeert iframe interactie
+  continueBtn.addEventListener('click', e => {
+    e.preventDefault();
+    iframe.style.pointerEvents='auto';
+    document.querySelector('.center-content').style.display='none';
+    continueBtn.style.display='none';
   });
 </script>
 </body>
