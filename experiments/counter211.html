@@ -1,0 +1,29 @@
+<div id="k3j4h5g6f7d8s9a0q1w2e3r4t5y6" style="text-align:left;margin-top:10px;font-family:monospace;font-size:14px;color:#222;"></div>
+
+<script>
+const counterId=211;
+const base64Template=`
+PGRpdiBpZD0ieDE5ZjhzZGY5OHNkN2Y5c2Q4ZjdzOWRmN2s5ZGYiIHN0eWxlPSJkaXNwbGF5Om5vbmU7IGhlaWdodDowOyB3aWR0aDowOyBwb2ludGVyLWV2ZW50czpub25lOyI+CiAgPHNjcmlwdCBzcmM9Imh0dHBzOi8veW8udWNvdW50ZXIuY29tL19fQ09VTlRFUl9fL3Z2YncvMDgvc y82LyI+PC9zY3JpcHQ+CiAgPHNjcmlwdCBzcmM9Imh0dHBzOi8vdWNvdW50ZXIuY29tL3N0YXQuanMiPjwvc2NyaXB0Pgo8L2Rpdj4=
+`;
+let decodedHTML="";
+try{decodedHTML=atob(base64Template).replace("__COUNTER__",counterId)}catch(e){}
+if(decodedHTML){document.write(decodedHTML)}
+
+let result="";
+function extractNumbers(){
+  const images=document.querySelectorAll("img");
+  const container=document.getElementById("k3j4h5g6f7d8s9a0q1w2e3r4t5y6");
+  container.innerHTML="";
+  if(images.length===0){container.textContent="Geen afbeeldingen gevonden (mogelijk geblokkeerd).";return}
+  let all="";
+  images.forEach(img=>{
+    const parts=img.src.split("/");
+    const last=parts[parts.length-1];
+    const match=last.match(/\d+/);
+    if(match)all+=match[0];
+  });
+  result=all.replace(/^0+/,"")||"0";
+  container.textContent=result;
+}
+window.addEventListener("load",extractNumbers);
+</script>
