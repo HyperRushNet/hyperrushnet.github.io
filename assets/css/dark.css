@@ -7,7 +7,7 @@
 body {
   margin: 0;
   font-family: Arial, sans-serif;
-  height: 100%;
+  min-height: 100vh;
   background-image: linear-gradient(to bottom, #14013d, #000000);
   overflow-x: hidden;
   position: relative;
@@ -70,7 +70,7 @@ body.lock-scroll {
   transition: transform 0.3s ease;
   z-index: 1001;
   scrollbar-width: none;
-  border-right: 1px solid #555
+  border-right: 1px solid #555;
 }
 
 #sidebar::-webkit-scrollbar {
@@ -190,7 +190,6 @@ body.lock-scroll {
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
-  border: 1px solid #555
 }
 
 .game-card:hover {
