@@ -19,7 +19,7 @@
 html, body {
   height: 100%;
   font-family: Arial, sans-serif;
-  background-image: linear-gradient(to bottom, #1e0259, black);
+  background-image: linear-gradient(to bottom, #14013d, #000000);
   overflow-x: hidden;
   margin: 0;
   position: relative;
@@ -106,7 +106,7 @@ body.lock-scroll {
   left: 0;
   height: 100vh;
   width: var(--sidebar-width);
-  background-image: linear-gradient(to top, black, #0a001f);
+  background-image: linear-gradient(to top, #000000, #14013d);
   padding: 1rem;
   box-shadow: 2px 0 5px rgba(0,0,0,0.8);
   overflow-y: auto;
