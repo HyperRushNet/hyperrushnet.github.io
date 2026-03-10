@@ -199,13 +199,12 @@ body.lock-scroll {
   padding-left: 1rem;
   transition: background 0.2s;
   color: white;
-  border: 1px solid white;
+  border: 1px solid #808080
 }
 
 #categoryList button:hover {
   background: transparent;
-  border: 1px solid white;
-  color: white;
+  color: white
 }
 
 #content {
