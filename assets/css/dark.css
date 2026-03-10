@@ -18,7 +18,7 @@
 html, body {
   height: 100%;
   font-family: Arial, sans-serif;
-  background-color: #0C2F79;
+  background-image: linear-gradient(to-bottom, #0a001f, black);
   overflow-x: hidden;
   margin: 0;
   position: relative;
