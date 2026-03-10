@@ -203,7 +203,8 @@ body.lock-scroll {
 }
 
 #categoryList button:hover {
-  background: #252424;
+  background: transparent;
+  border: 1px solid white;
   color: white;
 }
 
