@@ -70,6 +70,7 @@ body.lock-scroll {
   transition: transform 0.3s ease;
   z-index: 1001;
   scrollbar-width: none;
+  border-right: 1px solid #333
 }
 
 #sidebar::-webkit-scrollbar {
