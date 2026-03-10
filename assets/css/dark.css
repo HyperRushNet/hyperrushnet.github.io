@@ -7,6 +7,29 @@
   vertical-align: baseline;
   background: none;
 }
+* {
+  scrollbar-width: thin;
+  scrollbar-color: #444 #1e1e1e;
+}
+
+*::-webkit-scrollbar {
+  width: 6px;
+  height: 6px;
+}
+
+*::-webkit-scrollbar-track {
+  background: #1e1e1e;
+}
+
+*::-webkit-scrollbar-thumb {
+  background-color: #444;
+  border-radius: 10px;
+  border: 1px solid #1e1e1e;
+}
+
+*::-webkit-scrollbar-thumb:hover {
+  background-color: #555;
+}
 
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
