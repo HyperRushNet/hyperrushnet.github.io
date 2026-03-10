@@ -11,17 +11,6 @@
     ]
   },
   {
-    "number": 2,
-    "name": "1v1.lol",
-    "category": "Battle",
-    "img": "/images/1v1-lol.webp",
-    "link": "/games-1/1v1-lol/",
-    "device": [
-      "pc-touch",
-      "pc-no-touch"
-    ]
-  },
-  {
     "number": 3,
     "name": "Offline Paradise",
     "category": "Platformer",
