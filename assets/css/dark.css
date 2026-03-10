@@ -88,7 +88,7 @@ body.lock-scroll {
   left: 0;
   height: 100vh;
   width: var(--sidebar-width);
-  background: rgba(0, 0, 0, 0.6);
+  background-image: linear-gradient(to top, black, #0a001f);
   padding: 1rem;
   box-shadow: 2px 0 5px rgba(0,0,0,0.8);
   overflow-y: auto;
