@@ -191,7 +191,7 @@ body.lock-scroll {
   width: 100%;
   padding: 0.85rem 0.75rem;
   margin-bottom: 0.5rem;
-  background: #2D2C2C;
+  background: transparent;
   border-radius: 0.375rem;
   cursor: pointer;
   font-size: 1rem;
@@ -199,7 +199,7 @@ body.lock-scroll {
   padding-left: 1rem;
   transition: background 0.2s;
   color: white;
-  border: none;
+  border: 1px solid white;
 }
 
 #categoryList button:hover {
