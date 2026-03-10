@@ -190,6 +190,7 @@ body.lock-scroll {
   display: flex;
   flex-direction: column;
   transition: transform 0.3s ease;
+  border: 1px solid #555
 }
 
 .game-card:hover {
