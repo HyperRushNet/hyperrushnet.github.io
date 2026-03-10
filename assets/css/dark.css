@@ -221,6 +221,8 @@ body.lock-scroll {
 
   align-items: center;
   justify-content: center;
+  border: none;
+  background: transparent
 
 }
 
