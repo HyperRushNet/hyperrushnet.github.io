@@ -168,7 +168,7 @@ searchInput.addEventListener("keypress", e => {
   if (e.key === "Enter") filterAndRender();
 });
 
-fetch("/assets/json/games.json")
+fetch("/assets/json/games2.json")
   .then(res => res.json())
   .then(data => {
     allGames = data;
@@ -176,7 +176,7 @@ fetch("/assets/json/games.json")
     renderGames(allGames);
   })
   .catch(err => {
-    console.error("Fout bij laden van games.json:", err);
+    console.error("Fout bij laden van games2.json:", err);
   });
 
 window.addEventListener("resize", () => {
