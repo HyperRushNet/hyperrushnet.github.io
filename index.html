@@ -58,4 +58,41 @@
     </main>
   </div>
 </body>
+  <script>
+(function() {
+  if (localStorage.getItem('toastShown')) return;
+  localStorage.setItem('toastShown', 'true');
+
+  const link = document.createElement('link');
+  link.rel = 'stylesheet';
+  link.href = 'https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.css';
+  document.head.appendChild(link);
+
+  const script = document.createElement('script');
+  script.src = 'https://cdn.jsdelivr.net/npm/notyf@3/notyf.min.js';
+  script.onload = () => {
+    const style = document.createElement('style');
+    style.innerHTML = ".notyf__message a{color:#0af;text-decoration:underline;}";
+    document.head.appendChild(style);
+
+    const notyf = new Notyf({
+      duration: 8000,
+      position: { x: 'right', y: 'bottom' },
+      types: [
+        {
+          type: 'info',
+          background: '#111',
+          icon: false,
+          ripple: true
+        }
+      ]
+    });
+
+    notyf.open({
+      type: 'info',
+      message: 'Test site live: 500+ games! Devices not sorted yet, no images—but <a href="https://un-zynq.github.io" target="_blank">check it out!</a>'
+    });
+  };
+  document.body.appendChild(script);
+})();</script>
 </html>
