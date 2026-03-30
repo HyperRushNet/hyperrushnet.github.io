@@ -4,7 +4,7 @@
     "name": "10 Minutes Till Dawn",
     "category": "Survival",
     "img": "/images/10-minutes-till-dawn.webp",
-    "link": "/games-1/10-minutes-till-dawn/",
+    "link": "/games-1/10-minutes-till-dawn",
     "device": [
       "pc-touch",
       "pc-no-touch"
@@ -15,7 +15,7 @@
     "name": "Offline Paradise",
     "category": "Platformer",
     "img": "/images/offline-paradise.webp",
-    "link": "/games-1/OfflineParadise/",
+    "link": "/games-1/offline-paradise",
     "device": [
       "pc-touch",
       "pc-no-touch"
@@ -26,7 +26,7 @@
     "name": "Adam and Eve 5 Part 2",
     "category": "Puzzle",
     "img": "/images/adam-eve-2.webp",
-    "link": "/games-1/adam-eve-2",
+    "link": "/games-1/adam-and-eve-5-part-2",
     "device": [
       "pc-touch",
       "pc-no-touch",
@@ -39,7 +39,7 @@
     "name": "Adam and Eve 5 Part 1",
     "category": "Puzzle",
     "img": "/images/adam-eve-1.webp",
-    "link": "/games-1/adam-eve",
+    "link": "/games-1/adam-and-eve-5-part-1",
     "device": [
       "pc-touch",
       "pc-no-touch",
@@ -52,7 +52,7 @@
     "name": "A Dark Room",
     "category": "Strategy",
     "img": "/images/a-dark-room.webp",
-    "link": "/games-1/adarkroom",
+    "link": "/games-1/a-dark-room",
     "device": [
       "pc-touch",
       "pc-no-touch"
@@ -63,7 +63,7 @@
     "name": "Alien Hominid",
     "category": "Battle",
     "img": "/images/alien-hominid.webp",
-    "link": "/games-1/alienhominid",
+    "link": "/games-1/alien-hominid",
     "device": [
       "pc-touch",
       "pc-no-touch"
@@ -137,7 +137,7 @@
     "name": "The Backrooms 2D",
     "category": "Horror",
     "img": "/images/the-backrooms-2d.webp",
-    "link": "/games-1/backrooms-2d",
+    "link": "/games-1/the-backrooms-2d",
     "device": [
       "pc-touch",
       "pc-no-touch",
@@ -150,7 +150,7 @@
     "name": "The Backrooms",
     "category": "Horror",
     "img": "/images/the-backrooms.webp",
-    "link": "/games-1/backrooms",
+    "link": "/games-1/the-backrooms",
     "device": [
       "pc-touch",
       "pc-no-touch"
@@ -172,7 +172,7 @@
     "name": "The Black Knight",
     "category": "Challenge",
     "img": "/images/the-black-knight.webp",
-    "link": "/games-1/blackknight",
+    "link": "/games-1/the-black-knight",
     "device": [
       "pc-touch",
       "pc-no-touch",
@@ -269,8 +269,8 @@
     "number": 24,
     "name": "Champion Archer",
     "category": "Battle",
-    "img": "/images/championarcher.webp",
-    "link": "/games-1/championarcher",
+    "img": "/images/champion-archer.webp",
+    "link": "/games-1/champion-archer",
     "device": [
       "pc-touch",
       "pc-no-touch",
@@ -308,8 +308,8 @@
     "number": 27,
     "name": "Creative Kill Chamber",
     "category": "Puzzle",
-    "img": "/images/creativekillchamber.webp",
-    "link": "/games-1/creativekillchamber",
+    "img": "/images/creative-kill-chamber.webp",
+    "link": "/games-1/creative-kill-chamber",
     "device": [
       "pc-touch",
       "pc-no-touch",
@@ -330,7 +330,7 @@
       "phone"
     ]
   },
-   {
+  {
     "number": 29,
     "name": "Dante",
     "category": "Adventure",
@@ -343,7 +343,7 @@
       "phone"
     ]
   },
-   {
+  {
     "number": 30,
     "name": "Dead Again",
     "category": "Survival",
@@ -355,8 +355,8 @@
       "tablet",
       "phone"
     ]
-   },
-   {
+  },
+  {
     "number": 31,
     "name": "Death Run 3D",
     "category": "Reflexes",
@@ -366,8 +366,8 @@
       "pc-touch",
       "pc-no-touch"
     ]
-   },
-   {
+  },
+  {
     "number": 32,
     "name": "Defend the Tank",
     "category": "Strategy",
@@ -379,8 +379,8 @@
       "tablet",
       "phone"
     ]
-   },
-   {
+  },
+  {
     "number": 33,
     "name": "Dodge",
     "category": "Survival",
@@ -392,8 +392,8 @@
       "tablet",
       "phone"
     ]
-   },
-   {
+  },
+  {
     "number": 34,
     "name": "Down The Hill",
     "category": "Casual",
@@ -405,8 +405,8 @@
       "tablet",
       "phone"
     ]
-   },
-   {
+  },
+  {
     "number": 35,
     "name": "Dragon vs Bricks",
     "category": "Casual",
@@ -418,8 +418,8 @@
       "tablet",
       "phone"
     ]
-   },
-   {
+  },
+  {
     "number": 36,
     "name": "Eagle Ride",
     "category": "Reflexes",
@@ -429,9 +429,8 @@
       "pc-touch",
       "pc-no-touch"
     ]
-   },
-
-   {
+  },
+  {
     "number": 37,
     "name": "Electron Dash",
     "category": "Platformer",
@@ -440,251 +439,231 @@
     "device": [
       "pc-touch",
       "pc-no-touch",
-      "phone",
-      "tablet"
+      "tablet",
+      "phone"
     ]
-   },
+  },
   {
-  "number": 38,
-  "name": "Endless Tunnel",
-  "category": "Challenge",
-  "img": "/images/endless-tunnel.webp",
-  "link": "/games-1/endless-tunnel",
-  "device": [
-    "pc-touch",
-    "pc-no-touch",
-    "phone",
-    "tablet"
-  ]
-},
-{
-  "number": 39,
-  "name": "Endless War 3",
-  "category": "Battle",
-  "img": "/images/endlesswar3.webp",
-  "link": "/games-1/endlesswar3",
-  "device": [
-    "pc-touch",
-    "pc-no-touch"
-  ]
-},
-{
-  "number": 40,
-  "name": "Evil Glitch",
-  "category": "Survival",
-  "img": "/images/evil-glitch.webp",
-  "link": "/games-1/evil-glitch",
-  "device": [
-    "pc-touch",
-    "pc-no-touch"
-  ]
-},
-{
-  "number": 41,
-  "name": "Fancy Pants 2",
-  "category": "Casual",
-  "img": "/images/fancy-pants-2.webp",
-  "link": "/games-1/fancy-pants-2",
-  "device": [
-    "pc-touch",
-    "pc-no-touch"
-  ]
-},
-{
-  "number": 42,
-  "name": "Fancy Pants 3",
-  "category": "Casual",
-  "img": "/images/fancy-pants-3.webp",
-  "link": "/games-1/fancy-pants-3",
-  "device": [
-    "pc-touch",
-    "pc-no-touch"
-  ]
-},
-{
-  "number": 43,
-  "name": "Fancy Pants Adventures",
-  "category": "Platformer",
-  "img": "/images/fancypantsadventures.webp",
-  "link": "/games-1/fancypantsadventures",
-  "device": [
-    "pc-touch",
-    "pc-no-touch"
-  ]
-},
-{
-  "number": 44,
-  "name": "FireBoy & WaterGirl in The Forest Temple",
-  "category": "Casual",
-  "img": "/images/fireboywatergirlforesttemple.webp",
-  "link": "/games-1/fireboywatergirlforesttemple",
-  "device": [
-    "pc-touch",
-    "phone",
-    "tablet"
-  ]
-},
-{
-  "number": 45,
-  "name": "FNAF: Five Nights At Freddy's",
-  "category": "Horror",
-  "img": "/images/fnaf.webp",
-  "link": "/games-1/fnaf",
-  "device": [
-    "pc-touch",
-    "pc-no-touch"
-  ]
-},
-{
-  "number": 46,
-  "name": "FNAW: Five Nights At Wario's",
-  "category": "Horror",
-  "img": "/images/fnaw.webp",
-  "link": "/games-1/fnaw",
-  "device": [
-    "pc-touch",
-    "pc-no-touch"
-  ]
-},
-{
-  "number": 47,
-  "name": "Football Run",
-  "category": "Platformer",
-  "img": "/images/football-run.webp",
-  "link": "/games-1/football-run",
-  "device": [
-    "pc-touch",
-    "pc-no-touch",
-    "phone",
-    "tablet"
-  ]
-},
-{
-  "number": 48,
-  "name": "Froggy's Battle",
-  "category": "Casual",
-  "img": "/images/froggys-battle.webp",
-  "link": "/games-1/froggys-battle",
-  "device": [
-    "pc-touch",
-    "pc-no-touch"
-  ]
-},
-{
-  "number": 49,
-  "name": "Funny Shooter 2",
-  "category": "Shooter",
-  "img": "/images/funnyshooter2.webp",
-  "link": "/funnyshooter2",
-  "device": [
-    "pc-touch",
-    "phone",
-    "tablet"
-  ]
-},
-{
-  "number": 50,
-  "name": "Galaga",
-  "category": "Survival",
-  "img": "/images/galaga.webp",
-  "link": "/games-1/galaga",
-  "device": [
-    "pc-touch",
-    "pc-no-touch"
-  ]
-},
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-{
-      "number":1000,
-      "name":"1 on 1 Soccer",
-      "category":"Battle",
-      "img":"/images/1v1-soccer.webp",
-      "link":"/games-2/1v1-soccer",
-      "device":[
-         "pc-touch",
-         "pc-no-touch"
-      ]
-   },
-{
-      "number":1001,
-      "name":"3D Bowling",
-      "category":"Sports",
-      "img":"/images/3d-bowling.webp",
-      "link":"/games-2/3d-bowling",
-      "device":[
-         "pc-touch",
-         "pc-no-touch",
-         "tablet",
-         "phone"
-      ]
-   },
-      {
-      "number":1002,
-      "name":"8 Ball Pool",
-      "category":"Sports",
-      "img":"/images/8-ball.webp",
-      "link":"/games-2/8-ball",
-      "device":[
-         "pc-touch",
-         "pc-no-touch",
-         "tablet",
-         "phone"
-      ]
-   },
-      {
-      "number":1003,
-      "name":"Adrenaline Challenge",
-      "category":"Challenge",
-      "img":"/images/adrenalinechallenge.webp",
-      "link":"/games-2/adrenalinechallenge",
-      "device":[
-         "pc-touch",
-         "pc-no-touch"
-      ]
-   },
-      {
-      "number":1004,
-      "name":"Adventure Drivers",
-      "category":"Challenge",
-      "img":"/images/adventure-drivers.webp",
-      "link":"/games-2/adventure-drivers",
-      "device":[
-         "pc-touch",
-         "pc-no-touch",
-         "tablet",
-         "phone"
-      ]
-   },
-      {
-      "number":1005,
-      "name":"Aquapark Slides",
-      "category":"Casual",
-      "img":"/images/aquapark-slides.webp",
-      "link":"/games-2/aquapark-slides",
-      "device":[
-         "pc-touch",
-         "pc-no-touch",
-         "tablet",
-         "phone"
-      ]
-   }
+    "number": 38,
+    "name": "Endless Tunnel",
+    "category": "Challenge",
+    "img": "/images/endless-tunnel.webp",
+    "link": "/games-1/endless-tunnel",
+    "device": [
+      "pc-touch",
+      "pc-no-touch",
+      "tablet",
+      "phone"
+    ]
+  },
+  {
+    "number": 39,
+    "name": "Endless War 3",
+    "category": "Battle",
+    "img": "/images/endlesswar3.webp",
+    "link": "/games-1/endless-war-3",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 40,
+    "name": "Evil Glitch",
+    "category": "Survival",
+    "img": "/images/evil-glitch.webp",
+    "link": "/games-1/evil-glitch",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 41,
+    "name": "Fancy Pants 2",
+    "category": "Casual",
+    "img": "/images/fancy-pants-2.webp",
+    "link": "/games-1/fancy-pants-2",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 42,
+    "name": "Fancy Pants 3",
+    "category": "Casual",
+    "img": "/images/fancy-pants-3.webp",
+    "link": "/games-1/fancy-pants-3",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 43,
+    "name": "Fancy Pants Adventures",
+    "category": "Platformer",
+    "img": "/images/fancypantsadventures.webp",
+    "link": "/games-1/fancy-pants-adventures",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 44,
+    "name": "FireBoy & WaterGirl in The Forest Temple",
+    "category": "Casual",
+    "img": "/images/fireboywatergirlforesttemple.webp",
+    "link": "/games-1/fireboy-watergirl-forest-temple",
+    "device": [
+      "pc-touch",
+      "tablet",
+      "phone"
+    ]
+  },
+  {
+    "number": 45,
+    "name": "FNAF: Five Nights At Freddy's",
+    "category": "Horror",
+    "img": "/images/fnaf.webp",
+    "link": "/games-1/fnaf",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 46,
+    "name": "FNAW: Five Nights At Wario's",
+    "category": "Horror",
+    "img": "/images/fnaw.webp",
+    "link": "/games-1/fnaw",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 47,
+    "name": "Football Run",
+    "category": "Platformer",
+    "img": "/images/football-run.webp",
+    "link": "/games-1/football-run",
+    "device": [
+      "pc-touch",
+      "pc-no-touch",
+      "tablet",
+      "phone"
+    ]
+  },
+  {
+    "number": 48,
+    "name": "Froggy's Battle",
+    "category": "Casual",
+    "img": "/images/froggys-battle.webp",
+    "link": "/games-1/froggys-battle",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 49,
+    "name": "Funny Shooter 2",
+    "category": "Shooter",
+    "img": "/images/funnyshooter2.webp",
+    "link": "/games-1/funny-shooter-2",
+    "device": [
+      "pc-touch",
+      "tablet",
+      "phone"
+    ]
+  },
+  {
+    "number": 50,
+    "name": "Galaga",
+    "category": "Survival",
+    "img": "/images/galaga.webp",
+    "link": "/games-1/galaga",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 1000,
+    "name": "1 on 1 Soccer",
+    "category": "Battle",
+    "img": "/images/1v1-soccer.webp",
+    "link": "/games-2/1-on-1-soccer",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 1001,
+    "name": "3D Bowling",
+    "category": "Sports",
+    "img": "/images/3d-bowling.webp",
+    "link": "/games-2/3d-bowling",
+    "device": [
+      "pc-touch",
+      "pc-no-touch",
+      "tablet",
+      "phone"
+    ]
+  },
+  {
+    "number": 1002,
+    "name": "8 Ball Pool",
+    "category": "Sports",
+    "img": "/images/8-ball.webp",
+    "link": "/games-2/8-ball-pool",
+    "device": [
+      "pc-touch",
+      "pc-no-touch",
+      "tablet",
+      "phone"
+    ]
+  },
+  {
+    "number": 1003,
+    "name": "Adrenaline Challenge",
+    "category": "Challenge",
+    "img": "/images/adrenalinechallenge.webp",
+    "link": "/games-2/adrenaline-challenge",
+    "device": [
+      "pc-touch",
+      "pc-no-touch"
+    ]
+  },
+  {
+    "number": 1004,
+    "name": "Adventure Drivers",
+    "category": "Challenge",
+    "img": "/images/adventure-drivers.webp",
+    "link": "/games-2/adventure-drivers",
+    "device": [
+      "pc-touch",
+      "pc-no-touch",
+      "tablet",
+      "phone"
+    ]
+  },
+  {
+    "number": 1005,
+    "name": "Aquapark Slides",
+    "category": "Casual",
+    "img": "/images/aquapark-slides.webp",
+    "link": "/games-2/aquapark-slides",
+    "device": [
+      "pc-touch",
+      "pc-no-touch",
+      "tablet",
+      "phone"
+    ]
+  }
 ]
