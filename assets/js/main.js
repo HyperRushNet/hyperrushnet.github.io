@@ -1,9 +1,10 @@
-let allGames = [];
+/**
+ * ZYNQ Game Hub - Dynamic Category Loading
+ */
 let activeCategory = null;
-let resizeTimeout;
-let resizeWatching = false;
 const imageCache = {};
 
+// DOM Elements
 const sidebar = document.getElementById("sidebar");
 const menuToggle = document.getElementById("menuToggle");
 const categoryList = document.getElementById("categoryList");
@@ -12,185 +13,190 @@ const searchInput = document.getElementById("searchInput");
 const searchBtn = document.getElementById("searchBtn");
 const appWrapper = document.getElementById("appWrapper");
 
+/**
+ * Utility: Capitalize First Letter
+ */
+const capitalize = (str) => str.charAt(0).toUpperCase() + str.slice(1).toLowerCase();
+
+/**
+ * INITIALIZATION: ZYNQ Games Engine
+ */
+async function initZynq() {
+    try {
+        // Initialize the engine (fetches the global database)
+        await ZYNQ.games.init({
+            mode: "all",
+            sort: "name"
+        });
+
+        console.log("ZYNQ Loaded. Total games available:", ZYNQ.games.total);
+        
+        renderCategories();
+        renderGames(ZYNQ.games.list); 
+    } catch (err) {
+        console.error("Error initializing ZYNQ:", err);
+    }
+}
+
+/**
+ * UI EVENT LISTENERS
+ */
 menuToggle.addEventListener("click", () => {
-  const isOpen = sidebar.classList.toggle("open");
-  appWrapper.classList.toggle("active", isOpen);
-  document.body.classList.toggle("lock-scroll", isOpen);
-  if (isOpen) updateOverlaySize();
+    const isOpen = sidebar.classList.toggle("open");
+    appWrapper.classList.toggle("active", isOpen);
+    document.body.classList.toggle("lock-scroll", isOpen);
 });
 
 appWrapper.addEventListener("click", (e) => {
-  if (sidebar.classList.contains("open") && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+    if (sidebar.classList.contains("open") && !sidebar.contains(e.target) && !menuToggle.contains(e.target)) {
+        closeSidebar();
+    }
+});
+
+function closeSidebar() {
     sidebar.classList.remove("open");
     appWrapper.classList.remove("active");
     document.body.classList.remove("lock-scroll");
-  }
-});
-
-function updateOverlaySize() {
-  const overlay = appWrapper.querySelector("::after"); 
-  if (overlay) {
-    overlay.style.width = `${window.innerWidth}px`;
-    overlay.style.height = `${window.innerHeight}px`;
-  }
 }
 
-window.addEventListener("resize", () => {
-  if (!resizeWatching) {
-    resizeWatching = true;
-    requestAnimationFrame(() => {
-      updateOverlaySize();
-      resizeWatching = false;
-    });
-  }
-});
-
+/**
+ * CATEGORY LOGIC
+ * Automatically fetches categories and formats them
+ */
 function renderCategories() {
-  const categories = [...new Set(allGames.map(g => g.category))];
-  categoryList.innerHTML = "";
-  const allBtn = document.createElement("button");
-  allBtn.textContent = "All Games";
-  allBtn.onclick = () => {
-    activeCategory = null;
-    renderGames(allGames);
-    if (window.innerWidth < 768) {
-      sidebar.classList.remove("open");
-      appWrapper.classList.remove("active");
-      document.body.classList.remove("lock-scroll");
-    }
-  };
-  categoryList.appendChild(allBtn);
-
-  categories.forEach(cat => {
-    const btn = document.createElement("button");
-    btn.textContent = cat;
-    btn.onclick = () => {
-      activeCategory = cat;
-      filterAndRender();
-      if (window.innerWidth < 768) {
-        sidebar.classList.remove("open");
-        appWrapper.classList.remove("active");
-        document.body.classList.remove("lock-scroll");
-      }
+    // 1. Get unique categories from the dataset
+    // 2. Filter out empty ones
+    // 3. Sort them alphabetically
+    const rawCategories = [...new Set(ZYNQ.games.all.map(g => g.category).filter(Boolean))];
+    rawCategories.sort();
+    
+    categoryList.innerHTML = "";
+    
+    // Create "All Games" Button
+    const allBtn = document.createElement("button");
+    allBtn.textContent = "All Games";
+    allBtn.onclick = () => {
+        activeCategory = null;
+        ZYNQ.games.reset();
+        renderGames(ZYNQ.games.list);
+        if (window.innerWidth < 768) closeSidebar();
     };
-    categoryList.appendChild(btn);
-  });
-}
+    categoryList.appendChild(allBtn);
 
-function renderGames(games) {
-  gameCardsContainer.innerHTML = "";
-  games.forEach(game => {
-    const card = document.createElement("div");
-    card.className = "game-card";
-    card.onclick = () => {
-      window.location.href = `/game/${game.number}`;
-    };
-
-    let img;
-    if (imageCache[game.img]) {
-      img = imageCache[game.img].cloneNode();
-    } else {
-      img = document.createElement("img");
-      img.loading = "lazy";
-      img.src = game.img;
-      img.alt = `${game.name} Img`;
-      imageCache[game.img] = img;
-    }
-
-    const fallbackSrc = "https://placehold.co/600x400/2C2F33/FFFFFF?text=FAILED&font=montserrat&bold=true&font_size=48";
-
-    img.onerror = function () {
-      if (img.dataset.retrying) return;
-      img.dataset.retrying = "true";
-      img.src = fallbackSrc;
-
-      const retryInterval = setInterval(() => {
-        const testImg = new Image();
-        testImg.onload = function () {
-          clearInterval(retryInterval);
-          img.src = game.img;
-          delete img.dataset.retrying;
+    // Create Dynamic Buttons
+    rawCategories.forEach(cat => {
+        const btn = document.createElement("button");
+        
+        // Ensure first letter is uppercase
+        btn.textContent = capitalize(cat);
+        
+        btn.onclick = () => {
+            activeCategory = cat; // Use the raw category for the filter
+            ZYNQ.games.getByCategory(cat);
+            renderGames(ZYNQ.games.list);
+            if (window.innerWidth < 768) closeSidebar();
         };
-        testImg.onerror = function () {};
-        testImg.src = game.img;
-      }, 5000);
-    };
-
-    const fade = document.createElement("div");
-    fade.className = "game-fade";
-
-    const title = document.createElement("div");
-    title.className = "game-title-overlay";
-    title.textContent = game.name;
-
-    card.appendChild(img);
-    card.appendChild(fade);
-    card.appendChild(title);
-    gameCardsContainer.appendChild(card);
-  });
-  adjustGridColumns();
+        categoryList.appendChild(btn);
+    });
 }
 
-function adjustGridColumns() {
-  const containerWidth = gameCardsContainer.clientWidth;
-  const gap = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--gap')) || 10;
-  const minCardWidth = parseInt(getComputedStyle(document.documentElement).getPropertyValue('--min-card-width')) || 160;
+/**
+ * GAME RENDERING
+ */
+function renderGames(games) {
+    gameCardsContainer.innerHTML = "";
+    
+    games.forEach(game => {
+        const card = document.createElement("div");
+        card.className = "game-card";
+        
+        // Navigate using ZYNQ schema (url or alias)
+        card.onclick = () => {
+            window.location.href = game.url; 
+        };
 
-  let maxPerRow = Math.floor((containerWidth + gap) / (minCardWidth + gap));
-  maxPerRow = Math.max(1, maxPerRow);
+        // Image Handling
+        let img;
+        const thumbUrl = game.thumb;
 
-  const cardWidth = (containerWidth - (maxPerRow - 1) * gap) / maxPerRow;
-  gameCardsContainer.style.gridTemplateColumns = `repeat(${maxPerRow}, ${cardWidth}px)`;
+        if (imageCache[thumbUrl]) {
+            img = imageCache[thumbUrl].cloneNode();
+        } else {
+            img = document.createElement("img");
+            img.loading = "lazy";
+            img.src = thumbUrl;
+            img.alt = game.name;
+            imageCache[thumbUrl] = img;
+        }
+
+        const fallbackSrc = "https://placehold.co/600x400/2C2F33/FFFFFF?text=IMAGE+NOT+FOUND";
+
+        img.onerror = function () {
+            if (img.dataset.retrying) return;
+            img.dataset.retrying = "true";
+            img.src = fallbackSrc;
+        };
+
+        const fade = document.createElement("div");
+        fade.className = "game-fade";
+
+        const title = document.createElement("div");
+        title.className = "game-title-overlay";
+        title.textContent = game.name;
+
+        card.appendChild(img);
+        card.appendChild(fade);
+        card.appendChild(title);
+        gameCardsContainer.appendChild(card);
+    });
+    
+    adjustGridColumns();
 }
 
+/**
+ * FILTER & SEARCH (Using ZYNQ API)
+ */
 function filterAndRender() {
-  const term = searchInput.value.toLowerCase().trim();
-  let filtered;
+    const term = searchInput.value.toLowerCase().trim();
+    
+    if (term) {
+        ZYNQ.games.search(term);
+    } else if (activeCategory) {
+        ZYNQ.games.getByCategory(activeCategory);
+    } else {
+        ZYNQ.games.reset();
+    }
 
-  if (term) {
-    filtered = allGames.filter(g => g.name.toLowerCase().includes(term));
-  } else if (activeCategory) {
-    filtered = allGames.filter(g => g.category === activeCategory);
-  } else {
-    filtered = allGames;
-  }
-
-  renderGames(filtered);
-  if (window.innerWidth < 768 && sidebar.classList.contains("open")) {
-    sidebar.classList.remove("open");
-    appWrapper.classList.remove("active");
-    document.body.classList.remove("lock-scroll");
-  }
+    renderGames(ZYNQ.games.list);
 }
 
+/**
+ * LAYOUT UTILS
+ */
+function adjustGridColumns() {
+    const containerWidth = gameCardsContainer.clientWidth;
+    const gap = 15; 
+    const minCardWidth = 160;
+
+    let maxPerRow = Math.floor((containerWidth + gap) / (minCardWidth + gap));
+    maxPerRow = Math.max(1, maxPerRow);
+
+    const cardWidth = (containerWidth - (maxPerRow - 1) * gap) / maxPerRow;
+    gameCardsContainer.style.gridTemplateColumns = `repeat(${maxPerRow}, ${cardWidth}px)`;
+}
+
+// Global Listeners
 searchBtn.addEventListener("click", filterAndRender);
 searchInput.addEventListener("keypress", e => {
-  if (e.key === "Enter") filterAndRender();
+    if (e.key === "Enter") filterAndRender();
 });
-
-fetch("/assets/json/games2.json")
-  .then(res => res.json())
-  .then(data => {
-    allGames = data;
-    renderCategories();
-    renderGames(allGames);
-  })
-  .catch(err => {
-    console.error("Fout bij laden van games2.json:", err);
-  });
 
 window.addEventListener("resize", () => {
-  clearTimeout(resizeTimeout);
-  let count = 0;
-  const maxCount = 50;
-  const interval = setInterval(() => {
     adjustGridColumns();
-    count++;
-    if (count >= maxCount) clearInterval(interval);
-  }, 100);
 });
 
+// App Start
 document.addEventListener("DOMContentLoaded", () => {
-  adjustGridColumns();
-  updateOverlaySize();
+    initZynq();
+    adjustGridColumns();
 });
